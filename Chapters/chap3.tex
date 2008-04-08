@@ -1,6 +1,6 @@
 %!TEX root = /Users/admin/Desktop/Documents/Academic/MA 470 -THESIS/THESIS/thesis.tex
 
-\chapter{Synchronicity and Distributed Systems}
+\chapter{Synchronicity and Expressiveness}
 In \refsec{Syntax}, we introduced a version of the \picalc\ which we said was made \emph{asynchronous} by its use of non-blocking send operations.  Rather than allowing for an operation to happen after a sent value has been received by some other process, a sending process simply ends, hoping someone will eventually consume the sent message.  In \refex{exsynchronous} we gave a straightforward method of simulating synchronous sending the asynchronous \picalc.  We also briefly discussed the non-deterministic choice operator, absent in our calculus, and in \refex{exsummation} gave a method of simulating that as well.
 
 The original calculus given by Milner, Parrow and Walker modeled synchronous message passing, and included the two operators -- summation and synchronous sending -- that we omitted in our asynchronous \picalc.  When combined, these two operators yield a unique behavior.  We will give a presentation of the synchronous \picalc in \refsec{Synchronous picalc}, along with a few examples of its power and use.
