@@ -1,0 +1,110 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{TODO}[05/12/2002 v1.2 TODOs]
+%
+% The principle of this package is to provide an efficient manner to insert TODO tags in a TeX document. This package provides two commands
+% The \TODO command. This command, called with an optional argument, displays it in the DVI file in the margin to make it visible. 
+% 
+% This argument is also inserted into the created .TODO file, making it easy to view all the TODOs in a document by viewing this file. If no argument is specified, ??? is the default.
+% The \TOTHINK command. It has the same behaviour, but necessits the optional argument.
+% I have chosen the arguments to be optional because i'm used to insert \TODO directly into the text, without specifying what is to do, and don't want to have \TODO`{}' to write. 
+% 
+% By default, this package uses the package draft to have a text in the background to mean that this version of the text is not final (id est may contain TODOs). The package has few options
+% nodraft : Do not insert a text in background.
+% final means that your tex contains no more TODO. Verifies that this is the case, and implies the nodraft option
+% silent : Do not display the TODOs in the DVI file, but still creates the .TODO file
+% newstyle A new way of displaying the TODOs
+% 
+% 
+
+\newif\ifT@D@dr@ft
+\newif\ifT@D@fin@l
+\newif\ifT@D@newstyle
+\newif\ifT@D@verbose
+\T@D@verbosetrue
+\T@D@dr@fttrue
+\T@D@fin@lfalse
+\T@D@newstylefalse
+
+\DeclareOption{silent}{\T@D@verbosefalse}
+\DeclareOption{nodraft}{\T@D@dr@ftfalse}
+\DeclareOption{newstyle}{\T@D@newstyletrue}
+\DeclareOption{final}{\T@D@dr@ftfalse \T@D@fin@ltrue \T@D@verbosefalse}%
+
+\ProcessOptions%
+\ifT@D@dr@ft%
+\RequirePackage[french]{draftcopy}%
+\fi%
+
+\newtoks\tmpT@ks%
+\newwrite\T@D@file%
+\immediate\openout\T@D@file=\jobname.TODO%
+
+\def\T@D@st@ck{}%
+\def\pushFilen@me#1{\xdef\T@D@st@ck{{#1}{\T@D@st@ck}}}%
+\def\T@D@doDrop#1#2{\gdef\T@D@st@ck{#2}}%
+\def\popFilen@me{\expandafter\T@D@doDrop\T@D@st@ck}%
+\def\T@D@doPeek#1#2{#1}%
+\def\TheFilen@me{\expandafter\T@D@doPeek\T@D@st@ck}%
+\pushFilen@me{\jobname}%
+
+\let\T@D@incl@de=\include%
+
+\def\include#1{%
+  \pushFilen@me{#1}%
+  \T@D@incl@de{#1}% 
+  \popFilen@me%
+}%
+
+\ifT@D@newstyle%
+\newcommand{\affT@D@}[1]{%
+\vskip .1cm%
+\begingroup\par% 
+\hbox to \hsize{\strut\llap{\bf\large $\bigstar$ \`A faire%
+$\bigstar$\quad}\vrule\hfil\parbox{.9\hsize}{\it #1}\hfil}%%
+\par\endgroup%
+\vskip .1cm%
+}%
+\newcommand{\affT@THINK}[1]{}%
+\else%
+\newcommand{\affT@THINK}[1]{}%
+\newcommand{\affT@D@}[1]{%
+\begingroup\par% 
+\hbox to \hsize{\strut\llap{\bf TODO\quad}\hfil{\it #1}\hfil}%%
+\par\endgroup%
+}%
+\fi%
+
+\newcommand{\writeT@D@}[1]{%
+\tmpT@ks={#1}%  
+\immediate\write\T@D@file{(\TheFilen@me) l.\the\inputlineno, p \thepage, s \@currentlabel: \the\tmpT@ks}%
+}%
+
+\newcommand{\TODO}[1][N]{%
+\ifT@D@fin@l%
+\PackageError{TODO}{no TODO allowed in a final version}%
+\fi%
+\ifx#1N%
+\ifT@D@verbose%
+\affT@D@{???}%
+\fi%
+\writeT@D@{unknown TODO}%
+\else%
+\ifT@D@verbose%
+\affT@D@{#1}%
+\fi%
+\writeT@D@{#1}%
+\fi%
+}%
+
+
+\newcommand{\TOTHINK}[1][N]{%
+\ifx#1N%
+\PackageError{TODO}{TOTHINK command must have an argument}%
+\fi
+\ifT@D@verbose%
+\affT@THINK{#1}%
+\fi%
+\writeT@D@{#1}%
+}%
+
+\endinput

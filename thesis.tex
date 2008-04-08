@@ -1,0 +1,69 @@
+\include{picommands}
+\documentclass[12pt,twoside]{reedthesis}
+\usepackage{graphicx,latexsym} 
+\usepackage{amssymb,amsthm,amsmath}
+\usepackage{longtable,booktabs,setspace} 
+\usepackage{url}
+\usepackage{float}
+\usepackage{natbib}
+\usepackage{multirow}
+% \usepackage{a0size} used for a really big pi symbol - disabled
+
+\usepackage[palatino]{quotchap} %figure out where to stick \thispagestyle{empty}%
+\renewcommand\chapterheadstartvskip{\vspace*{-5\baselineskip}}
+\usepackage[calcwidth]{titlesec}
+
+%DIFFERING BEHAVOIR FOR PDF VS PRINT OUTPUT
+\newcounter{outputmode}
+\setcounter{outputmode}{0} %0 for pdf, 1 for print
+\ifthenelse{\equal{\value{outputmode}}{0}}{\usepackage[bookmarks,unicode, colorlinks, linkcolor= darkblue, citecolor= darkblue, pdftitle={The $pi$-calculus}, pdfauthor={William Henderson}]{hyperref}}{\usepackage[bookmarks, colorlinks=true, linkcolor=black, citecolor= black, pdftitle={The $pi$-calculus}, pdfauthor={William Henderson}]{hyperref}}
+\ifthenelse{\equal{\value{outputmode}}{0}}{\setlength{\evensidemargin}{0.3in}\setlength{\oddsidemargin}{0.3in}}{}
+
+\titleformat{\section}[hang]{\sffamily\bfseries}
+ {\Large\thesection}{12pt}{\Large}[{\titlerule[0.5pt]}]
+
+
+\title{The \picalc}
+\author{William Henderson}
+% see http://library.reed.edu/help/thesisformat.html for formatting reqs
+% The month and year that you submit your FINAL draft TO THE LIBRARY (May or December)
+\date{May 2008}
+\division{Mathematics and Natural Sciences}
+\advisor{James Fix}
+\department{Mathematics}
+
+\setlength{\parskip}{0pt}
+
+\begin{document}
+  \maketitle
+  \frontmatter % this stuff will be roman-numbered
+  \pagestyle{empty} % this removes page numbers from the frontmatter
+    
+   	\tableofcontents
+
+	\input{Chapters/front_matter}
+
+  \mainmatter % here the regular arabic numbering starts
+  \pagestyle{fancyplain} % turns page numbering back on
+
+    \input{Chapters/chap1_introduction}
+	
+	\input{Chapters/chap2}
+	
+	\input{Chapters/chap3}
+	
+	%\input{Chapters/conclusion}
+	
+  \backmatter
+	% \listoftables
+	\pagestyle{empty}
+    \listoffigures %header needs fixing
+    \addcontentsline{toc}{chapter}{List of Figures}
+% Make my bibliography be called "Bibliography" and not "References" (or "Works Cited" or...):
+% \renewcommand{\bibname}{Works Cited}
+    \bibliographystyle{plain}
+
+    \nocite{*}
+    \bibliography{thesis}
+	\printindex
+\end{document}

@@ -1,0 +1,303 @@
+%!TEX root = /Users/admin/Desktop/Documents/Academic/MA 470 -THESIS/THESIS/thesis.tex
+
+\chapter{The \Picalc}\label{the picalc}
+	In the 1930's, Alonzo Church and Stephen Kleene introduced the $\lambda$-calculus as an algebraic model for describing computation.  In the $\lambda$-calculus, computation is the invocation of functions.  In the 1980's, Robin Milner introduced his Calculus of Communicating Systems (CCS), in which computation is modeled as communication via message passing.  Because these channels can be shared and used an arbitrary number of times, there is not a concrete naming system for a chunk of computation the way there is in a function.  Instead, in the CCS any bit of functionality can be referred to as a \emph{process}, with no specification of the granularity.  Where we might think of a program in the $\lambda$-calculus as a bunch of functions invoking one another, in the the CCS we say that a \emph{system} is composed of many communicating processes.  It was this CCS that later became the basis for the \picalc.  
+	
+Although it can be defined in other ways, one of the ways of giving a process's \emph{location} is in terms of the communication channels which can be used to access it.  Since processes are the units populating the space of a CCS system, it is natural to think of a process's location in terms of the processes which are `near' it - those it can communicate with via named channels.  In this case, changing the channel topology of a system changes the locations of its component processes.  In the CCS, channel topology is static, whereas the \picalc\ allows communication channels to be dynamically established and relinquished between processes.  This gives a kind of \emph{mobility} of processes, which vastly expands the capabilities of interaction in a system.
+	
+	In this chapter, we will give the syntax of the \emph{asynchronous} \picalc\ and a discussion of its features.\footnote{Several versions of the \picalc\ have been proposed.  We will loosely follow the recent presentation given in \cite{henn07}.}  Following this, we will introduce a notion of equivalence of terms in the language.  Finally, we will give some semantic reduction rules that provide computational behavior via steps of reduction.
+	\section{Syntax}
+	The terms of the \picalc\ operate on a space of \defmargin{identifiers} $v,w,...$ which for the time being will consist of names $n,m,...$ for communication channels, and variables $x,y,...$ which, as we will see below, can refer to channels or to recursive process bodies.
+	
+		\begin{insettable}
+		\begin{center}
+		\begin{tabular}{r l l}
+		\multicolumn{3}{c}{\emph{Process terms}}\\
+		$R,S,B :=$  &$R_1 \comp R_2$ & Composition\\
+		&\send{n}{V} & Send\\
+		&$\receive{n}{X} R$ & Receive\\
+		&$\new{n}R$ & Restriction\\
+		&$\pif{v_1 = v_2}\pthen R_1 \pelse R_2$ & Matching\\
+		&$\rec{x} B$ & Recursion\\
+		&stop & Termination\\
+		&\\
+		
+		\multicolumn{3}{c}{\emph{Systems}} \\
+		$\sys{M,N} :=$ &$\new{c_1,...,c_n} R_1 \comp...\comp R_m$ & $n, m > 0$\\
+		\end{tabular}
+		\emph{\caption{Terms in the asynchronous \picalc}\label{apicalcterms}}
+		\end{center}
+		\end{insettable}
+		% \subsection{Names}
+	Given two or more processes, we can compose them using the $\comp$ operator, which means that the composed processes will be executed concurrently.
+		
+	We denote the sending of a tuple $V$ over a channel $n$ by \send{n}{V}.  Here $V$ is a tuple of identifiers in the form $V=(v_1,...,v_k):k\geq 0$.  We say that $V$ has \defmargin{arity} $k$.  In the case $n=0$ nothing is being transmitted; the communication acts as a \defmargin{handshake} or signal.  We will denote this case by \send{n}{}.  It is a feature of the language that sending is not a blocking operation -- that is, the process will not wait or depend on the value actually being received or operated on by another process, but will simply terminate after sending the value.  Non-blocking sends make our \picalc\ an \emph{asynchronous} language - processes that send values do not wait to sync operation with the processes that consume the values.  However, we will show in \refex{exsynchronous} that synchronous behavior can still be modeled in our language.
+	
+	The term \receive{n}{X}$R$ describes a process waiting to receive a tuple along $k$ before continuing with $R$.  Here $X$ is a \defmargin[pattern]{patterns}, or a tuple of variables of arity $k$.  Patterns allow us to decompose the transmitted tuple into its component values by naming them with $x_1,...,x_k$, which can be referred to in $R$.  Thus, in the term
+	\begin{align}
+		\send{c}{n_1,n_2,n_3} \comp \receive{c}{x_1,x_2,x_3} R,
+	\end{align}
+the names $n_1,n_2,n_3$ are received via $c$ and bound via matching to $x_1,x_2,x_3$ (the use of $x_1,x_2,x_3$ is limited to being within the process $R$).  Similarly to sending, the case of arity 0 is denoted \receive{n}{}$R$ -- here $R$ will not happen until a handshake is received on $n$.  Notice that in contrast to the case of sending, receiving is a \defmargin{guarded} operation -- that is, the process $R$ will not execute until $X$ has been received via $n$.  For example, the term
+\begin{align}
+	\receive{c}{}stop
+\end{align}
+represents a `listener'	process that simply consumes the value waiting on input channel $c$.  The term \emph{stop} describes a process that does nothing but halt.
+
+	The term $\new{n} R$ describes a process in which a new channel $n$ is created, limited to being expressed in the process $R$ (we say the \defmargin{scope} of $n$ is \emph{restricted} to $R$).  When creating multiple channel restrictions of the form $\new{n}(\new{m}R)$, we will abbreviate using $\new{n,m}R$.  It is important to note that $n$ \emph{can} be used outside of $R$ if it is sent and then received by some outside process.  This feature is known as \defmargin{scope extrusion}, and is the underpinning for the dynamic communication topologies introduced in the \picalc.  For example, in the term
+\begin{align}
+	\new{n} (\send{c}{n}) \comp \receive{c}{a} \send{a}{},
+\end{align}
+	$n$'s scope is just the left half of the term.  However, $n$ is sent over $c$ and is received (and bound as $a$) in the right hand of term.  When this happens, the channel $n$ will be able to be referred to outside of its initial scope.  We will give a precise account of how this happens in our reduction rules and \refex{exscopeextr} below.
+	
+	Simple value-matching is available to provide conditional behavior.  In the following term, the value received on $c$ is checked; if it matches $a$ then a handshake is sent along $a$ (which is referred to by $x$), otherwise the process terminates.
+	\begin{align}
+		\receive{c}{x}(\pif{x=a} \pthen \send{x}{} \pelse stop)
+	\end{align}
+	
+	Recursion is built into the language using the syntax $\rec{x}B$.  The process $\rec{x}B$ itself is referred to by the variable $x$, which is used somewhere in $B$ to express a recursive call.  For example, consider the recursive responder term below, which receives a channel $x_1$ via $c$.  It then sends a handshake response on $x_1$, while another responder process is run in parallel.
+	\begin{align}
+		\rec{x}\receive{c}{x_1}(\send{x_1}{} \comp x)
+		\label{reclistenerterm}
+	\end{align}
+	
+	We call a collection of parallel processes communicating over shared channels a \emph{system}.  Note that a system is itself a process.    Our choice to define it is somewhat auxiliary to the \picalc\ itself, but it is helpful to understanding the way that behavior can be modeled using processes as atoms of a system.
+\begin{example}{exsummation}
+	 Many presentations (including our own in the next chapter) of the \picalc\ involve a choice or summation operator as in $P+Q$ for two processes terms $P$ and $Q$.  The meaning is essentially that either $P$ or $Q$ can be non-deterministically executed, and the other process will not be.  However, we can model the same behavior without defining a choice operator:
+	\begin{align}
+		\send{c}{} \comp \receive{c}{}P_1 \comp \receive{c}{}P_2
+	\end{align}
+	In the above process, either $Q$ or $P$ (but not both) could be executed.  This is due to the asynchronous behavior of our language -- sending an empty signal along $c$, we cannot control which process consumes the signal (or even if it will be consumed at all). Thus, even without the choice operator our calculus is non-deterministic.
+	
+	We can build systems where only one process will send a value along some channel $c$ and only one will receive along.  However, suppose we took our system and used it in building a larger system.  Then we could have other processes that compete in sending or receiving along $c$ and make our system non-deterministic.  Nevertheless, we will see in the next example that we can at least learn \emph{that} a value was consumed, although we can't say by \emph{whom}.\end{example}
+	\begin{example}{exsynchronous}
+	 Perhaps we are not happy with this asynchronous transmission behavior.  Surely we'd like to have blocking sends sometimes, or be able to guarantee that a value is received.  However, it can be shown that our asynchronous languages is more general than a synchronous version.  To see why, consider the following system:
+	\begin{align}
+		F_1(c) & \pdef \rec{z} (\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp z)))\\
+		F_2(c) & \pdef \rec{q} (\receive{c}{ack}(\send{ack}{} \comp q)) \\
+		Sys_1 & \pdef \new{d}(F_1(d) \comp F_2(d))
+	\end{align}
+	First, we use \pdef with $F_1(c)$ to mean that the process term on the right with the channel $c$ will be denoted by $F_1(c)$ which we will call the \defmargin{interface} of a system or process.  Hence, $F_1(d)$ would represent $F_1(c)$, with the occurrences of $c$ replaced with $d$.  Both $F_1$ and $F_2$ have (infinite) recursive behavior, and we can think of $Sys_1$ as a term that `kicks off' both of them after creating a shared channel for them to communicate on.  
+	
+	In an iteration of $F_1$, a new channel $ack$ is created for acknowledgement.  This channel is sent along $c$ and then $F_1$ waits for input on $ack$ before executing some term $R$ and calling another iteration.  $F_2$ receives $ack$ along $c$ and then uses $ack$ to send an empty signal to $F_1$ that it has received input on $c$.  
+	
+	Of course, this is a silly example since the only thing being communicated is the acknowledgement channel itself -- we might imagine a more complex system where $F_1$ sends more input along $c$ and waits to make sure $F_2$ receives it.  Note that the channel $ack$ is only used \emph{once} -- we want to ensure that the acknowledgement that $F_1$ receives is definitely for \emph{that} instance of communication that it just initiated.  This allows us to guarantee that $F_2$ has executed before $F_1$ continues with R.  \end{example}
+
+\section{Structural Equivalence}
+	A natural question at this point is, given two \picalc\ terms, how can we determine if they are equivalent?  Intuitively, we want them to be equivalent if they \emph{act} the same, but actually defining this equivalence relation can be a bit subtle.  First, we will look at substitution and give some rules for when we can safely interchange identifiers without creating a different term. Following this, we will develop the notion of \emph{contexts} and then use it to build an equivalence relation among processes.
+\subsection{Identifier Substitution and $\alpha$-equivalence}
+	As a first step in our notion of equivalence, we might assert that the way things are named shouldn't change how they act.  Of course, this doesn't mean we can start interchanging symbols with carefree abandon --  only those identifiers whose use is \defmargin[bound]{bound identifiers}\refmargin{identifiers} in the process.  There are three ways that identifiers can become bound in the \picalc.  First, a name $n$ is bound in the restriction operator, \new{n}$R$.  Identifiers $x_i$ can be bound when they are part of the pattern $X$ matched in the receive expression \receive{c}{X}$R$.  Finally, $x$ can be bound in \rec{x}$B$.  
+	
+	We denote the set of bound identifiers in a term $R$ by $bi(R)$; all those which are not bound we call \defmargin[free]{free identifiers}, denoting them $fi(R)$.  We call a term with no free variables \defmargin[closed]{closed terms}.  Since such a term is self-contained in that it doesn't need any outside context to make sense, we will finally give our precise definition for \defmargin{processes} as terms that are closed.
+	
+	In term (\ref{reclistenerterm}) above, $x$ is a bound recursive variable, while $x_1$ is bound by the receive operator. Now consider the term
+	\begin{align}
+		\send{c}{n} \comp \new{n}(\rec{x}\receive{c}{x_1}(\send{x_1}{} \comp x))
+	\end{align}
+	Here $x_1, x$ are bound as before.  However, the use of $n$ being sent on $c$ is \emph{not} bound, since it occurs outside the scope of the scope restriction operator.  This is clear in the following term, which is equivalent (see \refex{exelimscoperest} for justification).
+	\begin{align}
+		\receive{a}{x_1,x_2}\send{x_1}{} \comp \rec{x}(\send{a}{n,m} \comp x)
+	\end{align}
+	We denote the substitution of values in $V$ for free identifiers $X$ in $R$ by $R$\subst{V}{X}.  Of course, during the course of a substitution, we might inadvertently `capture' a bound term -- suppose for example we wanted to perform the substitution $P_1(c)$\subst{n}{c} where
+\begin{align}
+	P_1(c) \pdef \new{n}(\send{n}{x} \comp \send{c}{y})	
+\end{align}	
+This would make the free identifier $c$ into a bound identifier $n$.  We can avoid this by first replacing $n$ a new variable that is `fresh' -- ie it does not occur elsewhere in the term:
+\begin{align}
+	P_1^{'}(c) \pdef \new{n'}(\send{n'}{x} \comp \send{c}{y})
+\end{align}
+We can now safely perform the substitution $P_1^{'}(c)$\subst{n}{c}, yielding
+\begin{align}
+	\new{n'}(\send{n'}{x} \comp \send{n}{y})
+\end{align}
+	Obviously we want to say $P_1(c)$ and $P_1^{'}(c)$ are equivalent.  In general when two terms are the same up to the names of bound identifiers, we say they are \defmargin[$\alpha$-equivalent]{$\alpha$-equivalency}, and write $P_1(c) \equiv_\alpha P_1^{'}(c)$.  We will intend from now on that a term represents its entire $\alpha$-equivalency class, and thus will not explicitly specify $\alpha$-equivalency in the equivalence relation below.
+
+\subsection{Contexts and Equivalence}
+Perhaps the next idea we might have for building our equivalence relation is that equivalent processes should act the same when dropped into any larger system.  Let us define more precisely what we mean by `dropping in' a process.
+\begin{definition}{Context}
+	A context $\mathbb{C}$ is given by:
+	\[
+		\mathbb{C} := \begin{cases}
+		[\ ]\\
+		\mathcal{C} \comp Q \text{ or } Q \comp \mathcal{C} & \text{for any process $Q$, context $\mathcal{C}$}\\
+		\new{n}\mathcal{C} & \text{for any name $n$, context $\mathcal{C}$}.
+		\end{cases}
+	\]
+	$\mathbb{C}[Q]$ denotes the result of replacing the placeholder $[\ ]$ in the context $\mathbb{C}$ with the process $Q$.
+	\end{definition}
+	Notice that with contexts, we do not pay any attention to whether a name in $Q$ is bound in $\mathbb{C}$.  Hence, unlike with substitution, free variables in $Q$ can become bound in $\mathbb{C}[Q]$.  We say that a relation $\sim$ between processes is \defmargin{contextual} if $P\sim Q$ implies $\mathbb{C}[P]\sim \mathbb{C}[Q]$ for any context $\mathbb{C}$.  We are now ready to define our notion of equivalency using contexts.
+	\begin{definition}{Structural Equivalence}
+		Structural Equivalence, denoted $\sequiv$ is the smallest contextual equivalence relation that satisfies the following axioms:
+		\begin{align*}
+			P \comp Q\ &\  \sequiv\  Q \comp P && \text{\tiny{(S-COMP-COMM)}}\\
+		 	(P \comp Q) \comp R\ &\ \sequiv\ P \comp (Q \comp R) && \text{\tiny{(S-COMP-ASSOC)}}\\
+			P \comp \text{stop}\ &\ \sequiv\ P && \text{\tiny{(S-COMP-ID)}}\\
+			\new{c} \text{stop}\ &\ \sequiv\ \text{stop} && \text{\tiny{(S-REST-ID)}}\\
+			\new{c}\new{d} P \ &\ \sequiv\ \new{d}\new{c} P && \text{\tiny{(S-REST-COMM)}}\\
+			\new{c}(P \comp Q)\ &\ \sequiv\  P \comp \new{c}Q\text{, if } c\not\in fi(P) && \text{\tiny{(S-REST-COMP)}}
+		\end{align*}
+	\end{definition}
+	These axioms are simply a set of properties that we expect our syntax to obey.  The first and second state that composition is commutative and associate.  Thus, we will omit parenthesis around compositions when our meaning is clear.  (S-COMP-ID) states that a terminated process can be eliminated from a composition.  (S-REST-ID) states that a scope restriction operator can be eliminated when its scope is only a terminated process. (S-REST-COMP) states that scope ordering does not matter, justifying our shorthand $\new{c,d} P$.  It is the last of these axioms that is most important -- it is the basis for\refmargin{scope extrusion} scope extrusion, upon which the language's process mobility is based (as we shall demonstrate in \refex{exscopeextr} below).
+	
+	\begin{example}{exelimscoperest}
+		In our discussion of bound identifiers above, we asserted that the elimination of a scope restriction when none of the scoped identifiers occur in its scope. We can now show why this is permissible:
+		\begin{align*}
+			&\ \new{n,m}(\receive{a}{x_1,x_2}\send{x_1}{})\comp \rec{x}(\send{a}{n,m} \comp x) &&\\
+			\sequiv\ &\ \new{n,m}(\receive{a}{x_1,x_2}\send{x_1}{} \comp stop)\comp \rec{x}(\send{a}{n,m} \comp x) && \text{\tiny{(S-COMP-ID)}}\\
+			\sequiv\ &\ \receive{a}{x_1,x_2}\send{x_1}{} \comp \new{n,m}(stop)\comp \rec{x}(\send{a}{n,m} \comp x) && \text{\tiny{(S-REST-COMP)}}\\
+			\sequiv\ &\ \receive{a}{x_1,x_2}\send{x_1}{} \comp stop \comp \rec{x}(\send{a}{n,m} \comp x) && \text{\tiny{(S-REST-ID)}}\\
+			\sequiv\ &\ \receive{a}{x_1,x_2}\send{x_1}{} \comp \rec{x}(\send{a}{n,m} \comp x) && \text{\tiny{(S-COMP-ID)}}
+		\end{align*}
+	\end{example}
+\section{Reduction Semantics}\label{secreducationsemantics}
+We also want to give some \emph{semantic} properties that a process in our language should possess.  Here we do not define a relation of equivalence but rather one that allows a process to internally evolve through a number of computation steps.
+\begin{definition}{Reduction}
+	The \emph{reduction relation} \pred\ is the smallest contextual relation that satisfies the following rules:
+	\begin{center}\begin{tabular}{rll}
+		$\send{c}{V} \comp \receive{c}{X}R$\ &\  $\pred\  R\subst{V}{X}$ & \tiny{(R-COMM)}\\
+		$\rec{x}B$\ &\  $\pred\  B\subst{\rec{x}B}{x}$ & \tiny{(R-REP)}\\
+		$\pif{v = v}\pthen P \pelse Q$\ &\ $\pred\ P$ & \tiny{(R-EQ)}\\
+		$\pif{v_1 = v_2}\pthen P \pelse Q$\ &\ $\pred\ Q$ \ \ (where $v_1\neq v_2$)& \tiny{(R-NEQ)}\\
+		\multicolumn{2}{c}{\hspace{4.5em}$\underline{P\sequiv P', P \pred Q, Q\sequiv Q'}$} & \multirow{2}{*}{\tiny{(R-STRUC)}}\\
+		\multicolumn{2}{c}{\hspace{4.5em}$P'\pred Q'$}
+	\end{tabular}\end{center}
+	We use the notation $P\preds Q$ when an arbitrary number of these rules have been applied in reducing $P$ to $Q$.
+\end{definition}
+The first of these allows a computation step for the transmission of values from one process to another.  (R-REP)  allows us to unravel a recursive expression into iterations of itself.  (R-MATCH) enables a computational step for value-matching.  Finally, (R-STRUCT) says that a reduction is defined up to structural equivalence.
+\begin{example}{exscopeextr}
+	We will give a demonstration of how scope extrusion is defined using the rules and axioms of reduction and structural equivalence.  Consider the expression 
+\begin{align}
+	\receive{d}{X}\send{X}{}\comp \new{c}(\send{d}{c} \comp \receive{c}{}stop)	
+\end{align}
+We can use (S-REST-COMP) to bring the restriction to the outside, giving:
+\begin{align}
+	\new{c}(\receive{d}{X}\send{X}{}\comp \send{d}{c} \comp \receive{c}{}stop)		
+\end{align}
+	Thanks to the reduction relation's contextuality, we can use (R-COMM) inside of the restriction operator and apply a substitution.  Using this in conjunction with the above structural equality and (R-STRUCT), we get:
+	\begin{align}
+		\new{c}(\send{c}{} \comp \receive{c}{}stop)
+	\end{align}
+	Finally, we can apply (R-STRUCT) again, so the process simply reduces to stop.  
+
+	Now let $P(d)$ to be the right half of our original process, and $\mathbb{C}$ to be the remaining context:
+	\begin{align}
+		P(d) \pdef \new{c}(\send{d}{c} \comp \receive{c}{}stop)
+	\end{align}
+	\begin{align}
+		\mathbb{C} = \receive{d}{X}\send{X}{} \comp [\ ]
+	\end{align}
+Then we have shown that if we drop $P(d)$ into the context $\mathbb{C}$ (forming $\mathbb{C}[P(d)]$), it will establish a new channel $c$ and extend its scope using $d$.  Hence it is (S-REST-COMP) which allows our system's communication topology to change dynamically via scope extrusion.
+\end{example}
+\begin{example}{exmemcells}
+	Suppose we wanted to model a simple memory cell with channels for getting and setting its value.  It turns out that we can simulate this just using message passing.  The problem that we have to work around is that receiving a identifier from a channel removes that value from the channel -- it cannot be retrieved again.  Thus, we need a way to push it back in for the next time.  Consider the following system:
+	\begin{equation}\begin{split}
+		Cell(get,set) \pdef \new{c} & (\send{c}{init} \\
+		& \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s)))
+	\end{split}\end{equation}
+	In the cell, we first create a new channel $c$ that will be used to `store' the value.  We then initialize $c$ with the value $init$.  The following line has a recursive listener process than, when given a channel via $get$, gets the value from $c$ and sends it back via the supplied channel.  In parallel, it sends the value back into $c$ so it can be had again.  The next line is similar except that two values are supplied via $set$ - a new value and a channel.  The old value is pulled from $c$ and simply discarded (ie not used), whereas the new value $x$ is pushed to the $c$ this time.  $x$ is also sent via $b$ as an acknowledgment that the cell's new value has been set.
+	
+	Also notice that the system has the free channels $get_c,set_c$ given in the interface.\refmargin{interface}  When some larger system binds them and uses them to interact with the components inside $Cell(get_c,set_c)$ we say that the system \defmargin[instantiates]{instantiate} $Cell(get_c,set_c)$.  In the following example we assume some larger system uses $printer$ to actually print the message.
+	\begin{equation}\begin{split}
+		Echo(printer) \pdef\\
+		\new{get_1,set_1} & (Cell\langle get_1,set_1\rangle\\
+		&\begin{split}\comp \new{a}(&\send{set_1}{``hello,\ world",a}\\
+		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})))\end{split}
+	\end{split}\end{equation}
+	The system $Echo$ creates new channels to interact with the instance of memory cell it spawns, while in parallel it puts a message in the cell, then (order is ensured using by waiting for the response via $a$) getting the value from the cell and sending it to the $printer$ channel.
+	
+	To see why this produces the behavior we expect, first observe scope restrictors for $a$ and $c$ can be moved out using $(S-REST-COMP)$:
+	\begin{equation}\begin{split}
+		\new{get_1,set_1,a,c} & \Big(\send{c}{init} \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \send{set_1}{``hello,\ world",a}\\
+		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
+	\end{split}\end{equation}
+	Two applications of (R-REP) allow us to `pull out' a recursive call:
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\send{c}{init} \comp\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp \receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x})\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \send{set_1}{``hello,\ world",a}\\
+		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
+	\end{split}\end{equation}
+	Now we can apply (R-COMM) to the memory cell's setter...
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\send{c}{init} \comp\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\begin{split}\comp \receive{c}{y}(&\send{c}{``hello,\ world"}\comp\send{a}{``hello,\ world"} \\
+			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s)))\end{split}\\
+		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
+	\end{split}\end{equation}
+	...which lets us strip out the initializer, and in turn the acknowledgement on $a$ of setting ``hello,\ world'' using (R-COMM),
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp \send{c}{``hello,\ world"} \comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \send{get_1}{a}\comp \receive{a}{y}\send{printer}{y}\Big)
+	\end{split}\end{equation}
+	We can now use (R-COMM) on the memory cell's getter and also on its use of $c$ to get the ``hello,\ world'' state:
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\send{c}{``hello,\ world"}\comp \send{a}{``hello,\ world"}\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \receive{a}{y}\send{printer}{y}\Big)
+	\end{split}\end{equation}
+	A final application of (R-COMM) to $a$ gives us
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\send{c}{``hello,\ world"}\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \send{printer}{``hello,\ world''}\Big)
+	\end{split}\end{equation}
+	which is essentially equivalent to initializing a memory cell with ``hello,\ world'' and also sending the message to $printer$.
+\end{example}
+
+\section{Action Semantics}
+Our description of process behaviors so far has been limited to talking about the internal computational steps through which it might evolve.  Now, we want to give a more general description of how a process might evolve in the context of a larger system.  In such a system, a process can be said to either send or receive values along channels it shares with the system.  To describe these abilities, we will use the notion of a \emph{labelled transition system}, or \emph{lts}.
+
+\begin{definition}{Labelled Transition System}
+	A \emph{labelled transition sytem} $\mathcal{L}$ is a tuple $(\mathcal{S}, \mathcal{A})$ 
+where $\mathcal{S}$ is a set of processes and $\mathcal{A}$ is a set of labels called \emph{actions}.  Furthermore, for each action $a$, there is a binary relation:
+	\[
+		R_a \subseteq \mathcal{S} \times \mathcal{S}
+	\]
+	To denote that $\langle P,Q\rangle \in R_a$, we will use the notation $P \evolves{a} Q$.
+\end{definition}
+Hence, the transition $P \evolves{a} Q$ indicates that there is an action under which the process P becomes Q.  We will refer to $Q$ is the \defmargin{residual} of $P$ after $a$.
+
+There are three types of actions that may cause a process to evolve.  Note that we will use $\alpha$ to refer to an action of arbitrary type.  First, the process might receive a value.  That is, a process $P$ can be said to be capable of the transition $P \evolves{\receives{c}{X}} Q$, which is to say $P$ can receive $X$ along $c$ resulting in the residual $Q$.
+
+The second type of action available is sending.  Here we need to be a bit more careful.  In the case of receiving, the received name is always bound to a new name $X$ - so we needn't worry about issues of scoping.  In sending, however, we might be transmitting either a free or a bound name (or a mix of them in a tuple).  In the latter case, we need to take account of the fact that the\refmargin{scope extrusion}scope of the name is being extruded to whatever process receives the name.  We denote the set of bound names in the send action by $\exports{B}$, and we say that this set of names is \defmargin{exported} by the process.  Hence, the transition $P \evolves{\exports{B}\sends{c}{V}} Q$ represents that P can send $V$ over $c$, exporting $\exports{B}$ and resulting in $Q$.  For example,
+\[
+	\new{a}\send{c}{a} \comp Q \evolves{\exports{b}\sends{c}{a}} Q
+\]
+
+Finally, we have a third action available for \defmargin{internal evolution}. This is caused by some internal evolution in P like those described in \refsec{secreducationsemantics}.  We use $\tau$ denote such an internal evolution step.  Thus, we say $P \evolves{\tau} Q$ if P is able evolve into Q by performing a reduction step without any external actions.  For example (thanks to (R-COMM)),
+\[
+	\send{c}{a} \comp \receive{c}{x}\send{x}{} \evolves{\tau} \send{c}{} 
+\]
+
+Using these actions, we can give a set of rules describing the behavior of a \picalc processes in an arbitrary context.  Hence, we now formally define the action relation under these rules:
+\note{I wonder if these couldn't be simplified by allowing a transition that happens over the reduction semantics?  i can't find anyone in the literature who does this but it seems like the best approach...}
+\begin{definition}{Action}
+	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:
+	\begin{center}\begin{tabular}{rllll}
+ 		$\receive{c}{X}R$ & \evolves{\receives{c}{X}} & R\subst{V}{X} & & \tiny{(A-IN)}\\
+		$\send{c}{V}$ & \evolves{\sends{c}{V}} & $stop$ & & \tiny{(A-OUT)}\\
+		$\rec{x}R$ & \evolves{\tau} & $R\subst{\rec{x}R}{x}$ & & \tiny{(A-REP)}\\
+		$\pif{v=v} \pthen P \pelse Q$ & \evolves{\tau} & $P$ & & \tiny{(A-EQ)}\\[10pt]
+		$\pif{v_1=v_2} \pthen P \pelse Q$ & \evolves{\tau} & $Q$ & $v_1 \neq v_2$ & \tiny{(A-NEQ)}\\[10pt]
+
+		\multicolumn{3}{c}{$\underline{P\evolves{\exports{B}\sends{c}{V}} P'}$} & & \multirow{2}{*}{\tiny{(A-OPEN)}}\\
+		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,B}\sends{c}{V}} P'$}\\[10pt]
+		
+		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{X}} P',\ Q \evolves{\exports{B}\sends{c}{V}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{B}\cap fn(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
+		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{B}(P'\comp Q')$}\\[10pt]
+		
+		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle bn(\alpha) \cap fn(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMP)}}\\
+		\multicolumn{3}{c}{$P\comp Q \evolves{\alpha} P'\comp Q$}\\[10pt]
+		
+		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle b \not \in n(\alpha)$ }} & \multirow{2}{*}{\tiny{(A-REST)}}\\
+		\multicolumn{3}{c}{$\new{b} P \evolves{\alpha} \new{b} P'$}\\[10pt]
+	\end{tabular}\end{center}
+\end{definition}

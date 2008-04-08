@@ -1,0 +1,69 @@
+
+	%pi-calc commands
+			
+			
+	\newcommand{\picalc}{%
+		\texorpdfstring{$\pi$}{pi}-calculus}
+	% \newcommand{\HUGE}{\fontsize{43}{54}\selectfont}
+	% \newcommand{\PICALC}{%
+	% 	\texorpdfstring{{\Huge{$\pi$}}}{pi}-Calculus\ %
+	% }
+	\newcommand{\exports}[1]{%
+	\ensuremath{({#1})}%
+	}
+	\newcommand{\Picalc}{%
+		\texorpdfstring{$\pi$}{pi}-Calculus}
+	
+	\newcommand{\send}[2]{%
+	 	\ensuremath{{#1}!\langle{#2}\rangle}%
+	}
+	\newcommand{\sends}[2]{%
+	 	\ensuremath{{#1}!{#2}}%
+	}
+	\newcommand{\ssend}[2]{%
+	 	\ensuremath{{#1}!\langle{#2}\rangle.}%
+	}
+	\newcommand{\receives}[2]{%
+	 	\ensuremath{{#1}?{#2}}%
+	}
+	\newcommand{\receive}[2]{%
+	 	\ensuremath{{#1}?({#2}).}%
+	}
+	\newcommand{\receivenodot}[2]{%
+	 	\ensuremath{{#1}?({#2})}%
+	}
+	\newcommand{\new}[1]{%
+	 	\ensuremath{\text{new}({#1}).}%
+	}
+	\newcommand{\pif}[1]{%
+		\ensuremath{\text{if } {#1}}%
+	}
+	\newcommand{\pthen}{%
+		\ensuremath{\text{ then }}%
+	}
+	\newcommand{\pelse}{%
+		 \ensuremath{\text{ else }}%
+	}
+	\newcommand{\comp}{%
+		\ensuremath{\ |\ }%
+	}
+	\newcommand{\rec}[1]{%
+		\ensuremath{\text{rec }{#1}.}%
+	}
+	\newcommand{\defequals}{%
+	 \ensuremath{\overset{\tiny{def}}{=}}%
+	}
+	\newcommand{\encd}[1]{%
+	 \ensuremath{\llbracket{#1}\rrbracket}%
+	}
+	\newcommand{\subst}[2]{%
+	 \ensuremath{\llbracket{#1}/{#2}\rrbracket}%
+	}
+	\newcommand{\pdef}{\ensuremath{\Leftarrow}\ }
+	\newcommand{\sys}[1]{\ensuremath{\mathbb{#1}}}
+	\newcommand{\sequiv}{\ensuremath{\equiv}}
+	\newcommand{\pred}{\ensuremath{\longrightarrow}}
+	\newcommand{\evolves}[1]{\ensuremath{\overset{{#1}}{\longrightarrow}}}
+	
+	\newcommand{\preds}{\ensuremath{\cdotp\!\cdotp\!\cdotp\!\longrightarrow}}
+	%end pi-calc commands

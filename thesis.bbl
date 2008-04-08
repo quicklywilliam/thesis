@@ -1,0 +1,54 @@
+\begin{thebibliography}{Hen07}
+
+\bibitem[Ber03]{miln03}
+Martin Berger.
+\newblock An interview with robin milner, September 2003.
+
+\bibitem[Cas02]{cast02}
+I.~Castellani, editor.
+\newblock {\em Models of Distribution and Mobility: State of the Art}. MIKADO
+  Global Computer Project, August 2002.
+
+\bibitem[Hen07]{henn07}
+Matthew Hennessy.
+\newblock {\em A Distributed Pi-Calculus}.
+\newblock Cambridge University Press, 2007.
+
+\bibitem[Mil92]{miln92}
+Robin Milner.
+\newblock Functions as processes.
+\newblock {\em Mathematical Structures in Computer Science}, 2(2):119--141,
+  1992.
+
+\bibitem[Mil99]{miln99}
+Robin Milner.
+\newblock {\em Communicating and Mobile Systems: the $\pi$-calclulus}.
+\newblock Cambridge University Press, 1999.
+
+\bibitem[Nes00]{nestm00}
+Uwe Nestmann.
+\newblock What is a ``good'' encoding of guarded choice?
+\newblock {\em Inf. Comput.}, 156(1-2):287--319, 2000.
+
+\bibitem[Pal03]{palam03}
+Catuscia Palamidessi.
+\newblock Comparing the expressive power of the synchronous and the
+  asynchronous $\pi$-calculus.
+\newblock {\em Mathematical Structures in Computer Science}, 13(5):685--719,
+  2003.
+
+\bibitem[PH01]{palam01}
+C.~Palamidessi and O.~Herescu.
+\newblock A randomized encoding of the -calculus with mixed choice, 2001.
+
+\bibitem[SW01]{sang01}
+Davide Sangiorgi and David Walker.
+\newblock {\em The $\pi$-calculus:A Theory of Mobile Processes}.
+\newblock Cambridge University Press, 2001.
+
+\bibitem[Tur96]{turner96}
+David~N. Turner.
+\newblock {\em The Polymorphic Pi-Calculus: Theory and Implementation}.
+\newblock PhD thesis, 1996.
+
+\end{thebibliography}
