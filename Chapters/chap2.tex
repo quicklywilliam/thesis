@@ -277,8 +277,8 @@ Finally, we have a third action available for \defmargin{internal evolution}. Th
 	\send{c}{a} \comp \receive{c}{x}\send{x}{} \evolves{\tau} \send{c}{} 
 \]
 
-Using these actions, we can give a set of rules describing the behavior of a \picalc processes in an arbitrary context.  Hence, we now formally define the action relation under these rules:
-\note{I wonder if these couldn't be simplified by allowing a transition that happens over the reduction semantics?  i can't find anyone in the literature who does this but it seems like the best approach...}
+Using these actions, we can give a set of rules describing the behavior of a \picalc processes in an arbitrary context.  Hence, we now formally define the action relation under these rules (with their preconditions listed alongside them):
+\note{I wonder if these couldn't be simplified (ie removing A-EQ, A-REP, etc.) by allowing a transition that happens over the reduction semantics?  i can't find anyone in the literature who does this but it seems like the best approach.  my sense is this approach is avoided because the action relation isn't actually contextual in our above definition (since we need to be more careful about bound variable captures).  but i wonder if there is a way to gracefully sidestep the issue and avoid all the redundancy...}
 \begin{definition}{Action}
 	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:
 	\begin{center}\begin{tabular}{rllll}
@@ -288,16 +288,34 @@ Using these actions, we can give a set of rules describing the behavior of a \pi
 		$\pif{v=v} \pthen P \pelse Q$ & \evolves{\tau} & $P$ & & \tiny{(A-EQ)}\\[10pt]
 		$\pif{v_1=v_2} \pthen P \pelse Q$ & \evolves{\tau} & $Q$ & $v_1 \neq v_2$ & \tiny{(A-NEQ)}\\[10pt]
 
-		\multicolumn{3}{c}{$\underline{P\evolves{\exports{B}\sends{c}{V}} P'}$} & & \multirow{2}{*}{\tiny{(A-OPEN)}}\\
-		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,B}\sends{c}{V}} P'$}\\[10pt]
-		
-		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{X}} P',\ Q \evolves{\exports{B}\sends{c}{V}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{B}\cap fn(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
-		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{B}(P'\comp Q')$}\\[10pt]
-		
 		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle bn(\alpha) \cap fn(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMP)}}\\
 		\multicolumn{3}{c}{$P\comp Q \evolves{\alpha} P'\comp Q$}\\[10pt]
 		
 		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle b \not \in n(\alpha)$ }} & \multirow{2}{*}{\tiny{(A-REST)}}\\
 		\multicolumn{3}{c}{$\new{b} P \evolves{\alpha} \new{b} P'$}\\[10pt]
+
+		\multicolumn{3}{c}{$\underline{P\evolves{\exports{B}\sends{c}{V}} P'}$} & & \multirow{2}{*}{\tiny{(A-OPEN)}}\\
+		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,B}\sends{c}{V}} P'$}\\[10pt]
+		
+		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{X}} P',\ Q \evolves{\exports{B}\sends{c}{V}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{B}\cap fn(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
+		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{B}(P'\comp Q')$}\\[10pt]
 	\end{tabular}\end{center}
 \end{definition}
+ The first of two of these rules simply describe the ability of processes to evolve under input or output.  For example, a process $\send{c}{V} \comp P$ will evolve to $stop \comp P \sequiv P$ when it exercises its capability for output on $c$.  For a receiving process, evolution under (A-IN) is only possible when the substitution $\subst{V}{X}$ makes sense.  That is, $V$ and $X$ must have the same arity\refmargin{arity}and in a typed system we'd want to ensure that their types were compatible\footnote{See \cite{henn07} for a discussion off type systems in the \picalc}.
+
+Meanwhile, (A-REP), (A-EQ) and (A-NEQ) serve the provide the same interval evolution capabilities as (R-REP), (R-EQ) and (R-NEQ) do in the reduction semantics.
+
+Together, (A-COMP) and (A-REST) provide a notion\refmargin{contextual}contextually - with a key difference being that in action semantics we need to be careful about inadvertently capturing bound variables.  Hence, in (A-REST) we require that the newly bound variable does not occur in the names of the action.  Suppose we ignored this precondition and tried the following:
+\begin{center}\begin{tabular}{rllll}
+	\multicolumn{3}{c}{$\underline{\receive{c}{}stop \evolves{\receives{c}{}} stop}$} & & \multirow{2}{*}{\tiny{(A-REST)}}\\
+	\multicolumn{3}{c}{$\new{c} \receive{c}{}stop \evolves{\receives{c}{}} \new{c} stop$}\\[10pt]
+\end{tabular}\end{center}
+But it is actually impossible for $\new{c} \receive{c}{}stop$ to evolve since the scope of $c$ cannot be extruded and thus no other process could ever send along $c$!  Similarly, there are problems in capturing the one of the transmitted variables.  
+
+For (A-COMP), we just need to ensure that none of the bound identifiers of $\alpha$ conflict with the free variables in $Q$.  Actually, the only variables that will be bound in an action is the set $\exports{b}$ exported by a send action.  Thus, the precondition on (A-COMP) simply requires that bound variables that are transmitted will be `fresh' in the receiving process.  For example, consider the following system:
+\begin{center}\begin{tabular}{rllll}
+	\multicolumn{3}{c}{$\underline{\new{b}\send{c}{b}\evolves{\exports{b}\sends{c}{x}} stop}$} & & \multirow{2}{*}{\tiny{(A-COMP)}}\\
+	\multicolumn{3}{c}{$\new{b}\send{c}{b} \comp \send{b}{a}\evolves{\exports{b}\sends{c}{x}} stop\comp \send{b}{a}}$}\\[10pt]
+\end{tabular}\end{center}
+Above, we have a process sending on $b$ but the scope of $b$ has not actually been extruded (ie by being received on $c$).  Hence, we need to be careful not to `capture' a channel like $b$ by allowing exported channels to have the same name as free variables outside the original scope of the process.
+
