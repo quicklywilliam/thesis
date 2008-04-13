@@ -70,13 +70,13 @@ represents a `listener'	process that simply consumes the value waiting on input 
 	
 	We can build systems where only one process will send a value along some channel $c$ and only one will receive along.  However, suppose we took our system and used it in building a larger system.  Then we could have other processes that compete in sending or receiving along $c$ and make our system non-deterministic.  Nevertheless, we will see in the next example that we can at least learn \emph{that} a value was consumed, although we can't say by \emph{whom}.\end{example}
 	\begin{example}{exsynchronous}
-	 Perhaps we are not happy with this asynchronous transmission behavior.  Surely we'd like to have blocking sends sometimes, or be able to guarantee that a value is received.  However, it can be shown that our asynchronous languages is more general than a synchronous version.  To see why, consider the following system:
+	 Perhaps we are not happy with this asynchronous transmission behavior.  Surely we'd like to have blocking sends sometimes, or be able to guarantee that a value is received.  However, it can be shown that our asynchronous calculus can model synchronous sending.  To see why, consider the following system:
 	\begin{align}
 		F_1(c) & \pdef \rec{z} (\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp z)))\\
 		F_2(c) & \pdef \rec{q} (\receive{c}{ack}(\send{ack}{} \comp q)) \\
 		Sys_1 & \pdef \new{d}(F_1(d) \comp F_2(d))
 	\end{align}
-	First, we use \pdef with $F_1(c)$ to mean that the process term on the right with the channel $c$ will be denoted by $F_1(c)$ which we will call the \defmargin{interface} of a system or process.  Hence, $F_1(d)$ would represent $F_1(c)$, with the occurrences of $c$ replaced with $d$.  Both $F_1$ and $F_2$ have (infinite) recursive behavior, and we can think of $Sys_1$ as a term that `kicks off' both of them after creating a shared channel for them to communicate on.  
+	Here we use \pdef with $F_1(c)$ to mean that the process term on the right with the channel $c$ will be denoted by $F_1(c)$ which we will call the \defmargin{interface} of a system or process.  Hence, $F_1(d)$ would represent $F_1(c)$, with the occurrences of $c$ replaced with $d$.  Both $F_1$ and $F_2$ have (infinite) recursive behavior, and we can think of $Sys_1$ as a term that `kicks off' both of them after creating a shared channel for them to communicate on.  
 	
 	In an iteration of $F_1$, a new channel $ack$ is created for acknowledgement.  This channel is sent along $c$ and then $F_1$ waits for input on $ack$ before executing some term $R$ and calling another iteration.  $F_2$ receives $ack$ along $c$ and then uses $ack$ to send an empty signal to $F_1$ that it has received input on $c$.  
 	
@@ -271,16 +271,18 @@ The second type of action available is sending.  Here we need to be a bit more c
 \[
 	\new{a}\send{c}{a} \comp Q \evolves{\exports{b}\sends{c}{a}} Q
 \]
+We will refer to sending and receiving as \defmargin[external actions]{external action}.
 
-Finally, we have a third action available for \defmargin{internal evolution}. This is caused by some internal evolution in P like those described in \refsec{secreducationsemantics}.  We use $\tau$ denote such an internal evolution step.  Thus, we say $P \evolves{\tau} Q$ if P is able evolve into Q by performing a reduction step without any external actions.  For example (thanks to (R-COMM)),
+Our third action we call \defmargin{internal action}. This is caused by some internal evolution in P like those described by (R-COMM) in our \refsec{secreducationsemantics}.  We call actions like sending and receiving external since in order to occur, they need some external process (given in some system of which the process in question is a part) to do the corresponding receiving or sending. However, with internal action there is no external process needed to proceed.  We use $\tau$ denote such an internal evolution step.  Thus, we say $P \evolves{\tau} Q$ if P is able evolve into Q by performing a reduction step without any external contributions.  For example (thanks to (R-COMM)),
 \[
 	\send{c}{a} \comp \receive{c}{x}\send{x}{} \evolves{\tau} \send{c}{} 
 \]
+We will define and further characterize $\tau$ in our discussion of (A-COMM) below.
 
 Using these actions, we can give a set of rules describing the behavior of a \picalc processes in an arbitrary context.  Hence, we now formally define the action relation under these rules (with their preconditions listed alongside them):
 \note{I wonder if these couldn't be simplified (ie removing A-EQ, A-REP, etc.) by allowing a transition that happens over the reduction semantics?  i can't find anyone in the literature who does this but it seems like the best approach.  my sense is this approach is avoided because the action relation isn't actually contextual in our above definition (since we need to be more careful about bound variable captures).  but i wonder if there is a way to gracefully sidestep the issue and avoid all the redundancy...}
 \begin{definition}{Action}
-	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:
+	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:\todo{make the arrow for evolution size according to the text above it}
 	\begin{center}\begin{tabular}{rllll}
  		$\receive{c}{X}R$ & \evolves{\receives{c}{X}} & R\subst{V}{X} & & \tiny{(A-IN)}\\
 		$\send{c}{V}$ & \evolves{\sends{c}{V}} & $stop$ & & \tiny{(A-OUT)}\\
@@ -294,10 +296,10 @@ Using these actions, we can give a set of rules describing the behavior of a \pi
 		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle b \not \in n(\alpha)$ }} & \multirow{2}{*}{\tiny{(A-REST)}}\\
 		\multicolumn{3}{c}{$\new{b} P \evolves{\alpha} \new{b} P'$}\\[10pt]
 
-		\multicolumn{3}{c}{$\underline{P\evolves{\exports{B}\sends{c}{V}} P'}$} & & \multirow{2}{*}{\tiny{(A-OPEN)}}\\
+		\multicolumn{3}{c}{$\underline{P\evolves{\exports{B}\sends{c}{V}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\in V$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
 		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,B}\sends{c}{V}} P'$}\\[10pt]
 		
-		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{X}} P',\ Q \evolves{\exports{B}\sends{c}{V}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{B}\cap fn(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
+		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{X}} P',\ Q \evolves{\exports{B}\sends{c}{V}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{B}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
 		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{B}(P'\comp Q')$}\\[10pt]
 	\end{tabular}\end{center}
 \end{definition}
@@ -315,7 +317,35 @@ But it is actually impossible for $\new{c} \receive{c}{}stop$ to evolve since th
 For (A-COMP), we just need to ensure that none of the bound identifiers of $\alpha$ conflict with the free variables in $Q$.  Actually, the only variables that will be bound in an action is the set $\exports{b}$ exported by a send action.  Thus, the precondition on (A-COMP) simply requires that bound variables that are transmitted will be `fresh' in the receiving process.  For example, consider the following system:
 \begin{center}\begin{tabular}{rllll}
 	\multicolumn{3}{c}{$\underline{\new{b}\send{c}{b}\evolves{\exports{b}\sends{c}{x}} stop}$} & & \multirow{2}{*}{\tiny{(A-COMP)}}\\
-	\multicolumn{3}{c}{$\new{b}\send{c}{b} \comp \send{b}{a}\evolves{\exports{b}\sends{c}{x}} stop\comp \send{b}{a}}$}\\[10pt]
+	\multicolumn{3}{c}{$\new{b}\send{c}{b} \comp \send{b}{a}\evolves{\exports{b}\sends{c}{x}} stop\comp \send{b}{a}$}\\[10pt]
 \end{tabular}\end{center}
 Above, we have a process sending on $b$ but the scope of $b$ has not actually been extruded (ie by being received on $c$).  Hence, we need to be careful not to `capture' a channel like $b$ by allowing exported channels to have the same name as free variables outside the original scope of the process.
 
+(A-OPEN) expresses scope extrusion of a name $n$.  If we have that a process $P$ can evolves to $P'$ under the action $\exports{B}\sends{c}{V}$, then we can infer that some name $n$, whose scope is now bound to $P$, can be exported in the the action $\exports{n,B}\sends{c}{V}$.  Note that $n$ must actually occur in $V$ if it is to be exported; note also that $n$ cannot be $c$ since restricting $n$ (ie $c$) to $P$ would cause a scoping issue that interfered with an outside processes ability to receive on $c$.
+
+Finally we have (A-COMM), which expresses scope extrusion as well but this time in the context of the internal action $\tau$.  According to (A-COMM), $\tau$ is defined as the simultaneous (compositionally) occurrence of an input action and a matching output action on the same channel.  In the inferred process $P\comp Q$, no external contributions are needed for evolution, which results in the process $P'\comp Q'$, with the exported names $\exports{B}$ now being scopes to both.
+
+\begin{example}{exsynchronous_actions}
+	In \refex{exsynchronous}, we defined a simple process for modeling synchronous sends:
+\[
+	F_1(c) \pdef \rec{z} (\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp z)))\\
+\]
+We then went on to show how this process might work as a component in a example system.  But suppose we wanted to characterize this process's behavior in general.  We could use action semantics to described how it it can evolve internally (in this case there isn't much interesting we can do except expand the replication), but we'd also want to include a description of how that process behaves externally.  If possible, we'd like to do this without having to come up with a system to place the process.  We don't want our characterization of the process to rely at all on some auxiliary system.  We can use action semantics to provide a characterization of how $F_1(c)$ behaves externally, all without defining a particular system for it to work in.  Consider the following inferences:
+\begin{center}\begin{tabular}{lllr}
+	$F_1(c)$ & $\evolves{\tau}$ & $\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp F_1(c)))$ & \tiny{(A-REP)}\\
+	& $\evolves{\exports{ack}\sends{c}{ack}}$ & $\new{ack}(stop \comp \receive{ack}{}(R \comp F_1(c)))$ & \tiny{(A-OPEN, A-OUT)}\\
+	& $\evolves{\exports{\receives{ack}{}}}$ & $\new{ack}(stop \comp (R \comp F_1(c))) $& \tiny{(A-IN)}\\
+\end{tabular}\end{center}
+Using the \hyperref[Structural Equivalence]{structural equivalence} rules (S-COMP-ID) and (S-REST-COMP).  We know the final step of this inference to be equivalent to:
+\[
+	R \comp \new{ack}(F_1(c))
+\]
+Above, we have shown presence of the important behaviors we expect in $F_1(c)$.  That is, we have shown that $F_(c)$ can:
+\begin{itemize}
+\item Recursively spawn a process that can...
+\item Send $ack$ over $c$, extruding its scope and resulting in a residual process that can...
+\item Receive the acknowledgement handshake on $ack$, resulting in a residual that can... 
+\item Run $R$ and wait for the next recursive iteration to occur (internally).
+\end{itemize}
+Thus, we have completely characterized $F_1(c)$'s capabilities to act as a recursive synchronous output process in a system -- but we have done so without having to say anything about what that system actually looks like. 
+\end{example}
