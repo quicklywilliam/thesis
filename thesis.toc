@@ -12,8 +12,8 @@
 \contentsline {section}{\numberline {2.4}Action Semantics}{12}{section.2.4}
 \contentsline {chapter}{Chapter 3: Synchronicity and Expressiveness}{16}{chapter.3}
 \contentsline {section}{\numberline {3.1}The Synchronous $\pi $-Calculus}{17}{section.3.1}
-\contentsline {section}{\numberline {3.2}Separation Results}{18}{section.3.2}
-\contentsline {chapter}{Chapter 4: Synchronicity and Distributed Systems}{21}{chapter.4}
-\contentsline {section}{\numberline {4.1}Symmetry in Practice}{22}{section.4.1}
-\contentsline {chapter}{List of Figures}{23}{chapter*.6}
-\contentsline {chapter}{References}{24}{chapter*.7}
+\contentsline {section}{\numberline {3.2}Separation Results}{20}{section.3.2}
+\contentsline {chapter}{Chapter 4: Synchronicity and Distributed Systems}{22}{chapter.4}
+\contentsline {section}{\numberline {4.1}Symmetry in Practice}{23}{section.4.1}
+\contentsline {chapter}{List of Figures}{24}{chapter*.6}
+\contentsline {chapter}{References}{25}{chapter*.7}

@@ -271,6 +271,13 @@
 			\begin{minipage}{.9\textwidth}\begin{mydef}[(#1)]\label{#1}\index{#1}}%
 {\end{mydef}\end{minipage}\end{Sbox}\begin{center}\Ovalbox{\TheSbox}\end{center}}
 
+\newenvironment{insettable_wide}%
+	{\begin{figure}[H]
+		\begin{center}%
+			\cornersize*{8.0pt}\begin{Sbox}%
+				\begin{minipage}{.9\textwidth}}%
+	{\end{minipage}\end{Sbox}\Ovalbox{\TheSbox}\end{center}\end{figure}}%
+	
 \newenvironment{insettable}%
 	{\begin{figure}[H]
 		\begin{center}%

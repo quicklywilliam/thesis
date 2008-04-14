@@ -6,7 +6,7 @@
 Although it can be defined in other ways, one of the ways of giving a process's \emph{location} is in terms of the communication channels which can be used to access it.  Since processes are the units populating the space of a CCS system, it is natural to think of a process's location in terms of the processes which are `near' it - those it can communicate with via named channels.  In this case, changing the channel topology of a system changes the locations of its component processes.  In the CCS, channel topology is static, whereas the \picalc\ allows communication channels to be dynamically established and relinquished between processes.  This gives a kind of \emph{mobility} of processes, which vastly expands the capabilities of interaction in a system.
 	
 	In this chapter, we will give the syntax of the \emph{asynchronous} \picalc\ and a discussion of its features.\footnote{Several versions of the \picalc\ have been proposed.  We will loosely follow the recent presentation given in \cite{henn07}.}  Following this, we will introduce a notion of equivalence of terms in the language.  Finally, we will give some semantic reduction rules that provide computational behavior via steps of reduction.
-	\section{Syntax}
+	\section{Syntax}\label{spisyntax}
 	The terms of the \picalc\ operate on a space of \defmargin{identifiers} $v,w,...$ which for the time being will consist of names $n,m,...$ for communication channels, and variables $x,y,...$ which, as we will see below, can refer to channels or to recursive process bodies.
 	
 		\begin{insettable}
@@ -281,7 +281,7 @@ We will define and further characterize $\tau$ in our discussion of (A-COMM) bel
 
 Using these actions, we can give a set of rules describing the behavior of a \picalc processes in an arbitrary context.  Hence, we now formally define the action relation under these rules (with their preconditions listed alongside them):
 \note{I wonder if these couldn't be simplified (ie removing A-EQ, A-REP, etc.) by allowing a transition that happens over the reduction semantics?  i can't find anyone in the literature who does this but it seems like the best approach.  my sense is this approach is avoided because the action relation isn't actually contextual in our above definition (since we need to be more careful about bound variable captures).  but i wonder if there is a way to gracefully sidestep the issue and avoid all the redundancy...}
-\begin{definition}{Action}
+\begin{definition}{Action}\label{apiactionrules}
 	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:\todo{make the arrow for evolution size according to the text above it}
 	\begin{center}\begin{tabular}{rllll}
  		$\receive{c}{X}R$ & \evolves{\receives{c}{X}} & R\subst{V}{X} & & \tiny{(A-IN)}\\
@@ -336,7 +336,7 @@ We then went on to show how this process might work as a component in a example 
 	& $\evolves{\exports{ack}\sends{c}{ack}}$ & $\new{ack}(stop \comp \receive{ack}{}(R \comp F_1(c)))$ & \tiny{(A-OPEN, A-OUT)}\\
 	& $\evolves{\exports{\receives{ack}{}}}$ & $\new{ack}(stop \comp (R \comp F_1(c))) $& \tiny{(A-IN)}\\
 \end{tabular}\end{center}
-Using the \hyperref[Structural Equivalence]{structural equivalence} rules (S-COMP-ID) and (S-REST-COMP).  We know the final step of this inference to be equivalent to:
+Using the \hyperref[Structural Equivalence]{structural equivalence} rules (S-COMP-ID) and (S-REST-COMP).  We know the final step of this inference to be equivalent to:\note{I could make an explicit rule for inferences between structurally equivalent action relations...some presentations do, some don't.  What do you think?}
 \[
 	R \comp \new{ack}(F_1(c))
 \]
