@@ -292,7 +292,7 @@
 \newcommand{\refdef}[1]{\hyperref[#1]{Definition \ref{#1}}}
 
 
-\marginparwidth=5em %makes things line up right on even pages
+\marginparwidth=6em %makes things line up right on even pages
 
 \newwrite\@todowrite
 \immediate\openout\@todowrite=\jobname.todo

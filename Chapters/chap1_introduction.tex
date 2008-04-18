@@ -12,13 +12,13 @@ To run this program, we need to actually apply it to something - that is, we nee
 \]
 The above program first substitutes 4 in for the input $x$, yielding 4+1.  The program then returns the result, 5.  Since we can nest functions, a slightly more complicated version adds 1 to the input 4 and then multiplies the result by 3.  We give this program with each computational `step' below:
 \begin{align*}
-	(\lambda y. y * 3) ((\lambda x. x + 1) 4)
-	(\lambda y. y * 3) (4+1)
-	(\lambda y. y * 3) 5
-	5 * 3
-	15
+	(\lambda y. y * 3) ((\lambda x. x + 1) 4)\\
+	(\lambda y. y * 3) (4+1)\\
+	(\lambda y. y * 3) 5\\
+	5 * 3\\
+	15\\
 \end{align*}
-You are probably already getting a sense of theo expressive power of the $\lambda$-calculus.  In fact, it is capable of expressing any algorithm, even without the numbers and arithmetic operators we have implicitly included above!  Besides allowing the proof of many important results in computer science, the $\lambda$-calculus went on to inspire many programming languages like Lisp, ML and Haskell, and even some functionality in languages like Smalltalk, Ruby and Python.
+You are probably already getting a sense of the expressive power of the $\lambda$-calculus.  In fact, it is capable of expressing any algorithm, even without the numbers and arithmetic operators we have implicitly included above!  Besides allowing the proof of many important results in computer science, the $\lambda$-calculus went on to inspire many programming languages like Lisp, ML and Haskell, and even some functionality in languages like Smalltalk, Ruby and Python.
 
 However, the discover of the $\lambda$-calculus did not end the search for new algebra.  More recently, new kinds of programs and demands have emerged with the computational platform of \defmargin{distributed systems}.  These systems consist of loose networks of machines capable of exchanging messages and information.  We say this shared information and computational power belongs to `the system' in that it can be accessed from any system, and that any program running on the system can freely access these resources and generally behaves just as it would running on a single machine.
 
@@ -50,6 +50,13 @@ A major step towards such an algebra came in the 1980's when Robin Milner introd
 	
 	As an example of how naturally the \picalc\ models distributed systems, let us again consider our mobile phone network\footnote{This presentation is adapted from a version first given in \cite{miln99}}.  \note{Jim: I choose to give this presentation synchronously with milner.  I think it could be adapted, but I'm hoping that this will be a natural way to see the expressive power of the synchronous algebra but still can motivate the asynchronous presentation by pointing out that it is the way real systems behave.  Also, it is simpler and (I think) thus a better introduction to the calculus.}  Our system will be simplified a bit: only two towers and one phone, with the only capabilities being talking on the phone or switching from one tower to another.
 	
+	\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.7]{figures/cell_network_pi.pdf} % requires the graphicx package
+	\caption{Simplified Mobile Phone Network in the \picalc}
+	\label{fig_cell_network_pi}
+	\end{figure}
+	
 	First we give a process describing the behavior of a mobile phone:
 	\[
 		Mobile(talk, switch) \pdef \ssend{talk}{} Mobile(talk,switch) + \receive{switch}{t,s} Mobile(t,s)
@@ -80,4 +87,12 @@ We have now completely described the components of our system, but we still have
 	\small{$\textstyle Mobile(talk_1,switch_1)|ActiveT_1(talk_1,switch_1,gain_1,loose_1)|IdleT(gain_2,loose_2)|Server_1$}
 \end{center}
 
-	
+	Now that we have gotten a taste of the power of the \picalc, we are ready to explore it in more detail.  However, our first pass at the \picalc will not include some of the operators included in our mobile phone network example.  For one, it will not include the $+$ operator.  We will also use a version of sending that is a little simpler than the one we've seen so far.  More specifically, our first calculus will be asynchronous, meaning that processes will not continue on with any computation after sending on a channel.  That is, in the process
+\[
+	\ssend{c}{}P,
+\]
+we will disallow the presence of $P$ -- the process will simply end after sending on $c$.  In Chapter \ref{the picalc}, we will give a rigorous presentation of the semantics of the \picalc the rules describing they way computation happens.
+
+The two simplifications mentioned above will make our synchronous calculus somewhat easier to grasp, but there is another reason to consider asynchronous calculus: it is far easier to implement on a real distributed system than the full synchronous version.  At the base level, communication between machines on a distributed system is asynchronous, so implementing synchronous calculi means finding a way to simulate synchronous message passing using only asynchronous primitives.  In Chapter \ref{sync_and_express}, after briefly presenting the synchronous \picalc and its computational rules, we will look at the problem of modeling the synchronous \picalc using the asynchronous version.
+
+Having looked at this problem, we will take a practical-minded look at the way that a synchronous \picalc-like language might be implemented on a system using asynchronous primitive \picalc constructs. Chapter \ref{sync_and_dist_sys} is a brief survey of some of the approaches that have been suggested or used to implement such a language, and how they bear on the results of Chapter \ref{sync_and_express}.
