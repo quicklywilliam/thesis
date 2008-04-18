@@ -3,17 +3,17 @@
 \contentsline {section}{A Word About Formatting}{iii}{section*.4}
 \contentsline {chapter}{Abstract}{iv}{chapter*.5}
 \contentsline {chapter}{Chapter 1: Introduction}{1}{chapter.1}
-\contentsline {chapter}{Chapter 2: The $\pi $-Calculus}{3}{chapter.2}
-\contentsline {section}{\numberline {2.1}Syntax}{3}{section.2.1}
-\contentsline {section}{\numberline {2.2}Structural Equivalence}{6}{section.2.2}
-\contentsline {subsection}{\numberline {2.2.1}Identifier Substitution and $\alpha $-equivalence}{6}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}Contexts and Equivalence}{7}{subsection.2.2.2}
-\contentsline {section}{\numberline {2.3}Reduction Semantics}{8}{section.2.3}
-\contentsline {section}{\numberline {2.4}Action Semantics}{12}{section.2.4}
-\contentsline {chapter}{Chapter 3: Synchronicity and Expressiveness}{16}{chapter.3}
-\contentsline {section}{\numberline {3.1}The Synchronous $\pi $-Calculus}{17}{section.3.1}
-\contentsline {section}{\numberline {3.2}Separation Results}{20}{section.3.2}
-\contentsline {chapter}{Chapter 4: Synchronicity and Distributed Systems}{22}{chapter.4}
-\contentsline {section}{\numberline {4.1}Symmetry in Practice}{23}{section.4.1}
-\contentsline {chapter}{List of Figures}{24}{chapter*.6}
-\contentsline {chapter}{References}{25}{chapter*.7}
+\contentsline {chapter}{Chapter 2: The $\pi $-Calculus}{6}{chapter.2}
+\contentsline {section}{\numberline {2.1}Syntax}{6}{section.2.1}
+\contentsline {section}{\numberline {2.2}Structural Equivalence}{9}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Identifier Substitution and $\alpha $-equivalence}{9}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Contexts and Equivalence}{10}{subsection.2.2.2}
+\contentsline {section}{\numberline {2.3}Reduction Semantics}{11}{section.2.3}
+\contentsline {section}{\numberline {2.4}Action Semantics}{14}{section.2.4}
+\contentsline {chapter}{Chapter 3: Synchronicity and Expressiveness}{19}{chapter.3}
+\contentsline {section}{\numberline {3.1}The Synchronous $\pi $-Calculus}{20}{section.3.1}
+\contentsline {section}{\numberline {3.2}Separation Results}{23}{section.3.2}
+\contentsline {chapter}{Chapter 4: Synchronicity and Distributed Systems}{25}{chapter.4}
+\contentsline {section}{\numberline {4.1}Symmetry in Practice}{26}{section.4.1}
+\contentsline {chapter}{List of Figures}{27}{chapter*.6}
+\contentsline {chapter}{References}{28}{chapter*.7}

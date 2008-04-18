@@ -123,7 +123,7 @@ Neither do the action rules for the synchronous \picalc, given below, differ sig
 \section{Separation Results}\label{Separation Results}
 When trying to compare the expressive power of different calculi, one good approach is to, as above, provide explicit encodings from one language to another\footnote{Note that \refex{syncembedding} is a trivial example of such an encoding since your encodings are straight-forward enough to be equivalent under the structural equivalence.  Most encodings require the more advanced structure of \emph{bisimulation} equivalences, which relies on setting up a notion of simulation and then proving that two processes simulate one another.}.  We say that we are trying to encode from \defmargin{source language} into the terms of a \defmargin{target language}, and if we succeed, we have shown that the target language is at least as expressive as the source.  Hence, in example \refex{syncembedding} we showed that the synchronous calculus is at least as expressive as the asynchronous calculus by giving an encoding from the asynchronous to the synchronous.  We will also use the notation
 \[
-	\encd{P} \defequals Q
+	\encode{P} \defequals Q
 \]
 to mean that P in the source language is encoded by Q in the target language.
 
@@ -137,8 +137,8 @@ Using these results, Palamidessi a set of useful requirements that formally sepa
 
 The first of those requirement is on \defmargin{uniformity}, which means that:
 \begin{align}
-	\encd{\alpha(P)} &= \alpha(\encd{Q})\label{unif1}\\
-	\encd{P\comp Q} &= \encd{P} \comp \encd{Q}\label{unif2}
+	\encode{\alpha(P)} &= \alpha(\encode{Q})\label{unif1}\\
+	\encode{P\comp Q} &= \encode{P} \comp \encode{Q}\label{unif2}
 \end{align}
 (\ref{unif1}) simply states $\alpha$-renaming \note{When I try to refer to the label $\alpha$-equivalency here, things break.  any idea how to fix this without re-engineering my definitions?} is not violated in the process of the encoding.  (\ref{unif2}) is related to the requirements of a distributed system.  That is, parallel processes really should just map to parallel processes, with not top level manager process or the like to aide the encoding.  This is how Palamidessi builds the requirement of a symmetric network into a language requirement.\todo{where/how?}
 

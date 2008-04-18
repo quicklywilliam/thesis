@@ -1,10 +1,6 @@
 %!TEX root = /Users/admin/Desktop/Documents/Academic/MA 470 -THESIS/THESIS/thesis.tex
 
-\chapter{The \Picalc}\label{the picalc}
-	In the 1930's, Alonzo Church and Stephen Kleene introduced the $\lambda$-calculus as an algebraic model for describing computation.  In the $\lambda$-calculus, computation is the invocation of functions.  In the 1980's, Robin Milner introduced his Calculus of Communicating Systems (CCS), in which computation is modeled as communication via message passing.  Because these channels can be shared and used an arbitrary number of times, there is not a concrete naming system for a chunk of computation the way there is in a function.  Instead, in the CCS any bit of functionality can be referred to as a \emph{process}, with no specification of the granularity.  Where we might think of a program in the $\lambda$-calculus as a bunch of functions invoking one another, in the the CCS we say that a \emph{system} is composed of many communicating processes.  It was this CCS that later became the basis for the \picalc.  
-	
-Although it can be defined in other ways, one of the ways of giving a process's \emph{location} is in terms of the communication channels which can be used to access it.  Since processes are the units populating the space of a CCS system, it is natural to think of a process's location in terms of the processes which are `near' it - those it can communicate with via named channels.  In this case, changing the channel topology of a system changes the locations of its component processes.  In the CCS, channel topology is static, whereas the \picalc\ allows communication channels to be dynamically established and relinquished between processes.  This gives a kind of \emph{mobility} of processes, which vastly expands the capabilities of interaction in a system.
-	
+\chapter{The \Picalc}\label{the picalc}	
 	In this chapter, we will give the syntax of the \emph{asynchronous} \picalc\ and a discussion of its features.\footnote{Several versions of the \picalc\ have been proposed.  We will loosely follow the recent presentation given in \cite{henn07}.}  Following this, we will introduce a notion of equivalence of terms in the language.  Finally, we will give some semantic reduction rules that provide computational behavior via steps of reduction.
 	\section{Syntax}\label{spisyntax}
 	The terms of the \picalc\ operate on a space of \defmargin{identifiers} $v,w,...$ which for the time being will consist of names $n,m,...$ for communication channels, and variables $x,y,...$ which, as we will see below, can refer to channels or to recursive process bodies.
@@ -76,7 +72,7 @@ represents a `listener'	process that simply consumes the value waiting on input 
 		F_2(c) & \pdef \rec{q} (\receive{c}{ack}(\send{ack}{} \comp q)) \\
 		Sys_1 & \pdef \new{d}(F_1(d) \comp F_2(d))
 	\end{align}
-	Here we use \pdef with $F_1(c)$ to mean that the process term on the right with the channel $c$ will be denoted by $F_1(c)$ which we will call the \defmargin{interface} of a system or process.  Hence, $F_1(d)$ would represent $F_1(c)$, with the occurrences of $c$ replaced with $d$.  Both $F_1$ and $F_2$ have (infinite) recursive behavior, and we can think of $Sys_1$ as a term that `kicks off' both of them after creating a shared channel for them to communicate on.  
+	Above, both $F_1$ and $F_2$ have (infinite) recursive behavior, and we can think of $Sys_1$ as a term that `kicks off' both of them after creating a shared channel for them to communicate on.  
 	
 	In an iteration of $F_1$, a new channel $ack$ is created for acknowledgement.  This channel is sent along $c$ and then $F_1$ waits for input on $ack$ before executing some term $R$ and calling another iteration.  $F_2$ receives $ack$ along $c$ and then uses $ack$ to send an empty signal to $F_1$ that it has received input on $c$.  
 	
