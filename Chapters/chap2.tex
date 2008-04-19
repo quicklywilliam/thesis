@@ -1,39 +1,38 @@
 %!TEX root = /Users/admin/Desktop/Documents/Academic/MA 470 -THESIS/THESIS/thesis.tex
 
 \chapter{The \Picalc}\label{the picalc}	
-	In this chapter, we will give the syntax of the \emph{asynchronous} \picalc\ and a discussion of its features.\footnote{Several versions of the \picalc\ have been proposed.  We will loosely follow the recent presentation given in \cite{henn07}.}  Following this, we will introduce a notion of equivalence of terms in the language.  Finally, we will give some semantic reduction rules that provide computational behavior via steps of reduction.
+	In this chapter, we will give the syntax of the \emph{asynchronous} \picalc\ and a discussion of its features.  We will loosely follow the style of a recent presentation given in \cite{henn07}.  Following this, we will introduce a notion of equivalence of terms in the language.  Finally, we will give some semantic reduction rules that provide computational behavior via steps of reduction.
 	\section{Syntax}\label{spisyntax}
-	The terms of the \picalc\ operate on a space of \defmargin{identifiers} $v,w,...$ which for the time being will consist of names $n,m,...$ for communication channels, and variables $x,y,...$ which, as we will see below, can refer to channels or to recursive process bodies.
+	The terms of the \picalc\ operate on a space of \defmargin{identifiers} which consists of names $a,b,c,...,n,m,o$ for communication channels, and variables $v,w,x$ which can refer to channels, and recursive variables $p,q,r$, explained in more detail below.  In general, we will use capital letter to denote a process.
 	
 		\begin{insettable}
 		\begin{center}
 		\begin{tabular}{r l l}
 		\multicolumn{3}{c}{\emph{Process terms}}\\
-		$R,S,B :=$  &$R_1 \comp R_2$ & Composition\\
-		&\send{n}{V} & Send\\
-		&$\receive{n}{X} R$ & Receive\\
+		$R :=$  &$R_1 \comp R_2$ & Composition\\
+		&\send{n}{\tuple{V}} & Send\\
+		&$\receive{n}{\tuple{X}} R$ & Receive\\
 		&$\new{n}R$ & Restriction\\
 		&$\pif{v_1 = v_2}\pthen R_1 \pelse R_2$ & Matching\\
-		&$\rec{x} B$ & Recursion\\
+		&$\rec{p} R$ & Recursion\\
 		&stop & Termination\\
 		&\\
 		
-		\multicolumn{3}{c}{\emph{Systems}} \\
-		$\sys{M,N} :=$ &$\new{c_1,...,c_n} R_1 \comp...\comp R_m$ & $n, m > 0$\\
+		\multicolumn{3}{c}{\emph{System}} \\
+		& $\new{c_1,...,c_n} R_1 \comp...\comp R_m$ & $n, m >= 0$\\
 		\end{tabular}
 		\emph{\caption{Terms in the asynchronous \picalc}\label{apicalcterms}}
 		\end{center}
 		\end{insettable}
-		% \subsection{Names}
 	Given two or more processes, we can compose them using the $\comp$ operator, which means that the composed processes will be executed concurrently.
 		
-	We denote the sending of a tuple $V$ over a channel $n$ by \send{n}{V}.  Here $V$ is a tuple of identifiers in the form $V=(v_1,...,v_k):k\geq 0$.  We say that $V$ has \defmargin{arity} $k$.  In the case $n=0$ nothing is being transmitted; the communication acts as a \defmargin{handshake} or signal.  We will denote this case by \send{n}{}.  It is a feature of the language that sending is not a blocking operation -- that is, the process will not wait or depend on the value actually being received or operated on by another process, but will simply terminate after sending the value.  Non-blocking sends make our \picalc\ an \emph{asynchronous} language - processes that send values do not wait to sync operation with the processes that consume the values.  However, we will show in \refex{exsynchronous} that synchronous behavior can still be modeled in our language.
+	We denote the sending of a tuple $\tuple{V}$ over a channel $n$ by \send{n}{\tuple{V}}.  Here $\tuple{V}$ is a tuple of identifiers in the form $\tuple{V}=(v_1,...,v_k):k\geq 0$.  We say that $\tuple{V}$ has \defmargin{arity} $k$.  In the case $k=0$ nothing is being transmitted; the communication acts as a \defmargin{handshake} or signal.  We will denote this case by \send{n}{}.  When $k=0$, only a single value $v_1$ is being transmitted, in which case we write $\send{n}{v_1}$.  It is a feature of the language that sending is not a blocking operation -- that is, the process will not wait or depend on the value actually being received or operated on by another process, but will simply terminate after sending the value.  Non-blocking sends make our \picalc\ an \emph{asynchronous} language - processes that send values do not wait to sync operation with the processes that consume the values.  However, we will show in \refex{exsynchronous} that synchronous behavior can still be modeled in our language.
 	
-	The term \receive{n}{X}$R$ describes a process waiting to receive a tuple along $k$ before continuing with $R$.  Here $X$ is a \defmargin[pattern]{patterns}, or a tuple of variables of arity $k$.  Patterns allow us to decompose the transmitted tuple into its component values by naming them with $x_1,...,x_k$, which can be referred to in $R$.  Thus, in the term
+	The term \receive{n}{\tuple{X}}$R$ describes a process waiting to receive a tuple along $k$ before continuing with $R$.  Here $\tuple{X}$ is a \defmargin[pattern]{patterns}, or a tuple of variables of arity $k$.  Patterns allow us to decompose the transmitted tuple into its component values by naming them with $x_1,...,x_k$, which can be referred to in $R$.  Thus, in the term
 	\begin{align}
 		\send{c}{n_1,n_2,n_3} \comp \receive{c}{x_1,x_2,x_3} R,
 	\end{align}
-the names $n_1,n_2,n_3$ are received via $c$ and bound via matching to $x_1,x_2,x_3$ (the use of $x_1,x_2,x_3$ is limited to being within the process $R$).  Similarly to sending, the case of arity 0 is denoted \receive{n}{}$R$ -- here $R$ will not happen until a handshake is received on $n$.  Notice that in contrast to the case of sending, receiving is a \defmargin{guarded} operation -- that is, the process $R$ will not execute until $X$ has been received via $n$.  For example, the term
+the names $n_1,n_2,n_3$ are received via $c$ and bound via matching to $x_1,x_2,x_3$ (the use of $x_1,x_2,x_3$ is limited to being within the process $R$).  Similarly to sending, the case of arity 0 is denoted \receive{n}{}$R$ -- here $R$ will not happen until a handshake is received on $n$.  Notice that in contrast to the case of sending, receiving is a \defmargin{guarded} operation -- that is, the process $R$ will not execute until $\tuple{X}$ has been received via $n$.  For example, the term
 \begin{align}
 	\receive{c}{}stop
 \end{align}
@@ -50,7 +49,7 @@ represents a `listener'	process that simply consumes the value waiting on input 
 		\receive{c}{x}(\pif{x=a} \pthen \send{x}{} \pelse stop)
 	\end{align}
 	
-	Recursion is built into the language using the syntax $\rec{x}B$.  The process $\rec{x}B$ itself is referred to by the variable $x$, which is used somewhere in $B$ to express a recursive call.  For example, consider the recursive responder term below, which receives a channel $x_1$ via $c$.  It then sends a handshake response on $x_1$, while another responder process is run in parallel.
+	Recursion is built into the language using the syntax $\rec{x}R$.  The process $\rec{x}R$ itself is referred to by the variable $x$, which is used somewhere in $R$ to express a recursive call.  For example, consider the recursive responder term below, which receives a channel $x_1$ via $c$.  It then sends a handshake response on $x_1$, while another responder process is run in parallel.
 	\begin{align}
 		\rec{x}\receive{c}{x_1}(\send{x_1}{} \comp x)
 		\label{reclistenerterm}
@@ -93,7 +92,7 @@ represents a `listener'	process that simply consumes the value waiting on input 
 	\begin{align}
 		\receive{a}{x_1,x_2}\send{x_1}{} \comp \rec{x}(\send{a}{n,m} \comp x)
 	\end{align}
-	We denote the substitution of values in $V$ for free identifiers $X$ in $R$ by $R$\subst{V}{X}.  Of course, during the course of a substitution, we might inadvertently `capture' a bound term -- suppose for example we wanted to perform the substitution $P_1(c)$\subst{n}{c} where
+	We denote the substitution of values in $\tuple{V}$ for free identifiers $V$ in $R$ by $R$\subst{\tuple{V}}{\tuple{X}}.  Of course, during the course of a substitution, we might inadvertently `capture' a bound term -- suppose for example we wanted to perform the substitution $P_1(c)$\subst{n}{c} where
 \begin{align}
 	P_1(c) \pdef \new{n}(\send{n}{x} \comp \send{c}{y})	
 \end{align}	
@@ -149,8 +148,8 @@ We also want to give some \emph{semantic} properties that a process in our langu
 \begin{definition}{Reduction}
 	The \emph{reduction relation} \pred\ is the smallest contextual relation that satisfies the following rules:
 	\begin{center}\begin{tabular}{rll}
-		$\send{c}{V} \comp \receive{c}{X}R$\ &\  $\pred\  R\subst{V}{X}$ & \tiny{(R-COMM)}\\
-		$\rec{x}B$\ &\  $\pred\  B\subst{\rec{x}B}{x}$ & \tiny{(R-REP)}\\
+		$\send{c}{\tuple{V}} \comp \receive{c}{\tuple{X}}R$\ &\  $\pred\  R\subst{\tuple{V}}{\tuple{X}}$ & \tiny{(R-COMM)}\\
+		$\rec{x}R$\ &\  $\pred\  R\subst{\rec{x}R}{x}$ & \tiny{(R-REP)}\\
 		$\pif{v = v}\pthen P \pelse Q$\ &\ $\pred\ P$ & \tiny{(R-EQ)}\\
 		$\pif{v_1 = v_2}\pthen P \pelse Q$\ &\ $\pred\ Q$ \ \ (where $v_1\neq v_2$)& \tiny{(R-NEQ)}\\
 		\multicolumn{2}{c}{\hspace{4.5em}$\underline{P\sequiv P', P \pred Q, Q\sequiv Q'}$} & \multirow{2}{*}{\tiny{(R-STRUC)}}\\
@@ -162,11 +161,11 @@ The first of these allows a computation step for the transmission of values from
 \begin{example}{exscopeextr}
 	We will give a demonstration of how scope extrusion is defined using the rules and axioms of reduction and structural equivalence.  Consider the expression 
 \begin{align}
-	\receive{d}{X}\send{X}{}\comp \new{c}(\send{d}{c} \comp \receive{c}{}stop)	
+	\receive{d}{x}\send{x}{}\comp \new{c}(\send{d}{c} \comp \receive{c}{}stop)	
 \end{align}
 We can use (S-REST-COMP) to bring the restriction to the outside, giving:
 \begin{align}
-	\new{c}(\receive{d}{X}\send{X}{}\comp \send{d}{c} \comp \receive{c}{}stop)		
+	\new{c}(\receive{d}{x}\send{x}{}\comp \send{d}{c} \comp \receive{c}{}stop)		
 \end{align}
 	Thanks to the reduction relation's contextuality, we can use (R-COMM) inside of the restriction operator and apply a substitution.  Using this in conjunction with the above structural equality and (R-STRUCT), we get:
 	\begin{align}
@@ -179,7 +178,7 @@ We can use (S-REST-COMP) to bring the restriction to the outside, giving:
 		P(d) \pdef \new{c}(\send{d}{c} \comp \receive{c}{}stop)
 	\end{align}
 	\begin{align}
-		\mathbb{C} = \receive{d}{X}\send{X}{} \comp [\ ]
+		\mathbb{C} = \receive{d}{x}\send{x}{} \comp [\ ]
 	\end{align}
 Then we have shown that if we drop $P(d)$ into the context $\mathbb{C}$ (forming $\mathbb{C}[P(d)]$), it will establish a new channel $c$ and extend its scope using $d$.  Hence it is (S-REST-COMP) which allows our system's communication topology to change dynamically via scope extrusion.
 \end{example}
@@ -261,9 +260,9 @@ where $\mathcal{S}$ is a set of processes and $\mathcal{A}$ is a set of labels c
 \end{definition}
 Hence, the transition $P \evolves{a} Q$ indicates that there is an action under which the process P becomes Q.  We will refer to $Q$ is the \defmargin{residual} of $P$ after $a$.
 
-There are three types of actions that may cause a process to evolve.  Note that we will use $\alpha$ to refer to an action of arbitrary type.  First, the process might receive a value.  That is, a process $P$ can be said to be capable of the transition $P \evolves{\receives{c}{X}} Q$, which is to say $P$ can receive $X$ along $c$ resulting in the residual $Q$.
+There are three types of actions that may cause a process to evolve.  Note that we will use $\alpha$ to refer to an action of arbitrary type.  First, the process might receive a value.  That is, a process $P$ can be said to be capable of the transition $P \evolves{\receives{c}{\tuple{X}}} Q$, which is to say $P$ can receive $\tuple{X}$ along $c$ resulting in the residual $Q$.
 
-The second type of action available is sending.  Here we need to be a bit more careful.  In the case of receiving, the received name is always bound to a new name $X$ - so we needn't worry about issues of scoping.  In sending, however, we might be transmitting either a free or a bound name (or a mix of them in a tuple).  In the latter case, we need to take account of the fact that the\refmargin{scope extrusion}scope of the name is being extruded to whatever process receives the name.  We denote the set of bound names in the send action by $\exports{B}$, and we say that this set of names is \defmargin{exported} by the process.  Hence, the transition $P \evolves{\exports{B}\sends{c}{V}} Q$ represents that P can send $V$ over $c$, exporting $\exports{B}$ and resulting in $Q$.  For example,
+The second type of action available is sending.  Here we need to be a bit more careful.  In the case of receiving, the received names are always bound to new names in $\tuple{X}$ - so we needn't worry about issues of scoping.  In sending, however, we might be transmitting either free or a bound names, or a mix of them.  In the latter case, we need to take account of the fact that the\refmargin{scope extrusion}scope of the name is being extruded to whatever process receives the name.  We denote the set of bound names in the send action by $\exports{\tuple{B}}$, and we say that this set of names is \defmargin{exported} by the process.  Hence, the transition $P \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q$ represents that P can send $\tuple{V}$ over $c$, exporting $\exports{\tuple{B}}$ and resulting in $Q$.  For example,
 \[
 	\new{a}\send{c}{a} \comp Q \evolves{\exports{b}\sends{c}{a}} Q
 \]
@@ -280,8 +279,8 @@ Using these actions, we can give a set of rules describing the behavior of a \pi
 \begin{definition}{Action}\label{apiactionrules}
 	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:\todo{make the arrow for evolution size according to the text above it}
 	\begin{center}\begin{tabular}{rllll}
- 		$\receive{c}{X}R$ & \evolves{\receives{c}{X}} & R\subst{V}{X} & & \tiny{(A-IN)}\\
-		$\send{c}{V}$ & \evolves{\sends{c}{V}} & $stop$ & & \tiny{(A-OUT)}\\
+ 		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{X}} & R\subst{V}{X} & & \tiny{(A-IN)}\\
+		$\send{c}{\tuple{V}}$ & \evolves{\sends{c}{V}} & $stop$ & & \tiny{(A-OUT)}\\
 		$\rec{x}R$ & \evolves{\tau} & $R\subst{\rec{x}R}{x}$ & & \tiny{(A-REP)}\\
 		$\pif{v=v} \pthen P \pelse Q$ & \evolves{\tau} & $P$ & & \tiny{(A-EQ)}\\[10pt]
 		$\pif{v_1=v_2} \pthen P \pelse Q$ & \evolves{\tau} & $Q$ & $v_1 \neq v_2$ & \tiny{(A-NEQ)}\\[10pt]
@@ -292,14 +291,14 @@ Using these actions, we can give a set of rules describing the behavior of a \pi
 		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle b \not \in n(\alpha)$ }} & \multirow{2}{*}{\tiny{(A-REST)}}\\
 		\multicolumn{3}{c}{$\new{b} P \evolves{\alpha} \new{b} P'$}\\[10pt]
 
-		\multicolumn{3}{c}{$\underline{P\evolves{\exports{B}\sends{c}{V}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\in V$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
-		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,B}\sends{c}{V}} P'$}\\[10pt]
+		\multicolumn{3}{c}{$\underline{P\evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\in \tuple{V}$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
+		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,\tuple{B}}\sends{c}{\tuple{V}}} P'$}\\[10pt]
 		
-		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{X}} P',\ Q \evolves{\exports{B}\sends{c}{V}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{B}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
-		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{B}(P'\comp Q')$}\\[10pt]
+		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{\tuple{X}}} P',\ Q \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{\tuple{B}}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
+		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q')$}\\[10pt]
 	\end{tabular}\end{center}
 \end{definition}
- The first of two of these rules simply describe the ability of processes to evolve under input or output.  For example, a process $\send{c}{V} \comp P$ will evolve to $stop \comp P \sequiv P$ when it exercises its capability for output on $c$.  For a receiving process, evolution under (A-IN) is only possible when the substitution $\subst{V}{X}$ makes sense.  That is, $V$ and $X$ must have the same arity\refmargin{arity}and in a typed system we'd want to ensure that their types were compatible\footnote{See \cite{henn07} for a discussion off type systems in the \picalc}.
+ The first of two of these rules simply describe the ability of processes to evolve under input or output.  For example, a process $\send{c}{\tuple{V}} \comp P$ will evolve to $stop \comp P \sequiv P$ when it exercises its capability for output on $c$.  For a receiving process, evolution under (A-IN) is only possible when the substitution $\subst{\tuple{V}}{\tuple{X}}$ makes sense.  That is, $\tuple{V}$ and $\tuple{X}$ must have the same arity\refmargin{arity}and in a typed system we'd want to ensure that their types were compatible\footnote{See \cite{henn07} for a discussion off type systems in the \picalc}.
 
 Meanwhile, (A-REP), (A-EQ) and (A-NEQ) serve the provide the same interval evolution capabilities as (R-REP), (R-EQ) and (R-NEQ) do in the reduction semantics.
 
@@ -317,9 +316,9 @@ For (A-COMP), we just need to ensure that none of the bound identifiers of $\alp
 \end{tabular}\end{center}
 Above, we have a process sending on $b$ but the scope of $b$ has not actually been extruded (ie by being received on $c$).  Hence, we need to be careful not to `capture' a channel like $b$ by allowing exported channels to have the same name as free variables outside the original scope of the process.
 
-(A-OPEN) expresses scope extrusion of a name $n$.  If we have that a process $P$ can evolves to $P'$ under the action $\exports{B}\sends{c}{V}$, then we can infer that some name $n$, whose scope is now bound to $P$, can be exported in the the action $\exports{n,B}\sends{c}{V}$.  Note that $n$ must actually occur in $V$ if it is to be exported; note also that $n$ cannot be $c$ since restricting $n$ (ie $c$) to $P$ would cause a scoping issue that interfered with an outside processes ability to receive on $c$.
+(A-OPEN) expresses scope extrusion of a name $n$.  If we have that a process $P$ can evolves to $P'$ under the action $\exports{\tuple{B}}\sends{c}{\tuple{V}}$, then we can infer that some name $n$, whose scope is now bound to $P$, can be exported in the the action $\exports{n,\tuple{B}}\sends{c}{\tuple{V}}$.  Note that $n$ must actually occur in $\tuple{V}$ if it is to be exported; note also that $n$ cannot be $c$ since restricting $n$ (ie $c$) to $P$ would cause a scoping issue that interfered with an outside processes ability to receive on $c$.
 
-Finally we have (A-COMM), which expresses scope extrusion as well but this time in the context of the internal action $\tau$.  According to (A-COMM), $\tau$ is defined as the simultaneous (compositionally) occurrence of an input action and a matching output action on the same channel.  In the inferred process $P\comp Q$, no external contributions are needed for evolution, which results in the process $P'\comp Q'$, with the exported names $\exports{B}$ now being scopes to both.
+Finally we have (A-COMM), which expresses scope extrusion as well but this time in the context of the internal action $\tau$.  According to (A-COMM), $\tau$ is defined as the simultaneous (compositionally) occurrence of an input action and a matching output action on the same channel.  In the inferred process $P\comp Q$, no external contributions are needed for evolution, which results in the process $P'\comp Q'$, with the exported names $\exports{\tuple{B}}$ now being scopes to both.
 
 \begin{example}{exsynchronous_actions}
 	In \refex{exsynchronous}, we defined a simple process for modeling synchronous sends:

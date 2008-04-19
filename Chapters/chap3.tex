@@ -24,18 +24,18 @@ A natural question arises at this point: can we represent this expressive commun
 \begin{center}
 \begin{tabular}{r l l}
 \multicolumn{3}{c}{\emph{Action Prefixes}}\\
-$\pi :=$  & $\send{n}{V}$ & Send\\
-&$\receivenodot{n}{X}$ & Receive\\
+$\pi :=$  & $\send{n}{\tuple{V}}$ & Send\\
+&$\receivenodot{n}{\tuple{X}}$ & Receive\\
 &$\tau$ & Internal Evolution\\
 
 &\\
 
 \multicolumn{3}{c}{\emph{Process terms}}\\
-$R,S,B :=$ & $\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i$ &\multirow{2}{*}{Summation ($n \in \mathbb{Z}$)}\\[20pt]
+$R :=$ & $\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i$ &\multirow{2}{*}{Summation ($n \in \mathbb{Z}$)}\\[20pt]
 &$R_1 \comp R_2$ & Composition\\
 &$\new{n}R$ & Restriction\\
 &$\pif{v_1 = v_2}\pthen R_1 \pelse R_2$ & Matching\\
-&$\rec{x} B$ & Recursion\\
+&$\rec{x} R$ & Recursion\\
 &stop & Termination\\
 &\\
 \end{tabular}
@@ -58,13 +58,13 @@ The summation case of $n=0$ is what is meant by our $stop$ termination process. 
 	\pi.R + 0 \sequiv \pi.R
 \end{align*}
 
-Note also that in our action prefixes, we have made sending a\refmargin{guarded}guarded operation, which means that $R$ will not execute until some other process receives $V$ along $n$.   Receiving is also guarded, as in the asynchronous version.  In the case where $\pi$ is some internal evolution $\tau$, we simply mean that $R$ can proceed after the process does something which we cannot observe.  This internal behavior is captured in the new reduction rule (R-TAU) below, while (R-SYNC) expresses the external evolution of the summation operator.
+Note also that in our action prefixes, we have made sending a\refmargin{guarded}guarded operation, which means that $R$ will not execute until some other process receives $\tuple{V}$ along $n$.   Receiving is also guarded, as in the asynchronous version.  In the case where $\pi$ is some internal evolution $\tau$, we simply mean that $R$ can proceed after the process does something which we cannot observe.  This internal behavior is captured in the new reduction rule (R-TAU) below, while (R-SYNC) expresses the external evolution of the summation operator.
 
 \begin{insettable}
 \begin{center}\begin{tabular}{rll}
 	$\tau.R + P$\ &\  $\pred\  R$ & \tiny{(R-TAU)}\\
-	$\ssend{c}{V} P + Q \comp \receive{c}{X}R + B$\ &\  $\pred\  (P \comp R)\subst{V}{X}$ & \tiny{(R-SYNC)}\\
-	$\rec{x}B$\ &\  $\pred\  B\subst{\rec{x}B}{x}$ & \tiny{(R-REP)}\\
+	$\ssend{c}{\tuple{V}} P + Q \comp \receive{c}{\tuple{X}}R + B$\ &\  $\pred\  (P \comp R)\subst{\tuple{V}}{\tuple{X}}$ & \tiny{(R-SYNC)}\\
+	$\rec{x}R$\ &\  $\pred\  R\subst{\rec{x}R}{x}$ & \tiny{(R-REP)}\\
 	$\pif{v = v}\pthen P \pelse Q$\ &\ $\pred\ P$ & \tiny{(R-EQ)}\\
 	$\pif{v_1 = v_2}\pthen P \pelse Q$\ &\ $\pred\ Q$ \ \ (where $v_1\neq v_2$)& \tiny{(R-NEQ)}\\
 	\multicolumn{2}{c}{\hspace{4.5em}$\underline{P\sequiv P', P \pred Q, Q\sequiv Q'}$} & \multirow{2}{*}{\tiny{(R-STRUC)}}\\
@@ -75,23 +75,23 @@ Note also that in our action prefixes, we have made sending a\refmargin{guarded}
 \end{insettable}
 
 \begin{example}{syncembedding}
-	It is not hard to show that the synchronous \picalc\ can model the asynchronous version.  To see why, first note that asynchronous sending can be encoded simply by $\ssend{n}{V}stop$.  This we will abbreviate with the familiar notation $\send{n}{V}$.  As we noted above, the summation notation allows for a single guarded process.  If we limit ourselves to these single summations, disallow use of the internal action $\tau$, and limit all sending to be of the form $\ssend{n}{V}stop$, then we have the asynchronous \picalc.  To see why the reduction semantics are compatible, note that (R-TAU) is not needed in the asynchronous calculus since we have excluded its operator.  The following shows that (R-SYNC) is a more general form of (R-COMM) of \refdef{Reduction}:\\
+	It is not hard to show that the synchronous \picalc\ can model the asynchronous version.  To see why, first note that asynchronous sending can be encoded simply by $\ssend{n}{\tuple{V}}stop$.  This we will abbreviate with the familiar notation $\send{n}{\tuple{V}}$.  As we noted above, the summation notation allows for a single guarded process.  If we limit ourselves to these single summations, disallow use of the internal action $\tau$, and limit all sending to be of the form $\ssend{n}{\tuple{V}}stop$, then we have the asynchronous \picalc.  To see why the reduction semantics are compatible, note that (R-TAU) is not needed in the asynchronous calculus since we have excluded its operator.  The following shows that (R-SYNC) is a more general form of (R-COMM) of \refdef{Reduction}:\\
 	
 	\begin{tabular}{rlr}
-				\ssend{c}{V} stop + stop \comp \receive{c}{X}R + stop\ \ &\ \ \sequiv\ \ \  \ssend{c}{V}stop \comp \receive{c}{X}R, & \text{\tiny{(S-SUM-ID}}\\
-		\ssend{c}{V}stop \comp \receive{c}{X}R\ &\  \pred\  (stop \comp R)\subst{V}{X}, & \text{\tiny{(R-SYNC)}}\\
-		\multicolumn{2}{c}{\hspace{44pt}$\underline{(stop \comp R)\subst{V}{X}\ \ \ \ \sequiv\ \ \ R\subst{V}{X}}$} & \text{\tiny{(S-COMP-ID)}}\\
-		\send{c}{V} \comp \receive{c}{X}R\ &\  \pred\  R \subst{V}{X} & \text{\tiny{(R-STRUC)}}\\
+				\ssend{c}{\tuple{V}} stop + stop \comp \receive{c}{\tuple{X}}R + stop\ \ &\ \ \sequiv\ \ \  \ssend{c}{\tuple{V}}stop \comp \receive{c}{\tuple{X}}R, & \text{\tiny{(S-SUM-ID}}\\
+		\ssend{c}{\tuple{V}}stop \comp \receive{c}{\tuple{X}}R\ &\  \pred\  (stop \comp R)\subst{\tuple{V}}{\tuple{X}}, & \text{\tiny{(R-SYNC)}}\\
+		\multicolumn{2}{c}{\hspace{44pt}$\underline{(stop \comp R)\subst{\tuple{V}}{\tuple{X}}\ \ \ \ \sequiv\ \ \ R\subst{\tuple{V}}{\tuple{X}}}$} & \text{\tiny{(S-COMP-ID)}}\\
+		\send{c}{\tuple{V}} \comp \receive{c}{\tuple{X}}R\ &\  \pred\  R \subst{\tuple{V}}{\tuple{X}} & \text{\tiny{(R-STRUC)}}\\
 	\end{tabular}\\
 	
-	It will be obvious from our presentation of synchronous action rules below that they needn't be shown to be a general version of the asynchronous rules -- they are equivalent simply by ignoring the extra rules and using our $\ssend{n}{V}stop$ encoding of sending.
+	It will be obvious from our presentation of synchronous action rules below that they needn't be shown to be a general version of the asynchronous rules -- they are equivalent simply by ignoring the extra rules and using our $\ssend{n}{\tuple{V}}stop$ encoding of sending.
 \end{example}
 Neither do the action rules for the synchronous \picalc, given below, differ significantly from \hyperref[apiactionrules]{those} in the asynchronous version.  As we would expect, (A-OUT) has been modified to express synchronous sending: it now evolves over output to a process $R$ and not simple the termination process $stop$.  We have also added two new rules.  The first, (A-TAU) describes the behavior of a process guarded by an internal action.  The second rule, (A-SUM), characterizes the summation operator.  It says, for example, that if some process $P$ is able to evolve to $P'$ over some action $\alpha$, then $\alpha$ will also cause $P+Q$ to evolve via choice to $P'$.
 
 \begin{insettable_wide}
 	\begin{center}\begin{tabular}{rllll}
- 		$\receive{c}{X}R$ & \evolves{\receives{c}{X}} & $R$\subst{V}{X} & & \tiny{(A-IN)}\\
-		$\ssend{c}{V}R$ & \evolves{\sends{c}{V}} & $R$ & & \tiny{(A-OUT)}\\
+ 		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{\tuple{X}}} & $R$\subst{\tuple{V}}{\tuple{X}} & & \tiny{(A-IN)}\\
+		$\ssend{c}{\tuple{V}}R$ & \evolves{\sends{c}{\tuple{V}}} & $R$ & & \tiny{(A-OUT)}\\
 		$\rec{x}R$ & \evolves{\tau} & $R\subst{\rec{x}R}{x}$ & & \tiny{(A-REP)}\\
 		$\pif{v=v} \pthen P \pelse Q$ & \evolves{\tau} & $P$ & & \tiny{(A-EQ)}\\[10pt]
 		$\pif{v_1=v_2} \pthen P \pelse Q$ & \evolves{\tau} & $Q$ & $v_1 \neq v_2$ & \tiny{(A-NEQ)}\\[10pt]
@@ -106,11 +106,11 @@ Neither do the action rules for the synchronous \picalc, given below, differ sig
 		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle b \not \in n(\alpha)$ }} & \multirow{2}{*}{\tiny{(A-REST)}}\\
 		\multicolumn{3}{c}{$\new{b} P \evolves{\alpha} \new{b} P'$}\\[10pt]
 
-		\multicolumn{3}{c}{$\underline{P\evolves{\exports{B}\sends{c}{V}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\in V$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
-		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,B}\sends{c}{V}} P'$}\\[10pt]
+		\multicolumn{3}{c}{$\underline{P\evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\in \tuple{V}$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
+		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,\tuple{B}}\sends{c}{\tuple{V}}} P'$}\\[10pt]
 		
-		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{X}} P',\ Q \evolves{\exports{B}\sends{c}{V}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{B}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
-		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{B}(P'\comp Q')$}\\[10pt]
+		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{\tuple{X}}} P',\ Q \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{\tuple{B}}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
+		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q')$}\\[10pt]
 	\end{tabular}	
 	\emph{\caption{Action rules for the synchronous \picalc}\label{spiacts}}
 \end{center}
