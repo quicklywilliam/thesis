@@ -7,6 +7,7 @@
 \usepackage{float}
 \usepackage{natbib}
 \usepackage{multirow}
+\usepackage{datetime}
 % \usepackage{a0size} used for a really big pi symbol - disabled
 
 \usepackage[palatino]{quotchap} %figure out where to stick \thispagestyle{empty}%
@@ -35,6 +36,8 @@
 \setlength{\parskip}{0pt}
 
 \begin{document}
+	\lfoot[Built at \pdfdate]{}%temporary - for revision marking
+	\rfoot[]{Built at \pdfdate}%
   \maketitle
   \frontmatter % this stuff will be roman-numbered
   \pagestyle{empty} % this removes page numbers from the frontmatter
@@ -55,11 +58,14 @@
 	\input{Chapters/chap4}
 	
 	%\input{Chapters/conclusion}
-	
   \backmatter
+	\fancypagestyle{plain}
+	{
+	    \fancyhead{}
+	    \fancyfoot{}
+	} % gets rid of page numbering for plain style, which the following commands use.
 	% \listoftables
-	\pagestyle{empty}
-    \listoffigures %header needs fixing
+    \listoffigures
     \addcontentsline{toc}{chapter}{List of Figures}
 % Make my bibliography be called "Bibliography" and not "References" (or "Works Cited" or...):
 % \renewcommand{\bibname}{Works Cited}
