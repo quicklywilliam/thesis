@@ -6,7 +6,7 @@ The original calculus given by Milner, Parrow and Walker modeled synchronous mes
 
 Our original calculus features synchronous receiving, but now sending is synchronous as well, allowing a process to be performed after the output has been consumed by some other receiver.  Hence, in the synchronous \picalc, processes can be \refmargin{guarded}guarded by both receiving \emph{and} sending.  
 
-If we have a group of guarded processes joined by the summation operator, only one of those will be processes will be `chosen' (non-deterministically) to be executed.  The rest will simply terminate without having any effect.  The power of the synchronous \picalc comes when we have another group of summed processes, running in parallel, something like: 
+If we have a group of guarded processes joined by the summation operator, only one of those will be processes will be `chosen' (non-deterministically)\index{non-determinism} to be executed.  The rest will simply terminate without having any effect.  The power of the synchronous \picalc comes when we have another group of summed processes, running in parallel, something like: 
 \[
 	\ssend{c}{}P_1 + \ssend{d_1}{}P_2 + \receive{d_2}{}P_3 \comp \receive{c}{}R_1 + \ssend{d_3}{}R_2
 \]

@@ -316,8 +316,11 @@
 \todof{make the subst operator have things on a diagonal instead of flat.}
  
 \newcommand{\refmargin}[1]{
-	\marginpar{\tiny{{#1}\\%
+	\index{#1}\marginpar{\tiny{{#1}\\%
 	$\hookrightarrow$ \hyperref[#1]{page \pageref{#1}}}}%
+}
+\newcommand{\inidx}[1]{
+	#1\index{#1}%
 }
 \newcommand{\defmargin}[2][null]{%
 	\ifthenelse{\equal{#1}{null}}{\emph{#2}}{\emph{#1}}%

@@ -24,48 +24,52 @@
 		\emph{\caption{Terms in the asynchronous \picalc}\label{apicalcterms}}
 		\end{center}
 		\end{insettable}
-	Given two or more processes, we can compose them using the $\comp$ operator, which means that the composed processes will be executed concurrently.
+		\todo{Get index up to snuff by making sure more terms are margin defined.}
+	Given two or more processes, we can compose them using the $\comp$ operator, which means that the composed processes will be executed concurrently.\index{parallel}
 		
-	We denote the sending of a tuple $\tuple{V}$ over a channel $n$ by \send{n}{\tuple{V}}.  Here $\tuple{V}$ is a tuple of identifiers in the form $\tuple{V}=(v_1,...,v_k):k\geq 0$.  We say that $\tuple{V}$ has \defmargin{arity} $k$.  In the case $k=0$ nothing is being transmitted; the communication acts as a \defmargin{handshake} or signal.  We will denote this case by \send{n}{}.  When $k=0$, only a single value $v_1$ is being transmitted, in which case we write $\send{n}{v_1}$.  It is a feature of the language that sending is not a blocking operation -- that is, the process will not wait or depend on the value actually being received or operated on by another process, but will simply terminate after sending the value.  Non-blocking sends make our \picalc\ an \emph{asynchronous} language - processes that send values do not wait to sync operation with the processes that consume the values.  However, we will show in \refex{exsynchronous} that synchronous behavior can still be modeled in our language.
+	\index{message passing}We denote the sending of a message $\tuple{V}$\index{tuple} over a channel $n$ by \send{n}{\tuple{V}}.  Here $\tuple{V}$ is a tuple of identifiers in the form $\tuple{V}=(v_1,...,v_k):k\geq 0$.  We say that $\tuple{V}$ has \defmargin{arity} $k$.  In the case $k=0$ nothing is being transmitted; the communication acts as a \defmargin{handshake} or signal.  We will denote this case by \send{n}{}.  When $k=0$, only a single value $v_1$ is being transmitted, in which case we write $\send{n}{v_1}$.  Because our calculus is \inidx{asynchronous}, sending is not a \defmargin{guarded} operation -- that is, a send operation does not continue to execute any process after sending its value, but simply terminates after sending the value.  We will show in \refex{exsynchronous} that synchronous behavior can still be modeled in our language.
 	
-	The term \receive{n}{\tuple{X}}$R$ describes a process waiting to receive a tuple along $k$ before continuing with $R$.  Here $\tuple{X}$ is a \defmargin[pattern]{patterns}, or a tuple of variables of arity $k$.  Patterns allow us to decompose the transmitted tuple into its component values by naming them with $x_1,...,x_k$, which can be referred to in $R$.  Thus, in the term
+	The term \receive{n}{\tuple{X}}$R$ describes a process waiting to receive a tuple along $n$ before continuing with $R$.  Here $\tuple{X}$ is a \defmargin[pattern]{patterns} -- a tuple of variables of arity $k$ -- which can be used anywhere in $R$.  Patterns allow us to decompose the transmitted tuple into its component values by naming them with $x_1,...,x_k$, which can be referred to in $R$.  Thus, in the term
 	\begin{align}
 		\send{c}{n_1,n_2,n_3} \comp \receive{c}{x_1,x_2,x_3} R,
 	\end{align}
-the names $n_1,n_2,n_3$ are received via $c$ and bound via matching to $x_1,x_2,x_3$ (the use of $x_1,x_2,x_3$ is limited to being within the process $R$).  Similarly to sending, the case of arity 0 is denoted \receive{n}{}$R$ -- here $R$ will not happen until a handshake is received on $n$.  Notice that in contrast to the case of sending, receiving is a \defmargin{guarded} operation -- that is, the process $R$ will not execute until $\tuple{X}$ has been received via $n$.  For example, the term
+the names $n_1,n_2,n_3$ are received via $c$ and bound via matching to $x_1,x_2,x_3$ (the use of $x_1,x_2,x_3$ is limited to being within the process $R$).  Similarly to sending, the case of arity 0 is denoted \receive{n}{}$R$ -- here $R$ will not happen until a handshake is received on $n$.  Notice that in contrast to the case of sending, receiving is a \inidx{guarded} operation -- that is, the process $R$ will execute after $\tuple{X}$ has been received via $n$.  For example, the term
 \begin{align}
 	\receive{c}{}stop
 \end{align}
 represents a `listener'	process that simply consumes the value waiting on input channel $c$.  The term \emph{stop} describes a process that does nothing but halt.
 
-	The term $\new{n} R$ describes a process in which a new channel $n$ is created, limited to being expressed in the process $R$ (we say the \defmargin{scope} of $n$ is \emph{restricted} to $R$).  When creating multiple channel restrictions of the form $\new{n}(\new{m}R)$, we will abbreviate using $\new{n,m}R$.  It is important to note that $n$ \emph{can} be used outside of $R$ if it is sent and then received by some outside process.  This feature is known as \defmargin{scope extrusion}, and is the underpinning for the dynamic communication topologies introduced in the \picalc.  For example, in the term
+	\index{scope restriction}The term $\new{n} R$ describes a process in which a new channel name $n$ is created and limited to being expressed in the process $R$ (we say the \defmargin{scope} of $n$ is \emph{restricted} to $R$).  We shall see that scope plays a very big role in the way processes can establish new connections.  Essentially, for a process $P$ to have a connection to another process $R$ really means that they both `know' about a common channel $c$.  In that case, $c$ is scoped $P$ and $R$.  Hence, $\new{n} R$ really means that we have created a channel $n$ that -- for the time being -- only process $R$ knows about.  It is important to note that $n$ \emph{can} be used outside of $R$ if it is sent and then received by some outside process.  This feature is known as \defmargin{scope extrusion}, and is the underpinning for the dynamic communication topologies introduced in the \picalc.  For example, in the term
 \begin{align}
-	\new{n} (\send{c}{n}) \comp \receive{c}{a} \send{a}{},
+	\new{n} (\send{c}{n}) \comp \receive{c}{x} \send{x}{},
 \end{align}
-	$n$'s scope is just the left half of the term.  However, $n$ is sent over $c$ and is received (and bound as $a$) in the right hand of term.  When this happens, the channel $n$ will be able to be referred to outside of its initial scope.  We will give a precise account of how this happens in our reduction rules and \refex{exscopeextr} below.
+	we have a channel $n$ scoped to the left hand process which is sending $n$ over $c$. The right hand process then receives $n$ over $c$ (bound as $x$) and then sends an empty signal over $n$.  At the time of its creation, $n$'s scope is just the left half of the term.  However, after $n$ is received in the right hand process it will be able to be referred to outside of its initial scope.  We will give a precise account of how this happens in our reduction rules and \refex{exscopeextr} below.
 	
-	Simple value-matching is available to provide conditional behavior.  In the following term, the value received on $c$ is checked; if it matches $a$ then a handshake is sent along $a$ (which is referred to by $x$), otherwise the process terminates.
+	We will sometimes abbreviate terms that use multiple channel restrictions by writing $\new{n,m}R$ to denote the term $\new{n}(\new{m}R)$. 
+	
+	Simple conditional execution based on value equality comparison is available through the use of $\pif{v_1 = v_2}\pthen R_1 \pelse R_2$.  For example, in the following term, the value received on $c$ is checked; if it matches $a$ then a handshake is sent along $a$ (which is referred to by $x$), otherwise the process terminates.
 	\begin{align}
 		\receive{c}{x}(\pif{x=a} \pthen \send{x}{} \pelse stop)
 	\end{align}
 	
-	Recursion is built into the language using the syntax $\rec{x}R$.  The process $\rec{x}R$ itself is referred to by the variable $x$, which is used somewhere in $R$ to express a recursive call.  For example, consider the recursive responder term below, which receives a channel $x_1$ via $c$.  It then sends a handshake response on $x_1$, while another responder process is run in parallel.
+	Recursion is built into the language using the syntax $\rec{p}R$.  The process $\rec{p}R$ itself is referred to by the variable $p$, which is used somewhere in $R$ to express a recursive call.  For example, consider the recursive responder term below, which receives a channel $x_1$ via $c$.  It then sends a handshake response on $x_1$, while another responder process is run in parallel.
 	\begin{align}
-		\rec{x}\receive{c}{x_1}(\send{x_1}{} \comp x)
+		\rec{p}\receive{c}{x_1}(\send{x_1}{} \comp p)
 		\label{reclistenerterm}
 	\end{align}
+The variable $p$'s scope is restricted $R$, just as $X$ is restricted to $R$ in $\receive{c}{X}R$ and $n$ is restricted to $R$ in $\new{n}R$.
 	
-	We call a collection of parallel processes communicating over shared channels a \emph{system}.  Note that a system is itself a process.    Our choice to define it is somewhat auxiliary to the \picalc\ itself, but it is helpful to understanding the way that behavior can be modeled using processes as atoms of a system.
+	We call a collection of parallel processes communicating over shared channels a\emph{\inidx{system}}.  Note that a system is itself a process.    Our choice to define it is somewhat auxiliary to the \picalc\ itself, but it is helpful to understanding the way that behavior can be modeled using processes as atoms of a system.
 \begin{example}{exsummation}
-	 Many presentations (including our own in the next chapter) of the \picalc\ involve a choice or summation operator as in $P+Q$ for two processes terms $P$ and $Q$.  The meaning is essentially that either $P$ or $Q$ can be non-deterministically executed, and the other process will not be.  However, we can model the same behavior without defining a choice operator:
+	 Many presentations (including our own in the next chapter) of the \picalc\ involve a \inidx{choice} or \inidx{summation} operator as in $P+Q$ for two processes terms $P$ and $Q$.  The meaning is essentially that either $P$ or $Q$ can be non-deterministically executed, and the other process will not be.  However, we can model the same behavior without defining a choice operator:
 	\begin{align}
-		\send{c}{} \comp \receive{c}{}P_1 \comp \receive{c}{}P_2
+		\send{c}{} \comp \receive{c}{}P \comp \receive{c}{}Q
 	\end{align}
-	In the above process, either $Q$ or $P$ (but not both) could be executed.  This is due to the asynchronous behavior of our language -- sending an empty signal along $c$, we cannot control which process consumes the signal (or even if it will be consumed at all). Thus, even without the choice operator our calculus is non-deterministic.
-	
-	We can build systems where only one process will send a value along some channel $c$ and only one will receive along.  However, suppose we took our system and used it in building a larger system.  Then we could have other processes that compete in sending or receiving along $c$ and make our system non-deterministic.  Nevertheless, we will see in the next example that we can at least learn \emph{that} a value was consumed, although we can't say by \emph{whom}.\end{example}
-	\begin{example}{exsynchronous}
-	 Perhaps we are not happy with this asynchronous transmission behavior.  Surely we'd like to have blocking sends sometimes, or be able to guarantee that a value is received.  However, it can be shown that our asynchronous calculus can model synchronous sending.  To see why, consider the following system:
+	In the above process, either $Q$ or $P$ (but not both) could be executed.  This is due to the asynchronous behavior of our language -- sending an empty signal along $c$, we cannot control which process consumes the signal (or even if it will be consumed at all). Thus, even without the choice operator our calculus is non-deterministic\index{non-determinism}.
+\end{example}
+
+\begin{example}{exsynchronous}
+	 Perhaps we are not happy with this asynchronous transmission behavior.  Surely we'd like to have blocking sends sometimes, or be able to guarantee that a value is received.  Our asynchronous calculus can model \inidx{synchronous} sending by using a private channel that acknowledges when a value is received.  To see how, consider the following system:
 	\begin{align}
 		F_1(c) & \pdef \rec{z} (\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp z)))\\
 		F_2(c) & \pdef \rec{q} (\receive{c}{ack}(\send{ack}{} \comp q)) \\
@@ -75,7 +79,7 @@ represents a `listener'	process that simply consumes the value waiting on input 
 	
 	In an iteration of $F_1$, a new channel $ack$ is created for acknowledgement.  This channel is sent along $c$ and then $F_1$ waits for input on $ack$ before executing some term $R$ and calling another iteration.  $F_2$ receives $ack$ along $c$ and then uses $ack$ to send an empty signal to $F_1$ that it has received input on $c$.  
 	
-	Of course, this is a silly example since the only thing being communicated is the acknowledgement channel itself -- we might imagine a more complex system where $F_1$ sends more input along $c$ and waits to make sure $F_2$ receives it.  Note that the channel $ack$ is only used \emph{once} -- we want to ensure that the acknowledgement that $F_1$ receives is definitely for \emph{that} instance of communication that it just initiated.  This allows us to guarantee that $F_2$ has executed before $F_1$ continues with R.  \end{example}
+	This is just a toy example: the only thing being communicated is the acknowledgement channel itself.  We might imagine a more complex system where $F_1$ sends more input along $c$ and waits to make sure $F_2$ receives it.  Note that the channel $ack$ is only used \emph{once} -- we want to ensure that the acknowledgement that $F_1$ receives is definitely for \emph{that} instance of communication that it just initiated.  This allows us to guarantee that $F_2$ has executed before $F_1$ continues with R.  \end{example}
 
 \section{Structural Equivalence}
 	A natural question at this point is, given two \picalc\ terms, how can we determine if they are equivalent?  Intuitively, we want them to be equivalent if they \emph{act} the same, but actually defining this equivalence relation can be a bit subtle.  First, we will look at substitution and give some rules for when we can safely interchange identifiers without creating a different term. Following this, we will develop the notion of \emph{contexts} and then use it to build an equivalence relation among processes.
