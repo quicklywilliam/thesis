@@ -7,14 +7,14 @@
 \contentsline {section}{\numberline {2.1}Syntax}{7}{section.2.1}
 \contentsline {section}{\numberline {2.2}Structural Equivalence}{10}{section.2.2}
 \contentsline {subsection}{\numberline {2.2.1}Identifier Substitution and $\alpha $-equivalence}{10}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}Contexts and Equivalence}{11}{subsection.2.2.2}
-\contentsline {section}{\numberline {2.3}Reduction Semantics}{12}{section.2.3}
+\contentsline {subsection}{\numberline {2.2.2}Contexts and Equivalence}{12}{subsection.2.2.2}
+\contentsline {section}{\numberline {2.3}Reduction Semantics}{13}{section.2.3}
 \contentsline {section}{\numberline {2.4}Action Semantics}{16}{section.2.4}
-\contentsline {chapter}{Chapter 3: Synchronicity and Expressiveness}{20}{chapter.3}
-\contentsline {section}{\numberline {3.1}The Synchronous $\pi $-Calculus}{21}{section.3.1}
-\contentsline {section}{\numberline {3.2}Separation Results}{24}{section.3.2}
-\contentsline {chapter}{Chapter 4: Synchronicity and Distributed Systems}{26}{chapter.4}
-\contentsline {section}{\numberline {4.1}Symmetry in Practice}{27}{section.4.1}
-\contentsline {chapter}{List of Figures}{28}{chapter*.6}
-\contentsline {chapter}{References}{29}{chapter*.7}
-\contentsline {chapter}{Index}{30}{chapter*.7}
+\contentsline {chapter}{Chapter 3: Synchronicity and Expressiveness}{21}{chapter.3}
+\contentsline {section}{\numberline {3.1}The Synchronous $\pi $-Calculus}{22}{section.3.1}
+\contentsline {section}{\numberline {3.2}Separation Results}{25}{section.3.2}
+\contentsline {chapter}{Chapter 4: Synchronicity and Distributed Systems}{27}{chapter.4}
+\contentsline {section}{\numberline {4.1}Symmetry in Practice}{28}{section.4.1}
+\contentsline {chapter}{List of Figures}{29}{chapter*.6}
+\contentsline {chapter}{References}{30}{chapter*.7}
+\contentsline {chapter}{Index}{31}{chapter*.7}

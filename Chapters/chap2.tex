@@ -33,7 +33,9 @@
 	\begin{align}
 		\send{c}{n_1,n_2,n_3} \comp \receive{c}{x_1,x_2,x_3} R,
 	\end{align}
-the names $n_1,n_2,n_3$ are received via $c$ and bound via matching to $x_1,x_2,x_3$ (the use of $x_1,x_2,x_3$ is limited to being within the process $R$).  Similarly to sending, the case of arity 0 is denoted \receive{n}{}$R$ -- here $R$ will not happen until a handshake is received on $n$.  Notice that in contrast to the case of sending, receiving is a \inidx{guarded} operation -- that is, the process $R$ will execute after $\tuple{X}$ has been received via $n$.  For example, the term
+the names $n_1,n_2,n_3$ are received via $c$ and correspond to the variables $x_1,x_2,x_3$ in the pattern.   Hence, the variables $x_1,x_2,x_3$ can be used anywhere within the process $R$ to mean $n_1,n_2,n_3$.  
+
+Similarly to sending, the case of arity 0 is denoted \receive{n}{}$R$ -- here $R$ will not happen until a handshake is received on $n$.  Notice that in contrast to the case of sending, receiving is a \inidx{guarded} operation -- that is, the process $R$ will execute after $\tuple{X}$ has been received via $n$.  For example, the term
 \begin{align}
 	\receive{c}{}stop
 \end{align}
@@ -43,7 +45,7 @@ represents a `listener'	process that simply consumes the value waiting on input 
 \begin{align}
 	\new{n} (\send{c}{n}) \comp \receive{c}{x} \send{x}{},
 \end{align}
-	we have a channel $n$ scoped to the left hand process which is sending $n$ over $c$. The right hand process then receives $n$ over $c$ (bound as $x$) and then sends an empty signal over $n$.  At the time of its creation, $n$'s scope is just the left half of the term.  However, after $n$ is received in the right hand process it will be able to be referred to outside of its initial scope.  We will give a precise account of how this happens in our reduction rules and \refex{exscopeextr} below.
+	we have a channel $n$ scoped to the left hand process which is sending $n$ over $c$. The right hand process then receives $n$ over $c$ (referred to by $x$) and then sends an empty signal over $n$.  At the time of its creation, $n$'s scope is just the left half of the term.  However, after $n$ is received in the right hand process it will be able to be referred to outside of its initial scope.  We will give a precise account of how this happens in our reduction rules and \refex{exscopeextr} below.
 	
 	We will sometimes abbreviate terms that use multiple channel restrictions by writing $\new{n,m}R$ to denote the term $\new{n}(\new{m}R)$. 
 	
@@ -52,7 +54,7 @@ represents a `listener'	process that simply consumes the value waiting on input 
 		\receive{c}{x}(\pif{x=a} \pthen \send{x}{} \pelse stop)
 	\end{align}
 	
-	Recursion is built into the language using the syntax $\rec{p}R$.  The process $\rec{p}R$ itself is referred to by the variable $p$, which is used somewhere in $R$ to express a recursive call.  For example, consider the recursive responder term below, which receives a channel $x_1$ via $c$.  It then sends a handshake response on $x_1$, while another responder process is run in parallel.
+	Recursion is built into the language using the syntax $\rec{p}R$.  The process $\rec{p}R$ itself is referred to by to the variable $p$, which is used somewhere in $R$ to express a recursive call.  For example, consider the recursive responder term below, which receives a channel $x_1$ via $c$.  It then sends a handshake response on $x_1$, while another responder process is run in parallel.
 	\begin{align}
 		\rec{p}\receive{c}{x_1}(\send{x_1}{} \comp p)
 		\label{reclistenerterm}
@@ -82,33 +84,39 @@ The variable $p$'s scope is restricted $R$, just as $X$ is restricted to $R$ in 
 	This is just a toy example: the only thing being communicated is the acknowledgement channel itself.  We might imagine a more complex system where $F_1$ sends more input along $c$ and waits to make sure $F_2$ receives it.  Note that the channel $ack$ is only used \emph{once} -- we want to ensure that the acknowledgement that $F_1$ receives is definitely for \emph{that} instance of communication that it just initiated.  This allows us to guarantee that $F_2$ has executed before $F_1$ continues with R.  \end{example}
 
 \section{Structural Equivalence}
-	A natural question at this point is, given two \picalc\ terms, how can we determine if they are equivalent?  Intuitively, we want them to be equivalent if they \emph{act} the same, but actually defining this equivalence relation can be a bit subtle.  In exploring this issue, we will first look at identifier substitution and give some rules for when we can safely interchange identifiers without creating a different term. Following this, we will develop the notion of \emph{contexts} and then use it to build an equivalence relation among processes.
-\subsection{Identifier Substitution and $\alpha$-equivalence}
-	As a first step in our notion of equivalence, we might assert that the way identifiers are named shouldn't change how they act.  Of course, this doesn't mean we can start interchanging symbols with carefree abandon --  only those identifiers whose use is \defmargin[bound]{bound identifiers}\refmargin{identifiers} in the process.  There are three ways that identifiers can become bound in the \picalc.  First, a name $n$ is bound in the restriction operator, \new{n}$R$.  Identifiers $x_i$ can be bound when they are part of the pattern $X$ matched in the receive expression \receive{c}{X}$R$.  Finally, $x$ can be bound in \rec{x}$B$.  
+	A natural question at this point is, given two \picalc\ terms, how can we determine if they are equivalent?  Intuitively, we want them to be equivalent if they \emph{act} the same, but actually defining this equivalence relation can be a bit subtle.  In exploring this issue, we will first look at identifier substitution, giving rules for when we can safely interchange identifiers without creating a different term. Following this, we will develop the notion of \emph{contexts} and then use it to build an equivalence relation among processes.\index{equivalence}
+\subsection{Identifier Substitution and $\alpha$-equivalence}\label{secSubst}
+	As a first step in our notion of equivalence, we might assert that the way identifiers are named shouldn't change how they act.  However, this doesn't mean we can start interchanging symbols with carefree abandon.  In a component process, some terms might be important for how the process acts in a larger system.  For example, if we changed the channel that a mobile phone uses to communicate with a tower, that phone certainly wouldn't act the same -- the tower would no longer know how to talk to it.  On the other hand, we should be able to change any of the channels that the phone uses to communicate internally with itself without much issue.
 	
-	We denote the set of bound identifiers in a term $R$ by $bi(R)$; all those which are not bound we call \defmargin[free]{free identifiers}, denoting them $fi(R)$.  We call a term with no free variables \defmargin[closed]{closed terms}.  Since such a term is self-contained in that it doesn't need any outside context to make sense, we will finally give our precise definition for \defmargin{processes} as terms that are closed.
+	The only identifiers we can safely change in a process without potentially affecting the way it behaves in a larger system are \defmargin{bound identifiers}\refmargin{identifiers}.  Intuitively, bound identifiers are those which are formally defined within the\inidx{scope} of the process.  In a \picalc term there are three ways that identifiers can become bound.  First, a name $n$ is bound in the process term $R$ to a new channel by the restriction operator as in \new{n}$R$.  Second, each channel variable $x_i$ in the pattern $X$ is bound in $R$ to some channel $v_i$ from the sending process when matched in a receive expression \receive{c}{X}$R$.  Finally, the recursive variable $x$ is bound in $R$ to process itself in the recursive expression \rec{x}$R$.
+	\note{I choose not to give a recursive def'n here...we should talk about how to do this and whether it would be a good thing at this point of the discussion}
+	We denote the set of bound identifiers in a term $R$ by $bi(R)$; all those which are not bound we call \defmargin[free]{free identifiers}, denoting them $fi(R)$.  Similarly, we denote the set of bound and free names in a term $R$ by $bn(R)$ and $fn(R)$, respectively.  We call a term with no free identifiers \defmargin[closed]{closed terms}.
 	
-	In term (\ref{reclistenerterm}) above, $x$ is a bound recursive variable, while $x_1$ is bound by the receive operator. Now consider the term
+	For example, in the term:
 	\begin{align}
-		\send{c}{n} \comp \new{n}(\rec{x}\receive{c}{x_1}(\send{x_1}{} \comp x))
+		\rec{p}\receive{c}{x_1}(\send{x_1}{} \comp p),
 	\end{align}
-	Here $x_1, x$ are bound as before.  However, the use of $n$ being sent on $c$ is \emph{not} bound, since it occurs outside the scope of the scope restriction operator.  This is clear in the following term, which is equivalent (see \refex{exelimscoperest} for justification).
+	$p$ is a bound recursive variable, while $x_1$ is bound by the receive operator. The channel $c$ is free.  Now consider the term
 	\begin{align}
-		\receive{a}{x_1,x_2}\send{x_1}{} \comp \rec{x}(\send{a}{n,m} \comp x)
+		\send{c}{n} \comp \new{n}(\rec{p}\receive{c}{x_1}(\send{x_1}{} \comp p))
 	\end{align}
-	We denote the substitution of values in $\tuple{V}$ for free identifiers $V$ in $R$ by $R$\subst{\tuple{V}}{\tuple{X}}.  Of course, during the course of a substitution, we might inadvertently `capture' a bound term -- suppose for example we wanted to perform the substitution $P_1(c)$\subst{n}{c} where
+	Here $x_1, p$ are bound as before.  However, the use of $n$ being sent on $c$ is \emph{not} bound, since it occurs outside the scope of the restriction operator.  In fact, the following term (with the restriction operator removed) is equivalent (see \refex{exelimscoperest} for justification).
+	\begin{align}
+		\send{c}{n} \comp \rec{p}\receive{c}{x_1}(\send{x_1}{} \comp p)
+	\end{align}
+	When a receive term like $\receive{c}{X}R$ is executed, we substitute the free variables $\tuple{X}$ occurring in $R$ with the values $\tuple{V}$ that were received.  We denote such substitutions by $R$\subst{\tuple{V}}{\tuple{X}}.  During the course of a substitution, we might inadvertently `capture' a bound term.  For example, suppose in the following term that some other process sent a channel $n$ over $a$ and that we wanted to perform the substitution \subst{n}{x} in running $\receivenodot{a}{x}$.\index{substitution}
 \begin{align}
-	P_1(c) \pdef \new{n}(\send{n}{x} \comp \send{c}{y})	
+	P(a) \pdef \receive{a}{x}(\new{n}(\send{n}{} \comp \send{x}{}))
 \end{align}	
-This would make the free identifier $c$ into a bound identifier $n$.  We can avoid this by first replacing $n$ a new variable that is `fresh' -- ie it does not occur elsewhere in the term:
+The received term $n$ is not the same as the $n$ occurring in $P(a)$ - it was sent by some process outside the scope of the restriction operator $\new{n}$  Thus, the problem in performing $\subst{n}{x}$ is that it would make the free outside name $n$ into the bound name $n$.  We say that running this substitution would \defmargin{capture} the bound name $n$.  We can avoid this by first replacing the bound $n$ with a new name that is `fresh' -- that is it does not occur elsewhere in the term.  For example:
 \begin{align}
-	P_1^{'}(c) \pdef \new{n'}(\send{n'}{x} \comp \send{c}{y})
+	P{'}(a) \pdef \receive{a}{x}(\new{n'}(\send{n'}{} \comp \send{c}{}))
 \end{align}
-We can now safely perform the substitution $P_1^{'}(c)$\subst{n}{c}, yielding
+We can now safely perform the receive and the corresponding substitution, yielding
 \begin{align}
-	\new{n'}(\send{n'}{x} \comp \send{n}{y})
+	\new{n'}(\send{n'}{} \comp \send{n}{})
 \end{align}
-	Obviously we want to say $P_1(c)$ and $P_1^{'}(c)$ are equivalent.  In general when two terms are the same up to the names of bound identifiers, we say they are \defmargin[$\alpha$-equivalent]{$\alpha$-equivalency}, and write $P_1(c) \equiv_\alpha P_1^{'}(c)$.  We will intend from now on that a term represents its entire $\alpha$-equivalency class, and thus will not explicitly specify $\alpha$-equivalency in the equivalence relation below.
+	\note{again, I wanted to check in with you before defining Subst recursively}Obviously we want to say $P(a)$ and $P^{'}(a)$ are equivalent.  In general when two terms are the same up to the use of bound identifiers, we say they are \defmargin[$\alpha$-equivalent]{$\alpha$-equivalency}, and write $P(a) \equiv_\alpha P^{'}(a)$.  Thus, when we perform a substitution $R\subst{\tuple{V}}{\tuple{X}}$, we pick a term $\alpha$-equivalent to $R$ where the substitution will not capture terms bound in $R$.  From now on we will intend that a term represents its entire $\alpha$-equivalency class, and thus will not explicitly specify $\alpha$-equivalency in the equivalence relation introduced below.
 
 \subsection{Contexts and Equivalence}
 Perhaps the next idea we might have for building our equivalence relation is that equivalent processes should act the same when dropped into any larger system.  Let us define more precisely what we mean by `dropping in' a process.
@@ -279,9 +287,9 @@ Our third action we call \defmargin{internal action}. This is caused by some int
 We will define and further characterize $\tau$ in our discussion of (A-COMM) below.
 
 Using these actions, we can give a set of rules describing the behavior of a \picalc processes in an arbitrary context.  Hence, we now formally define the action relation under these rules (with their preconditions listed alongside them):
-\note{I wonder if these couldn't be simplified (ie removing A-EQ, A-REP, etc.) by allowing a transition that happens over the reduction semantics?  i can't find anyone in the literature who does this but it seems like the best approach.  my sense is this approach is avoided because the action relation isn't actually contextual in our above definition (since we need to be more careful about bound variable captures).  but i wonder if there is a way to gracefully sidestep the issue and avoid all the redundancy...}
+\todo{make the arrow for evolution size according to the text above it}
 \begin{definition}{Action}\label{apiactionrules}
-	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:\todo{make the arrow for evolution size according to the text above it}
+	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:
 	\begin{center}\begin{tabular}{rllll}
  		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{X}} & R\subst{V}{X} & & \tiny{(A-IN)}\\
 		$\send{c}{\tuple{V}}$ & \evolves{\sends{c}{V}} & $stop$ & & \tiny{(A-OUT)}\\
@@ -301,7 +309,7 @@ Using these actions, we can give a set of rules describing the behavior of a \pi
 		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{\tuple{X}}} P',\ Q \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{\tuple{B}}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
 		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q')$}\\[10pt]
 	\end{tabular}\end{center}
-\end{definition}
+\end{definition}\note{I wonder if these couldn't be simplified (ie removing A-EQ, A-REP, etc.) by allowing a transition that happens over the reduction semantics?  my sense is this approach is avoided because the action relation isn't actually contextual in our above definition (since we need to be more careful about bound variable captures).  i wonder if there is a way to gracefully sidestep the issue and avoid all the redundancy...}
  The first of two of these rules simply describe the ability of processes to evolve under input or output.  For example, a process $\send{c}{\tuple{V}} \comp P$ will evolve to $stop \comp P \sequiv P$ when it exercises its capability for output on $c$.  For a receiving process, evolution under (A-IN) is only possible when the substitution $\subst{\tuple{V}}{\tuple{X}}$ makes sense.  That is, $\tuple{V}$ and $\tuple{X}$ must have the same arity\refmargin{arity}and in a typed system we'd want to ensure that their types were compatible\footnote{See \cite{henn07} for a discussion off type systems in the \picalc}.
 
 Meanwhile, (A-REP), (A-EQ) and (A-NEQ) serve the provide the same interval evolution capabilities as (R-REP), (R-EQ) and (R-NEQ) do in the reduction semantics.
