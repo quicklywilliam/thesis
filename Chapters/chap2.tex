@@ -129,7 +129,7 @@ Perhaps the next idea we might have for building our equivalence relation is tha
 		\new{n}\mathcal{C} & \text{for any name $n$, context $\mathcal{C}$}.
 		\end{cases}
 	\]
-	$\mathbb{C}[Q]$ denotes the result of replacing the placeholder $[\ ]$ in the context $\mathbb{C}$ with the process $Q$.
+	$\mathbb{C}[Q]$ denotes the result of replacing the placeholder $[\ ]$ in the context $\mathbb{C}$ with the process term $Q$.
 	\end{definition}
 	Notice that with contexts, we do not pay any attention to whether a name in $Q$ is bound in $\mathbb{C}$.  Hence, unlike with substitution, free variables in $Q$ can become bound in $\mathbb{C}[Q]$.  We say that a relation $\sim$ between processes is \defmargin{contextual} if $P\sim Q$ implies $\mathbb{C}[P]\sim \mathbb{C}[Q]$ for any context $\mathbb{C}$.  We are now ready to define our notion of equivalency using contexts.
 	\begin{definition}{Structural Equivalence}
