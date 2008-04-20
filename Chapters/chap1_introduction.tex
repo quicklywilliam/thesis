@@ -77,13 +77,16 @@ How can we abstract function invocation such that a function can be called from 
 Clearly we need an algebraic model for computation that eases the difficulty of modeling such systems.  
 Such a model might consider computation via its natural distributed unit - the \defmargin{process}.  
 A process is just a computational task, without reference to where it might be run nor with what input.  
-For example, we might make a conversation on a phone somewhere in our network a process. Since \inidx{concurrency} of processes is such a basic operation, we make it a part of our algebra.  
-A system, then, is simply a group of processes which are executing concurrently. An important thing about processes is that they maintain computation state independently of one another.  
+For example, we might make a conversation on a phone somewhere in our network a process. 
+Since \inidx{concurrency} of processes is such a basic operation, we make it a part of our algebra.  
+A system, then, is simply a group of processes which are executing concurrently. 
+An important thing about processes is that they maintain computation state independently of one another.  
 Instead of a single program state where functions interact via invocation, processes run independently and interact via \defmargin{message passing} -- sending data back-and-forth via named\inidx{channels}.  
 
 
 Because these channels can be shared among processes and used an arbitrary number of times, channels are not a concrete invocation system for a chunk of computation the way a function call is - processes simply send values to channels, assuming the receiver (if there is one) will do something useful with it.  
-As with functions in the $\lambda$-calculus, processes are the basic unit of a program in the \picalc. Any bit of functionality can be referred to as a process, with no specification of the granularity.
+As with functions in the $\lambda$-calculus, processes are the basic unit of a program in the \picalc. 
+Any bit of functionality can be referred to as a process, with no specification of the granularity.
 
 A major step towards such an algebra came in the 1980's when Robin Milner introduced his Calculus of Communicating Systems (\!\inidx{CCS}).  
  The CCS modeled systems as groups of communicating processes interacting via shared channels, and drastically eased the difficulty of modeling indirectly invoked concurrent operations.  
@@ -118,13 +121,15 @@ Our system will be simplified a bit: only two towers and one phone, with the onl
 	\]
 	Above, we use $\pdef$ to mean that the term to the right of the $\pdef$ is given the shorthand $Mobile$ and that it uses the channels $talk$ and $switch$ given elsewhere.  
 The channels given in the parentheses are simply substituted into the term on the right's corresponding channels.  
-Hence, for example, $Mobile(t,s)$ would be this right-hand term with the channels $t$ and $s$ substituted for $talk$ and $switch$. We call $Mobile(t,s)$ the \defmargin{interface} of the right-hand term.
+Hence, for example, $Mobile(t,s)$ would be this right-hand term with the channels $t$ and $s$ substituted for $talk$ and $switch$. 
+We call $Mobile(t,s)$ the \defmargin{interface} of the right-hand term.
 	
 	The notation \send{talk}{} means that we are sending an `empty' (since there are no input values given in the brackets) signal on channel $talk$, while $\receivenodot{switch}{t,s}$ means we are listening on $switch$ and receive the input $t,s$.  
 After a signal is sent or received on a channel, execution then continues with the term immediately to the right of the term, using the input provided (if any).  
 
 	
-	Thus, $\receive{switch}{t,s} Mobile(t,s)$ indicates that we should listen on $switch$ for the input $t,s$ and then use $t,s$ to `spawn' a new computation of $Mobile$ with these new channels. The term $\ssend{talk}{} Mobile(talk,switch)$ means send a signal on $talk$ before spawning a computation of $Mobile$ with the same $talk,switch$ channels we are using.  
+	Thus, $\receive{switch}{t,s} Mobile(t,s)$ indicates that we should listen on $switch$ for the input $t,s$ and then use $t,s$ to `spawn' a new computation of $Mobile$ with these new channels. 
+	The term $\ssend{talk}{} Mobile(talk,switch)$ means send a signal on $talk$ before spawning a computation of $Mobile$ with the same $talk,switch$ channels we are using.  
 Finally, the $+$ operator denotes that we should choose to compute one or the other of the operands (but not both).  
 In sum then, $mobile$ has the ability to either send along $talk$ and stay in its current location, or it can receive on $switch$ and `move' to the location where it has new talking and switching channels $t,s$.  
 This last capability expresses the mobile nature of our processes with surprising elegance: here we have just expressed that channels $talk,switch$ are lost and new channels $t,s$ are established.
@@ -175,4 +180,5 @@ The two simplifications mentioned above will make our calculus somewhat easier t
 At the base level, communication between machines on a distributed system is asynchronous, so implementing synchronous calculi requires finding a way to simulate synchronous message passing using only asynchronous primitives.  
 In Chapter \ref{sync_and_express}, after briefly presenting the \defmargin{synchronous} \picalc (which has the full expressive power used in the mobile phone network example) and its computational rules, we will look at the problem of modeling the synchronous \picalc\ using the asynchronous version.
 
-Having looked at this problem, we will take a practical-minded look at the way that a synchronous \picalc-like language might be implemented on a system using asynchronous primitive \picalc\ constructs. Chapter \ref{sync_and_dist_sys} is a brief survey of some of the approaches that have been suggested or used to implement such a language, and how they bear on the results of Chapter \ref{sync_and_express}.
+Having looked at this problem, we will take a practical-minded look at the way that a synchronous \picalc-like language might be implemented on a system using asynchronous primitive \picalc\ constructs. 
+Chapter \ref{sync_and_dist_sys} is a brief survey of some of the approaches that have been suggested or used to implement such a language, and how they bear on the results of Chapter \ref{sync_and_express}.

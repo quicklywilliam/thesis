@@ -62,7 +62,8 @@ $R :=$ & $\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i$ &\multirow{2}{*}{Summat
 \end{insettable}
 
 Note the important difference between \reffig{apicalcterms} and \reffig{spicalcterms}.  
-First, we have grouped sending and receiving together as \emph{action prefixes} (along with a new prefix for\refmargin{internal evolution}internal evolution). These prefixes are made available to the language via the summation operator. 
+First, we have grouped sending and receiving together as \emph{action prefixes} (along with a new prefix for\refmargin{internal evolution}internal evolution). 
+These prefixes are made available to the language via the summation operator. 
 
 Consider the term:
 \[
@@ -70,7 +71,8 @@ Consider the term:
 \]
 The notation $\pi_i.R_i$ requires that the action $\pi_i$ happen before the guarded process $R_i$ will be executed.  
 If $R_a$ is executed in this way, then for all $j \neq a$, both the capabilities $\pi_j$ and the execution of $R_j$ are lost.  
-In other words, the summation ensures that only one of $n$ guarded processes will be executed. Which of these processes is picked depends on which action prefix capability is exercised first. 
+In other words, the summation ensures that only one of $n$ guarded processes will be executed. 
+Which of these processes is picked depends on which action prefix capability is exercised first. 
 
 For the cases that $n=1$ and $n=2$, we will use the notation $\pi.R$ and $\pi_1.R_1 + \pi_2.R_2$, respectively.  
 We add to our congruence relation given in \refdef{Structural Equivalence} that summation is commutative and associative.

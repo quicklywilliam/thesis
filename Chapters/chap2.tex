@@ -71,7 +71,8 @@ For example, in the term
 \begin{align}
 	\new{n} (\send{c}{n}) \comp \receive{c}{x} \send{x}{},
 \end{align}
-	we have a channel $n$ scoped to the left hand process which is sending $n$ over $c$. The right hand process then receives $n$ over $c$ (referred to by $x$) and then sends an empty signal over $n$.  
+	we have a channel $n$ scoped to the left hand process which is sending $n$ over $c$. 
+	The right hand process then receives $n$ over $c$ (referred to by $x$) and then sends an empty signal over $n$.  
 At the time of its creation, $n$'s scope is just the left half of the term.  
 However, after $n$ is received in the right hand process it will be able to be referred to outside of its initial scope.  
 We will give a precise account of how this happens in our reduction rules and \refex{exscopeextr} below.
@@ -105,7 +106,8 @@ However, we can model the same behavior without defining a choice operator:
 		\send{c}{} \comp \receive{c}{}P \comp \receive{c}{}Q
 	\end{align}
 	In the above process, either $Q$ or $P$ (but not both) could be executed.  
-This is due to the asynchronous behavior of our language -- sending an empty signal along $c$, we cannot control which process consumes the signal (or even if it will be consumed at all). Thus, even without the choice operator our calculus is non-deterministic\index{non-determinism}.
+This is due to the asynchronous behavior of our language -- sending an empty signal along $c$, we cannot control which process consumes the signal (or even if it will be consumed at all). 
+Thus, even without the choice operator our calculus is non-deterministic\index{non-determinism}.
 \end{example}
 
 \begin{example}{exsynchronous}
@@ -134,7 +136,8 @@ This allows us to guarantee that $F_2$ has executed before $F_1$ continues with 
 
 \section{Structural Equivalence}
 	A natural question at this point is, given two \picalc\ terms, how can we determine if they are equivalent?  Intuitively, we want them to be equivalent if they \emph{act} the same, but actually defining this equivalence relation can be a bit subtle.  
-In exploring this issue, we will first look at identifier substitution, giving rules for when we can safely interchange identifiers without creating a different term. Following this, we will develop the notion of \emph{contexts} and then use it to build an equivalence relation among processes.\index{equivalence}
+In exploring this issue, we will first look at identifier substitution, giving rules for when we can safely interchange identifiers without creating a different term. 
+Following this, we will develop the notion of \emph{contexts} and then use it to build an equivalence relation among processes.\index{equivalence}
 \subsection{Identifier Substitution and $\alpha$-equivalence}\label{secSubst}
 	As a first step in our notion of equivalence, we might assert that the way identifiers are named shouldn't change how they act.  
 However, this doesn't mean we can start interchanging symbols with carefree abandon.  
@@ -157,7 +160,8 @@ We call a term with no free identifiers \defmargin[closed]{closed terms}.
 	\begin{align}
 		\rec{p}\receive{c}{x_1}(\send{x_1}{} \comp p),
 	\end{align}
-	$p$ is a bound recursive variable, while $x_1$ is bound by the receive operator. The channel $c$ is free.  
+	$p$ is a bound recursive variable, while $x_1$ is bound by the receive operator. 
+	The channel $c$ is free.  
 Now consider the term
 	\begin{align}
 		\send{c}{n} \comp \new{n}(\rec{p}\receive{c}{x_1}(\send{x_1}{} \comp p))
@@ -232,7 +236,8 @@ Thus, we will omit parentheses around compositions when our meaning is clear.
 The last of these axioms is most important -- it is the basis for\refmargin{scope extrusion} \emph{scope extrusion}, upon which process\refmargin{mobility} mobility is based (as we shall demonstrate in \refex{exscopeextr} below).
 	
 	\begin{example}{exelimscoperest}
-		In our discussion of bound identifiers above, we asserted that we can eliminate a scope restriction operation when none of the scoped identifiers occur in its scope. We can now show why this is permissible:
+		In our discussion of bound identifiers above, we asserted that we can eliminate a scope restriction operation when none of the scoped identifiers occur in its scope. 
+		We can now show why this is permissible:
 		\begin{align*}
 			&\ \new{n,m}(\receive{a}{x_1,x_2}\send{x_1}{})\comp \rec{x}(\send{a}{n,m} \comp x) &&\\
 			\sequiv\ &\ \new{n,m}(\receive{a}{x_1,x_2}\send{x_1}{} \comp stop)\comp \rec{x}(\send{a}{n,m} \comp x) && \text{\tiny{(S-COMP-ID)}}\\
@@ -402,8 +407,10 @@ For example,
 \]
 We will refer to sending and receiving as \defmargin[external actions]{external action}.
 
-Our third action we call \defmargin{internal action}. This is caused by some internal evolution in P like those described by (R-COMM) in our \refsec{secreducationsemantics}.  
-We call actions like sending and receiving external since in order to occur, they need some external process (given in some system of which the process in question is a part) to do the corresponding receiving or sending. However, with internal action there is no external process needed to proceed.  
+Our third action we call \defmargin{internal action}. 
+This is caused by some internal evolution in P like those described by (R-COMM) in our \refsec{secreducationsemantics}.  
+We call actions like sending and receiving external since in order to occur, they need some external process (given in some system of which the process in question is a part) to do the corresponding receiving or sending.  
+However, with internal action there is no external process needed to proceed.  
 We use $\tau$ denote such an internal evolution step.  
 Thus, we say $P \evolves{\tau} Q$ if P is able evolve into Q by performing a reduction step without any external contributions.  
 For example (thanks to (R-COMM)),
