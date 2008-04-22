@@ -13,7 +13,8 @@
 \contentsline {subsection}{\numberline {2.2.1}Identifier Substitution and $\alpha $-equivalence}{11}{subsection.2.2.1}
 \contentsline {subsection}{\numberline {2.2.2}Contexts and Equivalence}{13}{subsection.2.2.2}
 \contentsline {section}{\numberline {2.3}Reduction Semantics}{14}{section.2.3}
-\contentsline {section}{\numberline {2.4}Action Semantics}{17}{section.2.4}
+\contentsline {section}{\numberline {2.4}Action Semantics}{15}{section.2.4}
+\contentsline {section}{\numberline {2.5}Extended Example: Memory Cells}{19}{section.2.5}
 \contentsline {chapter}{Chapter 3: Synchronicity and Expressiveness}{22}{chapter.3}
 \contentsline {section}{\numberline {3.1}The Synchronous $\pi $-Calculus}{23}{section.3.1}
 \contentsline {section}{\numberline {3.2}Separation Results}{26}{section.3.2}

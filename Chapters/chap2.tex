@@ -4,7 +4,11 @@
 	In this chapter, we will give the syntax of the \emph{asynchronous} \picalc\ and a discussion of its features.  
 We will loosely follow the style of a recent presentation given in \cite{henn07}.  
 Following this, we will introduce a notion of equivalence of terms in the language.  
-Finally, we will give some semantic reduction rules that provide computational behavior via steps of reduction.
+There are two viewpoints from which the computation behavior of a process can be characterized.  
+The first is a set of semantic reduction rules, given in \refsec{secreducationsemantics}, that focus on the way a process behaves in and of itself through internal evolution.
+The second viewpoint is more general and addresses how a process evolves in the context of a larger system.
+We give this important system in \refsec{secactionsemantics}.
+Finally, we conclude the chapter with an extended example that provides an interesting \picalc\ implementation while demonstrating many of its systems and rules.
 	\section{Syntax}\label{spisyntax}
 	The terms of the \picalc\ operate on a space of \defmargin{identifiers} which consists of names $a,b,c,...,n,m,o$ for communication channels, and variables $v,w,x$ which can refer to channels, and recursive variables $p,q,r$, explained in more detail below.  
 In general, we will use capital letter to denote a process.
@@ -254,7 +258,7 @@ The set of rules given below show how a process can internally evolve through a 
 	The \emph{reduction relation} \pred\ is the smallest contextual relation that satisfies the following rules:
 	\begin{center}\begin{tabular}{rll}
 		$\send{c}{\tuple{V}} \comp \receive{c}{\tuple{X}}R$\ &\  $\pred\  R\subst{\tuple{V}}{\tuple{X}}$ & \tiny{(R-COMM)}\\
-		$\rec{x}R$\ &\  $\pred\  R\subst{\rec{x}R}{x}$ & \tiny{(R-REP)}\\
+		$\rec{p}R$\ &\  $\pred\  R\subst{\rec{p}R}{p}$ & \tiny{(R-REP)}\\
 		$\pif{v = v}\pthen P \pelse Q$\ &\ $\pred\ P$ & \tiny{(R-EQ)}\\
 		$\pif{v_1 = v_2}\pthen P \pelse Q$\ &\ $\pred\ Q$ \ \ (where $v_1\neq v_2$)& \tiny{(R-NEQ)}\\
 		\multicolumn{2}{c}{\hspace{4.5em}$\underline{P\sequiv P', P \pred Q, Q\sequiv Q'}$} & \multirow{2}{*}{\tiny{(R-STRUC)}}\\
@@ -263,114 +267,55 @@ The set of rules given below show how a process can internally evolve through a 
 	We use the notation $P\preds Q$ when an arbitrary number of these rules have been applied in reducing $P$ to $Q$.
 \end{definition}
 The first of these allows a computation step for the transmission of values over a channel.  
-(R-REP)  allows us to unravel a recursive expression into iterations of itself.  
-(R-EQ) enables a computational step for value-matching.  
-Finally, (R-STRUCT) says that a reduction is defined up to structural equivalence.
+(R-EQ) enables a computational step for value-matching.  For example, in
+\[
+	\send{c}{a} \comp \receive{c}{x} \pif{x=a} \pthen P \pelse stop  
+\]
+we can use (R-COMM) to infer
+\[
+	\pif{a=a} \pthen P \pelse stop  
+\]
+from which we can use (R-EQ) to infer $P$.
+(R-REP) allows us to unravel a recursive expression into iterations of itself.  For example,
+\[
+	\rec{p} \send{c}{} \comp p
+\]
+expands to
+\[
+	\send{c}{} \comp \rec{p} \send{c}{} \comp p
+\]
+Finally, (R-STRUCT) says that a reduction is defined up to structural equivalence.  We give an example of its use below...
 \begin{example}{exscopeextr}
 	We will give a demonstration of how scope extrusion is defined using the rules and axioms of reduction and structural equivalence.  
 Consider the expression 
-\begin{align}
+\begin{align}\label{exscopeextr_eqn1}
 	\receive{d}{x}\send{x}{}\comp \new{c}(\send{d}{c} \comp \receive{c}{}stop)	
 \end{align}
-We can use (S-REST-COMP) to bring the restriction to the outside, giving:
-\begin{align}
+You can probably see that $c$'s scope is extruded by sending over $d$ and that the left side of the term will then use $c$ to communicate with the right side.  Now we will show that this happens using the reduction rules.  First, we can use (S-REST-COMP) to bring the restriction to the outside, giving:
+\begin{align}\label{exscopeextr_eqn2}
 	\new{c}(\receive{d}{x}\send{x}{}\comp \send{d}{c} \comp \receive{c}{}stop)		
 \end{align}
-	Thanks to the reduction relation's contextuality, we can use (R-COMM) inside of the restriction operator and apply a substitution.  
-Using this in conjunction with the above structural equality and (R-STRUCT), we get:
-	\begin{align}
-		\new{c}(\send{c}{} \comp \receive{c}{}stop)
-	\end{align}
-	Finally, we can apply (R-STRUCT) again, so the process simply reduces to stop.  
+	Since \label{exscopeextr_eqn1} $\sequiv$ \label{exscopeextr_eqn2}, we can use (R-STRUCT) to deduce that if \label{exscopeextr_eqn2} reduces to some $Q$, then \label{exscopeextr_eqn1} will.
+	To find this $Q$, we can use (R-COMM), which we can do inside of the restriction operator thanks to the reduction relation's contextuality, and apply a substitution to \ref{exscopeextr_eqn2}, resulting in:
+\begin{align}
+	\new{c}(\send{c}{} \comp \receive{c}{}stop)
+\end{align}
+	Finally, we can apply (R-COMM) again, so the process simply reduces to stop.  
 
 
-	Now let $P(d)$ to be the right half of our original process, and $\mathbb{C}$ to be the remaining context:
+	Now let $P(d)$ be the right half of our original process, and $\mathbb{C}$ be the remaining context:
 	\begin{align}
 		P(d) \pdef \new{c}(\send{d}{c} \comp \receive{c}{}stop)
 	\end{align}
 	\begin{align}
 		\mathbb{C} = \receive{d}{x}\send{x}{} \comp [\ ]
 	\end{align}
-Then we have shown that if we drop $P(d)$ into the context $\mathbb{C}$ (forming $\mathbb{C}[P(d)]$), it will establish a new channel $c$ and extend its scope using $d$.  
-Hence it is (S-REST-COMP) which allows our system's communication topology to change dynamically via scope extrusion.
-\end{example}
-\begin{example}{exmemcells}
-	Suppose we wanted to model a simple memory cell with channels for getting and setting its value.  
-It turns out that we can simulate this just using message passing.  
-The problem that we have to work around is that receiving a identifier from a channel removes that value from the channel -- it cannot be retrieved again.  
-Thus, we need a way to push it back in for the next time.  
-Consider the following system:
-	\begin{equation}\begin{split}
-		Cell(get,set) \pdef \new{c} & (\send{c}{init} \\
-		& \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s)))
-	\end{split}\end{equation}
-	In the cell, we first create a new channel $c$ that will be used to `store' the value.  
-We then initialize $c$ with the value $init$.  
-The following line has a recursive listener process than, when given a channel via $get$, gets the value from $c$ and sends it back via the supplied channel.  
-In parallel, it sends the value back into $c$ so it can be had again.  
-The next line is similar except that two values are supplied via $set$ - a new value and a channel.  
-The old value is pulled from $c$ and simply discarded (ie not used), whereas the new value $x$ is pushed to the $c$ this time.  
-$x$ is also sent via $b$ as an acknowledgment that the cell's new value has been set.
-	
-	Also notice that the system has the free channels $get_c,set_c$ given in the interface.\refmargin{interface}  When some larger system binds them and uses them to interact with the components inside $Cell(get_c,set_c)$ we say that the system \defmargin[instantiates]{instantiate} $Cell(get_c,set_c)$.  
-In the following example we assume some larger system uses $printer$ to actually print the message.
-	\begin{equation}\begin{split}
-		Echo(printer) \pdef\\
-		\new{get_1,set_1} & (Cell\langle get_1,set_1\rangle\\
-		&\begin{split}\comp \new{a}(&\send{set_1}{``hello,\ world",a}\\
-		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})))\end{split}
-	\end{split}\end{equation}
-	The system $Echo$ creates new channels to interact with the instance of memory cell it spawns, while in parallel it puts a message in the cell, then (order is ensured using by waiting for the response via $a$) getting the value from the cell and sending it to the $printer$ channel.
-	
-	To see why this produces the behavior we expect, first observe scope restrictors for $a$ and $c$ can be moved out using $(S-REST-COMP)$:
-	\begin{equation}\begin{split}
-		\new{get_1,set_1,a,c} & \Big(\send{c}{init} \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \send{set_1}{``hello,\ world",a}\\
-		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
-	\end{split}\end{equation}
-	Two applications of (R-REP) allow us to `pull out' a recursive call:
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\send{c}{init} \comp\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp \receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x})\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \send{set_1}{``hello,\ world",a}\\
-		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
-	\end{split}\end{equation}
-	Now we can apply (R-COMM) to the memory cell's setter...
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\send{c}{init} \comp\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\begin{split}\comp \receive{c}{y}(&\send{c}{``hello,\ world"}\comp\send{a}{``hello,\ world"} \\
-			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s)))\end{split}\\
-		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
-	\end{split}\end{equation}
-	...which lets us strip out the initializer, and in turn the acknowledgement on $a$ of setting ``hello,\ world'' using (R-COMM),
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp \send{c}{``hello,\ world"} \comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \send{get_1}{a}\comp \receive{a}{y}\send{printer}{y}\Big)
-	\end{split}\end{equation}
-	We can now use (R-COMM) on the memory cell's getter and also on its use of $c$ to get the ``hello,\ world'' state:
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\send{c}{``hello,\ world"}\comp \send{a}{``hello,\ world"}\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \receive{a}{y}\send{printer}{y}\Big)
-	\end{split}\end{equation}
-	A final application of (R-COMM) to $a$ gives us
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\send{c}{``hello,\ world"}\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \send{printer}{``hello,\ world''}\Big)
-	\end{split}\end{equation}
-	which is essentially equivalent to initializing a memory cell with ``hello,\ world'' and also sending the message to $printer$.
+Then we have shown that if we drop the component $P(d)$ into the context $\mathbb{C}$ (forming $\mathbb{C}[P(d)]$), it will establish a new channel $c$ and extend its scope, using $d$.
+This means that components that are `dropped in' to a larger system can create new channels on the fly and then extrude them to communicate with the rest of the system (provided they share at least one channel to begin with).  
+In fact, this is the very procedure which allows our system's communication topology to change dynamically via scope extrusion.
 \end{example}
 
-\section{Action Semantics}
+\section{Action Semantics}\label{secactionsemantics}
 Our description of process behaviors so far has been limited to talking about the internal computational steps through which it might evolve.  
 Now, we want to give a more general description of how a process might evolve in the context of a larger system.  
 In such a system, a process can be said to either send or receive values along channels it shares with the system.  
@@ -513,3 +458,79 @@ That is, we have shown that $F_(c)$ can:
 \end{itemize}
 Thus, we have completely characterized $F_1(c)$'s capabilities to act as a recursive synchronous output process in a system -- but we have done so without having to say anything about what that system actually looks like. 
 \end{example}
+
+\section{Extended Example: Memory Cells}
+	Suppose we wanted to model a simple memory cell with channels for getting and setting its value.  
+It turns out that we can simulate this just using message passing.  
+The problem that we have to work around is that receiving a identifier from a channel removes that value from the channel -- it cannot be retrieved again.  
+Thus, we need a way to push it back in for the next time.  
+Consider the following system:
+	\begin{equation}\begin{split}
+		Cell(get,set) \pdef \new{c} & (\send{c}{init} \\
+		& \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s)))
+	\end{split}\end{equation}
+	In the cell, we first create a new channel $c$ that will be used to `store' the value.  
+We then initialize $c$ with the value $init$.  
+The following line has a recursive listener process than, when given a channel via $get$, gets the value from $c$ and sends it back via the supplied channel.  
+In parallel, it sends the value back into $c$ so it can be had again.  
+The next line is similar except that two values are supplied via $set$ - a new value and a channel.  
+The old value is pulled from $c$ and simply discarded (ie not used), whereas the new value $x$ is pushed to the $c$ this time.  
+$x$ is also sent via $b$ as an acknowledgment that the cell's new value has been set.
+	
+	Also notice that the system has the free channels $get_c,set_c$ given in the interface. 
+When some larger system binds them and uses them to interact with the components inside $Cell(get_c,set_c)$ we say that the system \defmargin[instantiates]{instantiate} $Cell(get_c,set_c)$.  
+In the following example we assume some larger system uses $printer$ to actually print the message.
+	\begin{equation}\begin{split}
+		Echo(printer) \pdef\\
+		\new{get_1,set_1} & (Cell\langle get_1,set_1\rangle\\
+		&\begin{split}\comp \new{a}(&\send{set_1}{``hello,\ world",a}\\
+		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})))\end{split}
+	\end{split}\end{equation}
+	The system $Echo$ creates new channels to interact with the instance of memory cell it spawns, while in parallel it puts a message in the cell, then (order is ensured using by waiting for the response via $a$) getting the value from the cell and sending it to the $printer$ channel.
+	
+	To see why this produces the behavior we expect, first observe scope restrictors for $a$ and $c$ can be moved out using $(S-REST-COMP)$:
+	\begin{equation}\begin{split}
+		\new{get_1,set_1,a,c} & \Big(\send{c}{init} \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \send{set_1}{``hello,\ world",a}\\
+		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
+	\end{split}\end{equation}
+	Two applications of (R-REP) allow us to `pull out' a recursive call:
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\send{c}{init} \comp\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp \receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x})\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \send{set_1}{``hello,\ world",a}\\
+		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
+	\end{split}\end{equation}
+	Now we can apply (R-COMM) to the memory cell's setter...
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\send{c}{init} \comp\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\begin{split}\comp \receive{c}{y}(&\send{c}{``hello,\ world"}\comp\send{a}{``hello,\ world"} \\
+			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s)))\end{split}\\
+		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
+	\end{split}\end{equation}
+	...which lets us strip out the initializer, and in turn the acknowledgement on $a$ of setting ``hello,\ world'' using (R-COMM),
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp \send{c}{``hello,\ world"} \comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \send{get_1}{a}\comp \receive{a}{y}\send{printer}{y}\Big)
+	\end{split}\end{equation}
+	We can now use (R-COMM) on the memory cell's getter and also on its use of $c$ to get the ``hello,\ world'' state:
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\send{c}{``hello,\ world"}\comp \send{a}{``hello,\ world"}\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \receive{a}{y}\send{printer}{y}\Big)
+	\end{split}\end{equation}
+	A final application of (R-COMM) to $a$ gives us
+	\begin{equation}\begin{split}
+		&\new{get_1,set_1,a,c}\\
+		&\Big(\send{c}{``hello,\ world"}\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
+			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
+		&\comp \send{printer}{``hello,\ world''}\Big)
+	\end{split}\end{equation}
+	which is essentially equivalent to initializing a memory cell with ``hello,\ world'' and also sending the message to $printer$.
