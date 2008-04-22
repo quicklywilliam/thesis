@@ -180,7 +180,7 @@ In fact, the following term (with the restriction operator removed) is equivalen
 We denote such substitutions by $R$\subst{\tuple{V}}{\tuple{X}}.  
 During the course of a substitution, we might inadvertently `capture' a bound term.  
 For example, suppose in the following term that some other process sent a channel $n$ over $a$ and that we wanted to perform the substitution \subst{n}{x} in running $\receivenodot{a}{x}$.\index{substitution}
-\begin{align}
+\begin{align}\label{subs_processpa}
 	P(a) \pdef \receive{a}{x}(\new{n}(\send{n}{} \comp \send{x}{}))
 \end{align}	
 The received term $n$ is not the same as the $n$ occurring in $P(a)$ - it was sent by some process outside the scope of the restriction operator $\new{n}$  Thus, the problem in performing $\subst{n}{x}$ is that it would make the free outside name $n$ into the bound name $n$.  
@@ -199,6 +199,18 @@ In general when two terms are the same up to the use of bound identifiers, we sa
 Thus, when we perform a substitution $R\subst{\tuple{V}}{\tuple{X}}$, we pick a term $\alpha$-equivalent to $R$ where the substitution will not capture terms bound in $R$.  
 From now on we will intend that a term represents its entire $\alpha$-equivalency class, and thus will not explicitly specify $\alpha$-equivalency in the equivalence relation introduced below.
 
+Notice the use of interfaces\refmargin{interface} to define the process $P(a)$ in (\ref{subs_processpa}).
+When a process has free channel names occurring in its body, as is the case with $a$, we will place those names inside the parenthesis in the process's interface.  
+We say that a process $Q$ with interface $Q(\tuple{V})$ \defmargin{exposes} the names $\tuple{V}$.  
+The idea is that since these terms are free, when the process is used as a component in a larger system, we can have other components that expose the same channels.  
+That way, our system can bind those channels at the top level and its components can communicate on them.  
+For example, in the following system
+\[
+	\new{b,c}Q_1(b) \comp Q_2(b,c),
+\]
+process components $Q_1$, $Q_2$ both expose the same channel $b$ which the system has bound.  
+Since usage of $b$ in the processes is free, $b$ is not captured when it is bound by the system.  
+Instead, both processes have the bound term in common, and can use it to interact.
 \subsection{Contexts and Equivalence}
 Perhaps the next idea we might have for building our equivalence relation is that equivalent processes should act the same when dropped into any larger system.  
 Let us define more precisely what we mean by `dropping in' a process.
@@ -267,7 +279,8 @@ The set of rules given below show how a process can internally evolve through a 
 	We use the notation $P\preds Q$ when an arbitrary number of these rules have been applied in reducing $P$ to $Q$.
 \end{definition}
 The first of these allows a computation step for the transmission of values over a channel.  
-(R-EQ) enables a computational step for value-matching.  For example, in
+(R-EQ) enables a computational step for value-matching.  
+For example, in
 \[
 	\send{c}{a} \comp \receive{c}{x} \pif{x=a} \pthen P \pelse stop  
 \]
@@ -276,7 +289,8 @@ we can use (R-COMM) to infer
 	\pif{a=a} \pthen P \pelse stop  
 \]
 from which we can use (R-EQ) to infer $P$.
-(R-REP) allows us to unravel a recursive expression into iterations of itself.  For example,
+(R-REP) allows us to unravel a recursive expression into iterations of itself.  
+For example,
 \[
 	\rec{p} \send{c}{} \comp p
 \]
@@ -284,14 +298,17 @@ expands to
 \[
 	\send{c}{} \comp \rec{p} \send{c}{} \comp p
 \]
-Finally, (R-STRUCT) says that a reduction is defined up to structural equivalence.  We give an example of its use below...
+Finally, (R-STRUCT) says that a reduction is defined up to structural equivalence.  
+We give an example of its use below...
 \begin{example}{exscopeextr}
 	We will give a demonstration of how scope extrusion is defined using the rules and axioms of reduction and structural equivalence.  
 Consider the expression 
 \begin{align}\label{exscopeextr_eqn1}
 	\receive{d}{x}\send{x}{}\comp \new{c}(\send{d}{c} \comp \receive{c}{}stop)	
 \end{align}
-You can probably see that $c$'s scope is extruded by sending over $d$ and that the left side of the term will then use $c$ to communicate with the right side.  Now we will show that this happens using the reduction rules.  First, we can use (S-REST-COMP) to bring the restriction to the outside, giving:
+You can probably see that $c$'s scope is extruded by sending over $d$ and that the left side of the term will then use $c$ to communicate with the right side.  
+Now we will show that this happens using the reduction rules.  
+First, we can use (S-REST-COMP) to bring the restriction to the outside, giving:
 \begin{align}\label{exscopeextr_eqn2}
 	\new{c}(\receive{d}{x}\send{x}{}\comp \send{d}{c} \comp \receive{c}{}stop)		
 \end{align}
@@ -335,11 +352,13 @@ We will refer to $Q$ is the \defmargin{residual} of $P$ after $\alpha$.
 
 There are three types of actions that may cause a process to evolve.  
 First, the process might receive a value.  
-That is, a process $P$ can be said to be capable of the transition $P \evolves{\receives{c}{\tuple{X}}} Q$, which is to say that $P$ can receive $\tuple{X}$ along $c$ resulting in the residual $Q$.  The capability of a process to evolve in this way is given by the rule (A-IN) in \reffig{apiactionrules}, which say that for a general process $c$ and input $\tuple{V}$
+That is, a process $P$ can be said to be capable of the transition $P \evolves{\receives{c}{\tuple{X}}} Q$, which is to say that $P$ can receive $\tuple{X}$ along $c$ resulting in the residual $Q$.  
+The capability of a process to evolve in this way is given by the rule (A-IN) in \reffig{apiactionrules}, which say that for a general process $c$ and input $\tuple{V}$
 \[
 	\receive{c}{\tuple{X}}R \evolves{\receives{c}{\tuple{V}}} R\subst{V}{X}
 \]
-For a receiving process, evolution under (A-IN) is only possible when the substitution $\subst{\tuple{V}}{\tuple{X}}$ makes sense.  That is, $\tuple{V}$ and $\tuple{X}$ must have the same arity\refmargin{arity}and in a typed system we'd want to ensure that their types were compatible
+For a receiving process, evolution under (A-IN) is only possible when the substitution $\subst{\tuple{V}}{\tuple{X}}$ makes sense.  
+That is, $\tuple{V}$ and $\tuple{X}$ must have the same arity\refmargin{arity}and in a typed system we'd want to ensure that their types were compatible
 \footnote{See \cite{henn07} for a discussion off type systems in the \picalc}.
 For example, a process $\send{c}{\tuple{V}} \comp P$ will evolve to $stop \comp P \sequiv P$ when it exercises its capability for output on $c$.  
 
@@ -423,7 +442,8 @@ For example, consider the following system:
 Above, we have a process sending on $b$ but the scope of $b$ has not actually been extruded (ie by being received on $c$).  
 Hence, we need to be careful not to `capture' a channel like $b$ by allowing exported channels to have the same name as free variables outside the original scope of the process.
 
-(A-OPEN) expresses scope extrusion of a name $n$.  Essentially, if we already know that 
+(A-OPEN) expresses scope extrusion of a name $n$.  
+Essentially, if we already know that 
 \[
 	P\evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} P'
 \]
@@ -440,7 +460,10 @@ In the inference
 \[
 	P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q'),
 \]
-no external contributions are needed for evolution.  The exported names $\exports{\tuple{B}}$ are now scopes to both processes as a result of the original export by $Q$.  Just as in (A-COMP), we need to make sure that none of these exported names are going to capture free terms in $P$.  Hence, we require that $\exports{\tuple{B}}\cap fn(P) = \emptyset$.
+no external contributions are needed for evolution.  
+The exported names $\exports{\tuple{B}}$ are now scopes to both processes as a result of the original export by $Q$.  
+Just as in (A-COMP), we need to make sure that none of these exported names are going to capture free terms in $P$.  
+Hence, we require that $\exports{\tuple{B}}\cap fn(P) = \emptyset$.
 
 \begin{example}{exsynchronous_actions}
 	In \refex{exsynchronous}, we defined a simple process for modeling synchronous sends:
@@ -477,23 +500,27 @@ Thus, we have completely characterized $F_1(c)$'s capabilities to act as a recur
 \end{example}
 
 \section{Extended Example: Memory Cells}
-	Suppose we wanted to model a simple memory cell with channels for getting and setting its value.  
-It turns out that we can simulate this just using message passing.  
-The problem that we have to work around is that receiving a identifier from a channel removes that value from the channel -- it cannot be retrieved again.  
+	We said in Chapter \ref{Introduction} that distributed systems usually involve information that is shared between processes executing independently on multiple machines.  
+In the \picalc, the principle means of sharing information is via message passing.  
+Suppose, that we wanted instead to model a memory cell that stores information in a less fleeting way.  
+Our cell might have channels for getting and setting its value, but as many processes as required could get the cell's value without it changing or disappearing.  
+It turns out that we can create this cell just using message passing.  
+
+	The problem that we have to work around is that receiving a identifier from a channel removes that value from the channel -- it cannot be retrieved again.  
 Thus, we need a way to push it back in for the next time.  
 Consider the following system:
 	\begin{equation}\begin{split}
 		Cell(get,set) \pdef \new{c} & (\send{c}{init} \\
-		& \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s)))
+		& \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{b}{y}\comp \send{c}{y}\comp g))\\
+		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{b}{x}\comp\send{c}{x}\comp s)))
 	\end{split}\end{equation}
-	In the cell, we first create a new channel $c$ that will be used to `store' the value.  
+	In $Cell$, we first create a new channel $c$ that will be used to `store' the value.  
 We then initialize $c$ with the value $init$.  
-The following line has a recursive listener process than, when given a channel via $get$, gets the value from $c$ and sends it back via the supplied channel.  
+The following line has a recursive listener process that, when given a channel via $get$, gets the value from $c$ and sends it back via the supplied channel.  
 In parallel, it sends the value back into $c$ so it can be had again.  
 The next line is similar except that two values are supplied via $set$ - a new value and a channel.  
 The old value is pulled from $c$ and simply discarded (ie not used), whereas the new value $x$ is pushed to the $c$ this time.  
-$x$ is also sent via $b$ as an acknowledgment that the cell's new value has been set.
+It is also sent via $b$ as an acknowledgment that the cell's new value has been set.
 	
 	Also notice that the system has the free channels $get_c,set_c$ given in the interface. 
 When some larger system binds them and uses them to interact with the components inside $Cell(get_c,set_c)$ we say that the system \defmargin[instantiates]{instantiate} $Cell(get_c,set_c)$.  
