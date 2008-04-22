@@ -103,12 +103,12 @@ Our system will be simplified a bit: only two towers and one phone, with the onl
 	
 	First we give a process describing the behavior of a mobile phone:
 	\[
-		Mobile(talk, switch) \pdef \ssend{talk}{} Mobile(talk,switch) + \receive{switch}{t,s} Mobile(t,s)
+		Mobile(talk, switch) \pdef \ssend{talk}{} Mobile\langle talk,switch\rangle + \receive{switch}{t,s} Mobile\langle t,s\rangle
 	\]
 	Above, we use $\pdef$ to mean that the term to the right of the $\pdef$ is given the shorthand $Mobile$ and that it uses the channels $talk$ and $switch$ given elsewhere.  
-The channels given in the parentheses are simply substituted into the term on the right's corresponding channels.  
-Hence, for example, $Mobile(t,s)$ would be this right-hand term with the channels $t$ and $s$ substituted for $talk$ and $switch$. 
-We call $Mobile(t,s)$ the \defmargin{interface} of the right-hand term.
+When the shorthand is used, which occurs with angle brackets $\langle\rangle$, the channels given in the brackets are simply substituted for the terms in the parenthesis.  
+Hence, for example, $Mobile\langle t,s\rangle$ would be the right-hand term with the channels $t$ and $s$ substituted for $talk$ and $switch$. 
+We call $Mobile(talk,switch)$ the \defmargin{interface} of the right-hand term.
 	\begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.7]{figures/cell_network_pi.pdf} % requires the graphicx package
@@ -119,17 +119,17 @@ We call $Mobile(t,s)$ the \defmargin{interface} of the right-hand term.
 After a signal is sent or received on a channel, execution then continues with the term immediately to the right of the term, using the input provided (if any).  
 
 	
-	Thus, $\receive{switch}{t,s} Mobile(t,s)$ indicates that we should listen on $switch$ for the input $t,s$ and then use $t,s$ to `spawn' a new computation of $Mobile$ with these new channels. 
-	The term $\ssend{talk}{} Mobile(talk,switch)$ means send a signal on $talk$ before spawning a computation of $Mobile$ with the same $talk,switch$ channels we are using.  
+	Thus, $\receive{switch}{t,s} Mobile\langle t,s\rangle$ indicates that we should listen on $switch$ for the input $t,s$ and then use $t,s$ to `spawn' a new computation of $Mobile$ with these new channels. 
+	The term $\ssend{talk}{} Mobile\langle talk,switch\rangle$ means send a signal on $talk$ before spawning a computation of $Mobile$ with the same $talk,switch$ channels we are using.  
 Finally, the $+$ operator denotes that we should choose to compute one or the other of the operands (but not both).  
 In sum then, $mobile$ has the ability to either send along $talk$ and stay in its current location, or it can receive on $switch$ and `move' to the location where it has new talking and switching channels $t,s$.  
 This last capability expresses the mobile nature of our processes with surprising elegance: here we have just expressed that channels $talk,switch$ are lost and new channels $t,s$ are established.
 	
 	Next we consider the behavior of a tower:
 	\begin{align*}
-		ActiveT(talk,switch,gain,lose) \pdef & \receive{talk}{}ActiveT(talk,switch,gain,lose) \\  
-		 & +\receive{lose}{t,s}\ssend{switch}{t,s}IdleT(gain, lose)\\
-		IdleT(gain,lose) \pdef & \receive{gain}{t,s}ActiveT(t,s,gain,lose)\\
+		ActiveT(talk,switch,gain,lose) \pdef & \receive{talk}{}ActiveT\angle talk,switch,gain,lose\rangle \\  
+		 & +\receive{lose}{t,s}\ssend{switch}{t,s}IdleT\langle gain, lose\rangle\\
+		IdleT(gain,lose) \pdef & \receive{gain}{t,s}ActiveT\langle t,s,gain,lose\rangle\\
 	\end{align*}
 Here, the are two `states' our tower can be in.  
 It can be active in talking with a mobile phone, or it can be disconnected and idle.  
@@ -152,7 +152,7 @@ To do so, we'll need a new operator.
 This operator denotes that its operands run concurrently in parallel and is denoted $\comp$.  
 Thus, our system is simply:\index{parallel}
 \begin{center}
-	\small{$\textstyle Mobile(talk_1,switch_1)|ActiveT_1(talk_1,switch_1,gain_1,lose_1)|IdleT(gain_2,lose_2)|Server_1$}
+	\small{$\textstyle Mobile\langle talk_1,switch_1\rangle|ActiveT_1\langle talk_1,switch_1,gain_1,lose_1\rangle|IdleT\langle gain_2,lose_2\rangle|Server_1$}
 \end{center}
 
 \section{An Outline of This Thesis}	

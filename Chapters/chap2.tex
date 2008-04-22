@@ -122,7 +122,7 @@ To see how, consider the following system:
 	\begin{align}
 		F_1(c) & \pdef \rec{z} (\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp z)))\\
 		F_2(c) & \pdef \rec{q} (\receive{c}{ack}(\send{ack}{} \comp q)) \\
-		Sys_1 & \pdef \new{d}(F_1(d) \comp F_2(d))
+		Sys_1 & \pdef \new{d}(F_1\angle d \rangle \comp F_2\langle d\rangle)
 	\end{align}
 	Above, both $F_1$ and $F_2$ have (infinite) recursive behavior, and we can think of $Sys_1$ as a term that `kicks off' both of them after creating a shared channel for them to communicate on.  
 
@@ -202,13 +202,14 @@ From now on we will intend that a term represents its entire $\alpha$-equivalenc
 Notice the use of interfaces\refmargin{interface} to define the process $P(a)$ in (\ref{subs_processpa}).
 When a process has free channel names occurring in its body, as is the case with $a$, we will place those names inside the parenthesis in the process's interface.  
 We say that a process $Q$ with interface $Q(\tuple{V})$ \defmargin{exposes} the names $\tuple{V}$.  
-The idea is that since these terms are free, when the process is used as a component in a larger system, we can have other components that expose the same channels.  
+The idea is that since these terms are free, when the interface is used as a component in a larger system, we can have other components that expose the same channels.  
 That way, our system can bind those channels at the top level and its components can communicate on them.  
-For example, in the following system
+For example, consider the following system:
 \[
-	\new{b,c}Q_1(b) \comp Q_2(b,c),
+	\new{b,c}Q_1(b) \comp Q_2(b,c)
 \]
-process components $Q_1$, $Q_2$ both expose the same channel $b$ which the system has bound.  
+Process components $Q_1$, $Q_2$ both expose the same channel $b$ which the system has bound.  
+When some larger system uses $new$ to bind channels that are exposed by a component interface we say that system \defmargin[instantiates]{instantiate} the interface.
 Since usage of $b$ in the processes is free, $b$ is not captured when it is bound by the system.  
 Instead, both processes have the bound term in common, and can use it to interact.
 \subsection{Contexts and Equivalence}
@@ -327,7 +328,7 @@ First, we can use (S-REST-COMP) to bring the restriction to the outside, giving:
 	\begin{align}
 		\mathbb{C} = \receive{d}{x}\send{x}{} \comp [\ ]
 	\end{align}
-Then we have shown that if we drop the component $P(d)$ into the context $\mathbb{C}$ (forming $\mathbb{C}[P(d)]$), it will establish a new channel $c$ and extend its scope, using $d$.
+Then we have shown that if we drop the component $P(d)$ into the context $\mathbb{C}$ (forming $\mathbb{C}[P\langle d \rangle]$), it will establish a new channel $c$ and extend its scope, using $d$.
 This means that components that are `dropped in' to a larger system can create new channels on the fly and then extrude them to communicate with the rest of the system (provided they share at least one channel to begin with).  
 In fact, this is the very procedure which allows our system's communication topology to change dynamically via scope extrusion.
 \end{example}
@@ -478,9 +479,9 @@ We don't want our characterization of the process to rely on some auxiliary syst
 Without defining a particular system for it to work in, we can use action semantics to provide a characterization of how $F_1(c)$ behaves externally.  
 Consider the following inferences:
 \begin{center}\begin{tabular}{lllr}
-	$F_1(c)$ & $\evolves{\tau}$ & $\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp F_1(c)))$ & \tiny{(A-REP)}\\
-	& $\evolves{\exports{ack}\sends{c}{ack}}$ & $\new{ack}(stop \comp \receive{ack}{}(R \comp F_1(c)))$ & \tiny{(A-OPEN, A-OUT)}\\
-	& $\evolves{\exports{\receives{ack}{}}}$ & $\new{ack}(stop \comp (R \comp F_1(c))) $& \tiny{(A-IN)}\\
+	$F_1(c)$ & $\evolves{\tau}$ & $\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp F_1\langle c\rangle))$ & \tiny{(A-REP)}\\
+	& $\evolves{\exports{ack}\sends{c}{ack}}$ & $\new{ack}(stop \comp \receive{ack}{}(R \comp F_1\langle c\rangle))$ & \tiny{(A-OPEN, A-OUT)}\\
+	& $\evolves{\exports{\receives{ack}{}}}$ & $\new{ack}(stop \comp (R \comp F_1\langle c\rangle)) $& \tiny{(A-IN)}\\
 \end{tabular}\end{center}
 Using the \hyperref[Structural Equivalence]{structural equivalence} rules (S-COMP-ID) and (S-REST-COMP).  
 We know the final step of this inference to be equivalent to:\note{I could make an explicit rule for inferences between structurally equivalent action relations...some presentations do, some don't.  
@@ -521,9 +522,7 @@ In parallel, it sends the value back into $c$ so it can be had again.
 The next line is similar except that two values are supplied via $set$ - a new value and a channel.  
 The old value is pulled from $c$ and simply discarded (ie not used), whereas the new value $x$ is pushed to the $c$ this time.  
 It is also sent via $b$ as an acknowledgment that the cell's new value has been set.
-	
-	Also notice that the system has the free channels $get_c,set_c$ given in the interface. 
-When some larger system binds them and uses them to interact with the components inside $Cell(get_c,set_c)$ we say that the system \defmargin[instantiates]{instantiate} $Cell(get_c,set_c)$.  
+	 
 In the following example we assume some larger system uses $printer$ to actually print the message.
 	\begin{equation}\begin{split}
 		Echo(printer) \pdef\\
