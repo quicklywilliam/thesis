@@ -7,5 +7,5 @@
 - TOWRITE@P-14L-269: make all index terms lowercase
 - TOWRITE@P-17L-397: make the arrow for evolution size according to the text above it
 - TOWRITE@P-23L-626: line up all the above equations by putting them in one array and using breaks
-- TOWRITE@P-28L-197: where/how?
-- TOWRITE@P-30L-8: make a note about why the original example only covered input guarded choice
+- TOWRITE@P-28L-197: When I try to refer to the label $\alpha $-equivalency here, things break. any idea how to fix this without re-engineering my definitions?
+- TOWRITE@P-29L-209: come up with an implement a short hand for the calculi: SPI and API?

@@ -1,7 +1,7 @@
 %!TEX root = /Users/admin/Desktop/Documents/Academic/MA 470 -THESIS/THESIS/thesis.tex
 \chapter{Synchronicity and Expressiveness}\label{sync_and_express}
 In \refsec{spisyntax}, we introduced a version of the \picalc\ which we said was made \emph{asynchronous} by its use of non-blocking send operations.  
-Rather than allowing an operation to happen after a sent value has been received by some other process, a sending process simply ends, hoping someone will eventually consume the sent message.  
+Rather than allowing an operation to happen after a sent value has been received by some other process, a sending process simply ends.  
 In \refex{exsynchronous} we gave a straightforward method of simulating synchronous sending in the asynchronous \picalc.  
 Also absent in our calculus was the non-deterministic choice operator, also known as the summation operator.  
 We gave a method of simulating this in \refex{exsummation}.
@@ -129,7 +129,7 @@ It says, for example, that if some process $P$ is able to evolve to $P'$ over so
 
 \begin{insettable_wide}
 	\begin{center}\begin{tabular}{rllll}
- 		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{\tuple{X}}} & $R$\subst{\tuple{V}}{\tuple{X}} & & \tiny{(A-IN)}\\
+ 		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{\tuple{V}}} & $R$\subst{\tuple{V}}{\tuple{X}} & & \tiny{(A-IN)}\\
 		$\ssend{c}{\tuple{V}}R$ & \evolves{\sends{c}{\tuple{V}}} & $R$ & & \tiny{(A-OUT)}\\
 		$\rec{x}R$ & \evolves{\tau} & $R\subst{\rec{x}R}{x}$ & & \tiny{(A-REP)}\\
 		$\pif{v=v} \pthen P \pelse Q$ & \evolves{\tau} & $P$ & & \tiny{(A-EQ)}\\[10pt]
@@ -160,7 +160,8 @@ It says, for example, that if some process $P$ is able to evolve to $P'$ over so
 \end{example}
 
 \section{Separation Results}\label{Separation Results}
-When trying to compare the expressive power of different calculi, one good approach is to, as above, provide explicit encodings from one language to another\footnote{Note that \refex{syncembedding} is a trivial example of such an encoding since your encodings are straight-forward enough to be equivalent under the structural equivalence.  
+When trying to compare the expressive power of different calculi, one good approach is to, as above, provide explicit encodings from one language to another
+\footnote{Note that \refex{syncembedding} is a trivial example of such an encoding since our encodings are straight-forward enough to be equivalent under the structural equivalence.  
 Most encodings require the more advanced structure of \emph{bisimulation} equivalences, which relies on setting up a notion of simulation and then proving that two processes simulate one another.}.  
 We say that we are trying to encode from \defmargin{source language} into the terms of a \defmargin{target language}, and if we succeed, we have shown that the target language is at least as expressive as the source.  
 Hence, in example \refex{syncembedding} we showed that the synchronous calculus is at least as expressive as the asynchronous calculus by giving an encoding from the asynchronous to the synchronous.  
@@ -183,20 +184,39 @@ It may be less obvious, but it is not possible to solve the leader election prob
 This is a direct result of the lack of the choice operator: without it, the symmetric processes have no way to pick a leader non-deterministically without potentially disagreeing with one another.  
 It is only through the implicit communication underlying the choice operator that synchronous processes are able to break out of their symmetry and agree on a leader.
 
-Using these results, Palamidessi a set of useful requirements that formally separate the two calculi.
+(give a brief overview of the argument as to why?)
 
-The first of those requirement is on \defmargin{uniformity}, which means that:
+Using these results, Palamidessi gives a useful set of requirements that formally separate the two calculi.
+
+The first of those requirement, which is on the encoding, is \defmargin{uniformity}, which means that:
 \begin{align}
 	\encode{\alpha(P)} &= \alpha(\encode{Q})\label{unif1}\\
 	\encode{P\comp Q} &= \encode{P} \comp \encode{Q}\label{unif2}
 \end{align}
-(\ref{unif1}) simply states $\alpha$-renaming \note{When I try to refer to the label $\alpha$-equivalency here, things break.  
-any idea how to fix this without re-engineering my definitions?} is not violated in the process of the encoding.  
-(\ref{unif2}) is related to the requirements of a distributed system.  
-That is, parallel processes really should just map to parallel processes, with not top level manager process or the like to aide the encoding.  
-This is how Palamidessi builds the requirement of a symmetric network into a language requirement.\todo{where/how?}
+Rule (\ref{unif1}) simply states that an arbitrary $\alpha$ renaming function $\alpha$ \todo{When I try to refer to the label $\alpha$-equivalency here, things break.  
+any idea how to fix this without re-engineering my definitions?} is not violated in the process of the encoding.  That is, if we $\alpha$-rename a process $P$ and then encode it we get the same result as if we encode it and then $\alpha$-rename it.
+Rule (\ref{unif2}) is related to the requirements of a distributed system.  
+That is, parallel processes really should just map to parallel processes, with no top level `manager' process or the like to aide the encoding.  That is, we wouldn't want to encode $P \comp Q$ to something like 
+\[
+	P \comp Manager \comp Q
+\]
+This is how Palamidessi uses the requirement of a symmetric network in the leader election problem to forge a more general requirement on the encoding.
 
-The other requirement is on \defmargin{reasonability}.  
-Reasonability to Palamidessi means that the language can distinguish between two processes when their actions are different on a certain given channel.  
+The other requirement is on \defmargin{reasonability} and is on the target language's semantics.  
+Reasonability to Palamidessi means that the language itself can distinguish between two processes when their actions are different on a certain given channel.  
 This essentially encapsulates the requirements of the leader election problem.  
 That is, a electoral system would be one were actions on the output channel are the same and we want our target language to be capable of semantically distinguishing this from a non-electoral system (where actions on the output channel differ).
+\todo{come up with an implement a short hand for the calculi: SPI and API?}
+
+\section{Implications}
+Given these two definitions, we can say with Palamidessi that no uniform encoding of the synchronous \picalc\ into the asynchronous \picalc preserving reasonable semantics exists.  This is a very strong result:  weakening either of the requirements that Palamidessi assumes seems like it would produce an encoding not rigorous enough to study.  For this reason, the fully expressive synchronous \picalc\ seems like a better candidate for formal study than the asynchronous \picalc.
+
+However, we need still consider the implementation of a synchronous \picalc.  
+On distributed systems, we have only asynchronous sending available to us.\refmargin{distributed systems}  
+Hence, it is useful to study the asynchronous \picalc as well it models these systems more accurately than a synchronous model.
+In the study of distributed systems, rather than showing the asynchronous to be not worth our time, Palamidessi's separation result raises the question of whether we should be considering \emph{synchronous} calculi. 
+
+However, we still would like to be able to use the expressiveness of the synchronous \picalc if possible - it allows us to solve a large class of problems much more easily and clearly.
+We saw just how useful the synchronous \picalc\ can be for expressing distributed systems in our extended mobile phone network example in the introduction.
+We could have modeled this system in the asynchronous \picalc, but it would have involved a convoluted mess of acknowledgement channels just to express the necessary ordering of events in the system.
+Hence, the next chapter looks at some of the more implementation-minded encodings of the synchronous \picalc in the asynchronous \picalc, and o what extent we need to relax Palamidessi's requirements to allow these encodings.

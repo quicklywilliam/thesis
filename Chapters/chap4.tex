@@ -1,15 +1,8 @@
 \chapter{Synchronicity and Distributed Systems}\label{sync_and_dist_sys}
-The second question we might ask is about the implementation of a synchronous \picalc.  
-On distributed systems, which seem like the natural setting for such an implementation, we have only asynchronous available to us.  
-Hence, depending on the answer to the first question, we may have to 
-
-However, whether the asynchronous calculus actually has the expressive power of its synchronous forebear is a matter of more complexity.  
-In fact, we will see by straightforward counterexample (and by a rather less straightforward argument due to Palamidessi \cite{palam03}) that two are not truly equal.
-\todo{make a note about why the original example only covered input guarded choice}
-The implementation of synchronous calculi on distributed systems is a thorny issue.  
+Given the results of the last chapter, it should come as no surprise that the implementation of synchronous calculi on distributed systems is a thorny issue.  
 On the one hand, it is a useful construct in that it allows us to model many problems more naturally and easily.  
 On the other, all communication in a distributed system is in fact asynchronous in nature, and so synchronous communication must be layered on top at some level of the implementation.  
-It is notoriously difficult construct to implement synchronous communication efficiently without violating the requirements of a truly distributed system where there is shared memory or central control process.  
+It can be quite difficult to construct synchronous communication efficiently without violating the requirements of a truly distributed system where there is no central control process.  
 The issue becomes more difficult still with the Palamidessi's related requirement of symmetry, which means that a process's behavior does not depend on its location in the channel topology. 
 
 The creators of Pict, the Join-calculus, and other implementations based on the \picalc\ all decided to have their primitives support only asynchronous communication, while synchronous communication is made available overtop of this via a library or higher-level language.  
