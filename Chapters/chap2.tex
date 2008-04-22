@@ -317,38 +317,48 @@ In fact, this is the very procedure which allows our system's communication topo
 
 \section{Action Semantics}\label{secactionsemantics}
 Our description of process behaviors so far has been limited to talking about the internal computational steps through which it might evolve.  
-Now, we want to give a more general description of how a process might evolve in the context of a larger system.  
-In such a system, a process can be said to either send or receive values along channels it shares with the system.  
+Now, we want to give a more general description of how a process might evolve when placed within the context of a larger system.  
+A process can interact with such a system by sending or receiving values along channels they share.  
 To describe these abilities, we will use the notion of a \emph{labelled transition system}, or \emph{lts}.
 
 \begin{definition}{Labelled Transition System}
 	A \emph{labelled transition sytem} $\mathcal{L}$ is a tuple $(\mathcal{S}, \mathcal{A})$ 
 where $\mathcal{S}$ is a set of processes and $\mathcal{A}$ is a set of labels called \emph{actions}.  
-Furthermore, for each action $a$, there is a binary relation:
+Furthermore, for each action $\alpha$, there is a binary relation:
 	\[
-		R_a \subseteq \mathcal{S} \times \mathcal{S}
+		R_{\alpha} \subseteq \mathcal{S} \times \mathcal{S}
 	\]
-	To denote that $\langle P,Q\rangle \in R_a$, we will use the notation $P \evolves{a} Q$.
+	To denote that $\langle P,Q\rangle \in R_{\alpha}$, we will use the notation $P \evolves{\alpha} Q$.
 \end{definition}
-Hence, the transition $P \evolves{a} Q$ indicates that there is an action under which the process P becomes Q.  
-We will refer to $Q$ is the \defmargin{residual} of $P$ after $a$.
+Hence, the transition $P \evolves{\alpha} Q$ indicates that there is an action under which the process P becomes Q.  
+We will refer to $Q$ is the \defmargin{residual} of $P$ after $\alpha$.
 
 There are three types of actions that may cause a process to evolve.  
-Note that we will use $\alpha$ to refer to an action of arbitrary type.  
 First, the process might receive a value.  
-That is, a process $P$ can be said to be capable of the transition $P \evolves{\receives{c}{\tuple{X}}} Q$, which is to say $P$ can receive $\tuple{X}$ along $c$ resulting in the residual $Q$.
+That is, a process $P$ can be said to be capable of the transition $P \evolves{\receives{c}{\tuple{X}}} Q$, which is to say that $P$ can receive $\tuple{X}$ along $c$ resulting in the residual $Q$.  The capability of a process to evolve in this way is given by the rule (A-IN) in \reffig{apiactionrules}, which say that for a general process $c$ and input $\tuple{V}$
+\[
+	\receive{c}{\tuple{X}}R \evolves{\receives{c}{\tuple{V}}} R\subst{V}{X}
+\]
+For a receiving process, evolution under (A-IN) is only possible when the substitution $\subst{\tuple{V}}{\tuple{X}}$ makes sense.  That is, $\tuple{V}$ and $\tuple{X}$ must have the same arity\refmargin{arity}and in a typed system we'd want to ensure that their types were compatible
+\footnote{See \cite{henn07} for a discussion off type systems in the \picalc}.
+For example, a process $\send{c}{\tuple{V}} \comp P$ will evolve to $stop \comp P \sequiv P$ when it exercises its capability for output on $c$.  
 
 The second type of action available is sending.  
 Here we need to be a bit more careful.  
-In the case of receiving, the received names are always bound to new names in $\tuple{X}$ - so we needn't worry about issues of scoping.  
+In the case of receiving, the received names are always bound to new names in $\tuple{X}$ - so we needn't worry about issues of scope.  
 In sending, however, we might be transmitting either free or a bound names, or a mix of them.  
 In the latter case, we need to take account of the fact that the\refmargin{scope extrusion}scope of the name is being extruded to whatever process receives the name.  
-We denote the set of bound names in the send action by $\exports{\tuple{B}}$, and we say that this set of names is \defmargin{exported} by the process.  
-Hence, the transition $P \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q$ represents that P can send $\tuple{V}$ over $c$, exporting $\exports{\tuple{B}}$ and resulting in $Q$.  
+We denote the set of names that are bound\refmargin{bound identifiers} in the send action by $\exports{\tuple{B}}$, and we say that this set of names is \defmargin{exported} by the process.  
+Hence, the transition $\send{c}{\tuple{V}} \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} stop$ expresses that the capability to send the value $\tuple{V}$ over $c$, exporting $\exports{\tuple{B}}$ and resulting in $stop$.  
 For example,
 \[
-	\new{a}\send{c}{a} \comp Q \evolves{\exports{b}\sends{c}{a}} Q
+	\new{d}(\send{c}{d} \comp Q) \evolves{\exports{d}\sends{c}{d}} Q
 \]
+The capability of a process to evolve by sending a value is described by (A-OUT) for a general channel $c$ and output values $\tuple{V}$:
+\[
+	\send{c}{\tuple{V}} \evolves{\sends{c}{\tuple{V}}} stop 
+\]
+
 We will refer to sending and receiving as \defmargin[external actions]{external action}.
 
 Our third action we call \defmargin{internal action}. 
@@ -359,18 +369,17 @@ We use $\tau$ denote such an internal evolution step.
 Thus, we say $P \evolves{\tau} Q$ if P is able evolve into Q by performing a reduction step without any external contributions.  
 For example (thanks to (R-COMM)),
 \[
-	\send{c}{a} \comp \receive{c}{x}\send{x}{} \evolves{\tau} \send{c}{} 
+	\send{c}{a} \comp \receive{c}{x}\send{x}{} \evolves{\tau} \send{a}{} 
 \]
-We will define and further characterize $\tau$ in our discussion of (A-COMM) below.
+The capability for $\tau$ is defined through the rules (A-COMM), (A-REP), (A-EQ) and (A-NEQ).  (A-REP), (A-EQ) and (A-NEQ) simply the provide the same interval evolution capabilities as (R-REP), (R-EQ) and (R-NEQ) do in the \hyperref[secreducationsemantics]{reduction semantics}. (A-COMM), however, is more subtle then (R-COMM) and it makes sense to look at a few of the other rules of \reffig{apiactionrules} before characterizing it.
 
-Using these actions, we can give a set of rules describing the behavior of a \picalc\ processes in an arbitrary context.  
-Hence, we now formally define the action relation under these rules (with their preconditions listed alongside them):
+Hence, we now formally define the action relation under the following rules (with their preconditions listed alongside them):
 \todo{make the arrow for evolution size according to the text above it}
 \begin{definition}{Action}\label{apiactionrules}
 	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:
 	\begin{center}\begin{tabular}{rllll}
- 		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{X}} & R\subst{V}{X} & & \tiny{(A-IN)}\\
-		$\send{c}{\tuple{V}}$ & \evolves{\sends{c}{V}} & $stop$ & & \tiny{(A-OUT)}\\
+ 		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{\tuple{V}}} & R\subst{V}{X} & & \tiny{(A-IN)}\\
+		$\send{c}{\tuple{V}}$ & \evolves{\sends{c}{\tuple{V}}} & $stop$ & & \tiny{(A-OUT)}\\
 		$\rec{x}R$ & \evolves{\tau} & $R\subst{\rec{x}R}{x}$ & & \tiny{(A-REP)}\\
 		$\pif{v=v} \pthen P \pelse Q$ & \evolves{\tau} & $P$ & & \tiny{(A-EQ)}\\[10pt]
 		$\pif{v_1=v_2} \pthen P \pelse Q$ & \evolves{\tau} & $Q$ & $v_1 \neq v_2$ & \tiny{(A-NEQ)}\\[10pt]
@@ -389,15 +398,11 @@ Hence, we now formally define the action relation under these rules (with their 
 	\end{tabular}\end{center}
 \end{definition}\note{I wonder if these couldn't be simplified (ie removing A-EQ, A-REP, etc.) by allowing a transition that happens over the reduction semantics?  my sense is this approach is avoided because the action relation isn't actually contextual in our above definition (since we need to be more careful about bound variable captures).  
 i wonder if there is a way to gracefully sidestep the issue and avoid all the redundancy...}
- The first of two of these rules simply describe the ability of processes to evolve under input or output.  
-For example, a process $\send{c}{\tuple{V}} \comp P$ will evolve to $stop \comp P \sequiv P$ when it exercises its capability for output on $c$.  
-For a receiving process, evolution under (A-IN) is only possible when the substitution $\subst{\tuple{V}}{\tuple{X}}$ makes sense.  
-That is, $\tuple{V}$ and $\tuple{X}$ must have the same arity\refmargin{arity}and in a typed system we'd want to ensure that their types were compatible\footnote{See \cite{henn07} for a discussion off type systems in the \picalc}.
-
-Meanwhile, (A-REP), (A-EQ) and (A-NEQ) serve the provide the same interval evolution capabilities as (R-REP), (R-EQ) and (R-NEQ) do in the reduction semantics.
 
 Together, (A-COMP) and (A-REST) provide a notion\refmargin{contextual}contextually - with a key difference being that in action semantics we need to be careful about inadvertently capturing bound variables.  
-Hence, in (A-REST) we require that the newly bound variable does not occur in the names of the action.  
+
+In (A-REST), we allow the inference of $\new(b)P \evolves{\alpha} P'$ if we know $P\evolves{\alpha} P'$. 
+However, we require that the newly bound variable $b$ does not occur in the names of the action  $n(\alpha)$.  
 Suppose we ignored this precondition and tried the following:
 \begin{center}\begin{tabular}{rllll}
 	\multicolumn{3}{c}{$\underline{\receive{c}{}stop \evolves{\receives{c}{}} stop}$} & & \multirow{2}{*}{\tiny{(A-REST)}}\\
@@ -406,7 +411,8 @@ Suppose we ignored this precondition and tried the following:
 But it is actually impossible for $\new{c} \receive{c}{}stop$ to evolve since the scope of $c$ cannot be extruded and thus no other process could ever send along $c$!  Similarly, there are problems in capturing the one of the transmitted variables.  
 
 
-For (A-COMP), we just need to ensure that none of the bound identifiers of $\alpha$ conflict with the free variables in $Q$.  
+For (A-COMP), we allow the inference of $P\comp Q \evolves{\alpha} P' \comp Q$ if we know $P \evolves{\alpha} P'$.
+We just need to ensure that none of the bound identifiers of $\alpha$ conflict with the free variables in $Q$.  
 Actually, the only variables that will be bound in an action is the set $\exports{b}$ exported by a send action.  
 Thus, the precondition on (A-COMP) simply requires that bound variables that are transmitted will be `fresh' in the receiving process.  
 For example, consider the following system:
@@ -417,13 +423,24 @@ For example, consider the following system:
 Above, we have a process sending on $b$ but the scope of $b$ has not actually been extruded (ie by being received on $c$).  
 Hence, we need to be careful not to `capture' a channel like $b$ by allowing exported channels to have the same name as free variables outside the original scope of the process.
 
-(A-OPEN) expresses scope extrusion of a name $n$.  
-If we have that a process $P$ can evolves to $P'$ under the action $\exports{\tuple{B}}\sends{c}{\tuple{V}}$, then we can infer that some name $n$, whose scope is now bound to $P$, can be exported in the the action $\exports{n,\tuple{B}}\sends{c}{\tuple{V}}$.  
-Note that $n$ must actually occur in $\tuple{V}$ if it is to be exported; note also that $n$ cannot be $c$ since restricting $n$ (ie $c$) to $P$ would cause a scoping issue that interfered with an outside processes ability to receive on $c$.
+(A-OPEN) expresses scope extrusion of a name $n$.  Essentially, if we already know that 
+\[
+	P\evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} P'
+\]
+then we can take a free name $n\in \tuple{V}$ and bind it, inferring
+\[
+	\new{n} P\evolves{\exports{\tuple{n,B}}\sends{c}{\tuple{V}}} P'
+\]
+The name $n$ is then exported as well.
+Note that $n$ cannot be $c$ since restricting $n$ (ie $c$) to $P$ would cause a scoping issue that interfered with an outside processes ability to receive on $c$.
 
-Finally we have (A-COMM), which expresses scope extrusion as well but this time in the context of the internal action $\tau$.  
-According to (A-COMM), $\tau$ is defined as the simultaneous (compositionally) occurrence of an input action and a matching output action on the same channel.  
-In the inferred process $P\comp Q$, no external contributions are needed for evolution, which results in the process $P'\comp Q'$, with the exported names $\exports{\tuple{B}}$ now being scopes to both.
+Finally we have (A-COMM), which expresses scope extrusion as well but this time in the context of the internal action that we described with (R-COMM) in the reduction semantics.  
+According to (A-COMM), $\tau$ can occur in two process $P$ and $Q$ with the simultaneous (compositionally) occurrence of an input action $\receives{c}{\tuple{X}}$, with residual $P'$, and a matching output action $\exports{\tuple{B}}\sends{c}{\tuple{V}}$, with residual $Q'$.  
+In the inference
+\[
+	P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q'),
+\]
+no external contributions are needed for evolution.  The exported names $\exports{\tuple{B}}$ are now scopes to both processes as a result of the original export by $Q$.  Just as in (A-COMP), we need to make sure that none of these exported names are going to capture free terms in $P$.  Hence, we require that $\exports{\tuple{B}}\cap fn(P) = \emptyset$.
 
 \begin{example}{exsynchronous_actions}
 	In \refex{exsynchronous}, we defined a simple process for modeling synchronous sends:
@@ -433,9 +450,9 @@ In the inferred process $P\comp Q$, no external contributions are needed for evo
 We then went on to show how this process might work as a component in a example system.  
 But suppose we wanted to characterize this process's behavior in general.  
 We could use action semantics to described how it it can evolve internally (in this case there isn't much interesting we can do except expand the replication), but we'd also want to include a description of how that process behaves externally.  
-If possible, we'd like to do this without having to come up with a system to place the process.  
-We don't want our characterization of the process to rely at all on some auxiliary system.  
-We can use action semantics to provide a characterization of how $F_1(c)$ behaves externally, all without defining a particular system for it to work in.  
+If possible, we'd like to do this without having to come up with a system in which to place the process.  
+We don't want our characterization of the process to rely on some auxiliary system.  
+Without defining a particular system for it to work in, we can use action semantics to provide a characterization of how $F_1(c)$ behaves externally.  
 Consider the following inferences:
 \begin{center}\begin{tabular}{lllr}
 	$F_1(c)$ & $\evolves{\tau}$ & $\new{ack}(\send{c}{ack} \comp \receive{ack}{}(R \comp F_1(c)))$ & \tiny{(A-REP)}\\
