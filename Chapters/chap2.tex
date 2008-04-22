@@ -506,74 +506,135 @@ In the \picalc, the principle means of sharing information is via message passin
 Suppose, that we wanted instead to model a memory cell that stores information in a less fleeting way.  
 Our cell might have channels for getting and setting its value, but as many processes as required could get the cell's value without it changing or disappearing.  
 It turns out that we can create this cell just using message passing.  
+This section will explore the creation and use of a memory cell, serving as a good review and usage example of the concepts introduced in the rest of the chapter.
 
 	The problem that we have to work around is that receiving a identifier from a channel removes that value from the channel -- it cannot be retrieved again.  
 Thus, we need a way to push it back in for the next time.  
 Consider the following system:
 	\begin{equation}\begin{split}
 		Cell(get,set) \pdef \new{c} & (\send{c}{init} \\
-		& \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{b}{y}\comp \send{c}{y}\comp g))\\
-		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{b}{x}\comp\send{c}{x}\comp s)))
+		& \comp\rec{g}(\receive{get}{x}\receive{c}{y}(\send{x}{y}\comp \send{c}{y}\comp g))\\
+		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{x}{b}\comp\send{c}{b}\comp s)))
 	\end{split}\end{equation}
 	In $Cell$, we first create a new channel $c$ that will be used to `store' the value.  
 We then initialize $c$ with the value $init$.  
-The following line has a recursive listener process that, when given a channel via $get$, gets the value from $c$ and sends it back via the supplied channel.  
+The following line has a recursive listener process that, when given a channel via $get$, gets the value from $c$ and sends it back via the supplied channel $x$.  
 In parallel, it sends the value back into $c$ so it can be had again.  
 The next line is similar except that two values are supplied via $set$ - a new value and a channel.  
-The old value is pulled from $c$ and simply discarded (ie not used), whereas the new value $x$ is pushed to the $c$ this time.  
-It is also sent via $b$ as an acknowledgment that the cell's new value has been set.
+The old value is pulled from $c$ and simply discarded (ie not used), whereas the new value $b$ is pushed to the $c$ this time.  
+It is also sent via $x$ as an acknowledgment that the cell's new value has been set.
 	 
-In the following example we assume some larger system uses $printer$ to actually print the message.
+Now let use look at how this memory cell might be used.
+In the following system we assume that we have access to standard arithmetic operations and that memory cells are initialized with the integer 0.  
+We also give an exposed `output' channel $o$.
 	\begin{equation}\begin{split}
-		Echo(printer) \pdef\\
-		\new{get_1,set_1} & (Cell\langle get_1,set_1\rangle\\
-		&\begin{split}\comp \new{a}(&\send{set_1}{``hello,\ world",a}\\
-		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})))\end{split}
+		MemoryClient(get_1,set_1,o)\pdef & (\new{a}(\send{get_1}{a}\\
+		& \comp \new{a_2}(\receive{a}{y} \send{set_1}{y+1,a_2} \comp \receive{a_2}{z}\send{o}{z}))
 	\end{split}\end{equation}
-	The system $Echo$ creates new channels to interact with the instance of memory cell it spawns, while in parallel it puts a message in the cell, then (order is ensured using by waiting for the response via $a$) getting the value from the cell and sending it to the $printer$ channel.
-	
-	To see why this produces the behavior we expect, first observe scope restrictors for $a$ and $c$ can be moved out using $(S-REST-COMP)$:
+	The system gets the current value from the channel $get_1$ and then uses that value to send an incremented value to $set_1$, receiving acknowledgement on channel $a_2$.  
+Notice that we created new channels for acknowledgement but left the cell's channels free and exposed.  
+Thus, the two components might be put together in the following system (which leaves the output channel free):
+\[
+	\new{get_1,set_1}(Cell\langle get_1,set_1\rangle \comp MemoryClient\langle get_1,set_1,o\rangle)
+\]	
+	To see why this system produces the behavior we expect, we substitute in $Cell$'s definition and observe scope restrictors for $a$ and $a_2$ can be moved out using $(S-REST-COMP)$:
 	\begin{equation}\begin{split}
-		\new{get_1,set_1,a,c} & \Big(\send{c}{init} \comp\rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \send{set_1}{``hello,\ world",a}\\
-		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
+		\new{get_1, set_1a,a_2}&(\new{c} (\send{c}{init} \\
+			&\comp\rec{g}(\receive{get}{x}\receive{c}{y}(\send{x}{y}\comp \send{c}{y}\comp g))\\
+			&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{x}{b}\comp\send{c}{b}\comp s)))\\
+			&\comp \send{get_1}{a}\\
+			&\comp \receive{a}{y} \send{set_1}{y+1,a_2} \comp \receive{a_2}{z}\send{o}{z})
 	\end{split}\end{equation}
-	Two applications of (R-REP) allow us to `pull out' a recursive call:
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\send{c}{init} \comp\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp \receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x})\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \send{set_1}{``hello,\ world",a}\\
-		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
-	\end{split}\end{equation}
-	Now we can apply (R-COMM) to the memory cell's setter...
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\send{c}{init} \comp\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\begin{split}\comp \receive{c}{y}(&\send{c}{``hello,\ world"}\comp\send{a}{``hello,\ world"} \\
-			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s)))\end{split}\\
-		&\comp \receive{a}{x}(\send{get_1}{a}\comp \receive{a}{y}\send{printer}{y})\Big)
-	\end{split}\end{equation}
-	...which lets us strip out the initializer, and in turn the acknowledgement on $a$ of setting ``hello,\ world'' using (R-COMM),
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y})\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp \send{c}{``hello,\ world"} \comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \send{get_1}{a}\comp \receive{a}{y}\send{printer}{y}\Big)
-	\end{split}\end{equation}
-	We can now use (R-COMM) on the memory cell's getter and also on its use of $c$ to get the ``hello,\ world'' state:
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\send{c}{``hello,\ world"}\comp \send{a}{``hello,\ world"}\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \receive{a}{y}\send{printer}{y}\Big)
-	\end{split}\end{equation}
-	A final application of (R-COMM) to $a$ gives us
-	\begin{equation}\begin{split}
-		&\new{get_1,set_1,a,c}\\
-		&\Big(\send{c}{``hello,\ world"}\comp \rec{g}(\receive{get}{b}\receive{c}{y}(\send{c}{y}\comp \send{b}{y}\comp g))\\
-			&\comp \rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{c}{x}\comp\send{b}{x}\comp s))\\
-		&\comp \send{printer}{``hello,\ world''}\Big)
-	\end{split}\end{equation}
-	which is essentially equivalent to initializing a memory cell with ``hello,\ world'' and also sending the message to $printer$.
+To get at the $get_1$ receive in the memory cell, we need to first apply (R-REP):
+\begin{equation}\begin{split}
+	\new{get_1, set_1a,a_2}&(\new{c} (\send{c}{init} \\
+		&\comp \receive{get}{x}\receive{c}{y}(\send{x}{y}\comp \send{c}{y} \\
+		&\comp\rec{g}(\receive{get}{x}\receive{c}{y}(\send{x}{y}\comp \send{c}{y}\comp g))\\
+		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{x}{b}\comp\send{c}{b}\comp s)))\\
+		&\comp \send{get_1}{a}\\
+		&\comp \receive{a}{y} \send{set_1}{y+1,a_2} \comp \receive{a_2}{z}\send{o}{z})
+\end{split}\end{equation}
+Now we can apply (R-COMM) to the memory cell's getter...
+\begin{equation}\begin{split}
+	\new{get_1, set_1a,a_2}&(\new{c} (\send{c}{init} \\
+		&\comp \receive{c}{y}(\send{a}{y}\comp \send{c}{y} \\
+		&\comp\rec{g}(\receive{get}{x}\receive{c}{y}(\send{x}{y}\comp \send{c}{y}\comp g))\\
+		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{x}{b}\comp\send{c}{b}\comp s)))\\
+		&\comp \receive{a}{y} \send{set_1}{y+1,a_2} \comp \receive{a_2}{z}\send{o}{z})
+\end{split}\end{equation}
+...and apply it once again to the memory's `internal' channel $c$, stripping out the initializer:
+\begin{equation}\begin{split}
+	\new{get_1, set_1a,a_2}&(\new{c} (\\
+		&\comp \send{a}{init}\comp \send{c}{init} \\
+		&\comp\rec{g}(\receive{get}{x}\receive{c}{y}(\send{x}{y}\comp \send{c}{y}\comp g)\\
+		&\comp\rec{s}(\receive{set}{x,b}\receive{c}{y}(\send{x}{b}\comp\send{c}{b}\comp s)))\\
+		&\comp \receive{a}{y} \send{set_1}{y+1,a_2} \comp \receive{a_2}{z}\send{o}{z})
+\end{split}\end{equation}
+Which, with one more (R-COMM), finally sends back the $init$ value to the $MemoryClient$.  
+It should now be quite painfully obvious why action semantics would be a better way to analyze the behavior of our memory cell.  
+But there is another problem.  
+Consider the following modification to our system:
+\begin{equation}\begin{split}
+	\new{get_1,set_1}&(Cell\langle get_1, set_1\rangle\\
+	 &\comp  MemoryClient_1\langle get_1,set_1,o\rangle \\
+	 &\comp  MemoryClient_2\langle get_1,set_1,o\rangle)
+\end{split}\end{equation}
+If we were run these as such, we may find that the output channel was producing some unexpected results.  
+This is due to a \defmargin{race condition}, a classic issue in concurrent systems, which means that the output of a system is dependent on the timing of computations in the system.  
+For example, consider what happens if $MemoryClient_1$ gets the value 0 of the cell first, but before it can set it $MemoryClient_2$ steps in, receives the 0 again and then sets the cell to 1.  
+In that case, $MemoryClient_1$ will have `stored' the value 0 for the cell in $y$ that is no longer current.  
+It will then set the value of the cell to 1 again, where we would expect it to set 2 since the two clients each incremented once.
+
+The usual solution to this type of problem is by implementing a \defmargin{lock}.  
+A lock ensures that only one client at a time is doing critical operations like incrementing a value.  
+The client asks for a lock, and when it gets it it proceeds with its critical operations before giving up the lock.  
+If no lock is available, the client has to wait until one frees.  
+Asynchronous channels map naturally to this type of behavior, as in we will see in our $MemoryClient$, which we've modified to include a lock.  
+
+We use the short hand $l?lock.P$ to mean:
+\[
+	\rec{p}(\receive{l}{x} \pif{x=true}\ then (P\comp \send{l}{true}) else (p \comp \send{l}{true}))
+\]
+Here we check the lock channel $l$ and execute $P$ if it is currently set to $false$. 
+Otherwise we recursively try to get the lock again.
+Notice that whether the lock is already set to $true$ or we are able to acquire it, we need to send $true$ to $l$ so that another process can't acquire it.
+
+Let's use action semantics to make sure locking behaves as expected.  
+We first note using (A-REP) that the above can internally evolve over $\tau$ to
+\begin{equation}\begin{split}
+	\evolves{\tau} & \receive{l}{x} \pif{x=true}\ then (P\comp \send{l}{true}) else \\
+	&l?lock.P \comp \send{l}{true}))
+\end{split}\end{equation}
+If $\receive{l}{x}$ receives a true, then
+\begin{equation}\begin{split}
+	\evolves{\receives{c}{true}} & \pif{true=true}\ then (P\comp \send{l}{true}) else \\
+	&l?lock.P \comp \send{l}{true}))
+\end{split}\end{equation}
+We can now apply (A-EQ), yielding:
+\begin{equation}\begin{split}
+	\evolves{\tau} & P\comp \send{l}{true}\\
+\end{split}\end{equation}
+As expected.  Otherwise, if $\receive{l}{x}$ receives a false, then $l?lock.P$
+\begin{equation}\begin{split}
+	\evolves{\receives{c}{false}} & \pif{false=true}\ then (P\comp \send{l}{true}) else \\
+	&l?lock.P \comp \send{l}{true}))
+\end{split}\end{equation}
+This time using (A-NEQ),
+\begin{equation}\begin{split}
+	\evolves{\tau} &l?lock.P \comp \send{l}{true}))
+\end{split}\end{equation}
+Which of course is just the lock after using (A-OUT) to express the capability of its sending $true$ back to the lock.  Thus, we have verified that the lock works as expected.\todo{line up all the above equations by putting them in one array and using breaks}
+
+Now, unlocking is done via the shorthand $l!unlock$, meaning
+\[
+	\receive{l}{x} \send{l}{false}
+\]
+Here we simply discard the current $l$ value and set it to $false$.  
+
+Our $MemoryClient$ thus becomes:
+\begin{equation}\begin{split}
+	LMemoryClient(get_1,set_1,o,l)\pdef & (\new{a}(l?lock.(\send{get_1}{a}\\
+	&\comp \new{a_2}(\receive{a}{y} \send{set_1}{y+1,a_2}\\
+	&\comp \receive{a_2}{z}(l!unlock\comp \send{o}{z}))))
+\end{split}\end{equation}
+Using action semantics to verify that the whole system works as intended is somewhat tedious but perhaps instructive and will thus be left as an exercise to the reader.  We will return to the subject of locks in Chapter \ref{sync_and_dist_sys}, where they will play a surprisingly similar in the implementation of a synchronous \picalc.
