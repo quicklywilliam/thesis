@@ -1,6 +1,6 @@
 %!TEX root = /Users/admin/Desktop/Documents/Academic/MA 470 -THESIS/THESIS/thesis.tex
 \chapter{Introduction}\label{Introduction}
-	Computer scientists have long been interested in algebraic models that are capable of describing computation by formulating a `program' as an algebraic expression along with a set of rules for reducing such expressions - i.e. `running' them.  
+	Computer scientists have long been interested in algebraic models that are capable of describing computation by formulating a `program' as an algebraic expression along with a set of rules for reducing such expressions ---  i.e. `running' them.  
 The advantage of such algebras is that they can be studied using formal reasoning techniques.  
 This means that we can rigorously prove things about them and derive useful observations `programming' in them without actually ever having to implement them on a system.  
 Of course, these algebras often are used in real languages whether faithfully or in part, but this is usually after they have been studied in detail for some time and we can be sure of their value.
@@ -12,7 +12,7 @@ For example, the following is a very simple `successor' program that takes in a 
 	\[
 		(\lambda x. x + 1)
 	\]
-To run this program, we need to actually apply it to something - that is, we need to give it input.  
+To run this program, we need to actually apply it to something ---  that is, we need to give it input.  
 We express this by placing the input to the right of the function, as in:
 \[
 	(\lambda x. x + 1) 4
@@ -45,7 +45,7 @@ We say this shared information and computational power belongs to `the system' i
 For example, consider the familiar system that powers your mobile phone network.  
 There may be one or more connected central servers, all of which are connected to the various towers that provide service.  
 Towers and servers may have different capabilities and responsibilities, but the important thing is that the entire system needs to behave as a single unit with a bunch of shared information and computational power.  
-A call in progress, for example, is a resource that will need to be accessed in various places in the system - by a tower to handle the call, by a server, perhaps, to handle the billing and routing of that call.  
+A call in progress, for example, is a resource that will need to be accessed in various places in the system ---  by a tower to handle the call, by a server, perhaps, to handle the billing and routing of that call.  
 
 Mobile clients are also connected and a part of this system.  
 When a user places a call, for example, he may use some capabilities on the phone to input the number, which is transmitted by the phone to the tower and then sent to the server to be routed.  
@@ -59,7 +59,7 @@ Furthermore, our system of many machines could be doing many different things at
 Yet the $\lambda$-calculus has no means of easily expressing this concurrency which is so basic to many distributed systems.
 
 Consider the phones on our system.  
-They are\defmargin[mobile]{mobility} - in the sense that their connections to the system can be added and removed at any time.  
+They are\defmargin[mobile]{mobility} ---  in the sense that their connections to the system can be added and removed at any time.  
 In \reffig{fig_cell_network} above, client $M_b$ is wirelessly connected to tower $T_a$ while $M_c,M_d$ are connected to $T_b$.  
 Client $M_a$ is currently disconnected and $T_c$ has no clients.  
 All the towers maintain a hard-wired link to $server$.  
@@ -72,7 +72,7 @@ How can we abstract function invocation such that a function can be called from 
 
 \section{Process Algebra}
 Clearly we need an algebraic model for computation that eases the difficulty of modeling such systems.  
-Such a model might consider computation via its natural distributed unit - the \defmargin{process}. 
+Such a model might consider computation via its natural distributed unit ---  the \defmargin{process}. 
 A process is just a computational task, without reference to where it might be run nor with what input.  
 For example, we might make a conversation on a phone somewhere in our network a process. 
 Since \inidx{concurrency} of processes is such a basic operation, we make it a part of our algebra.  
@@ -80,7 +80,7 @@ A system, then, is simply a group of processes which are executing concurrently.
 An important thing about processes is that they maintain computation state independently of one another.  
 Instead of a single program state where functions interact via invocation, processes run independently and interact via \defmargin{message passing} -- sending data back-and-forth via named\inidx{channels}.  
 
-Because these channels can be shared among processes and used an arbitrary number of times, channels are not a concrete invocation system for a chunk of computation the way a function call is - processes simply send values to channels, assuming the receiver (if there is one) will do something useful with it.  
+Because these channels can be shared among processes and used an arbitrary number of times, channels are not a concrete invocation system for a chunk of computation the way a function call is ---  processes simply send values to channels, assuming the receiver (if there is one) will do something useful with it.  
 As with functions in the $\lambda$-calculus, processes are the basic unit of a program in the \picalc. 
 Any bit of functionality can be referred to as a process, with no specification of the granularity.
 
@@ -89,11 +89,11 @@ A major step towards such an algebra came in the 1980's when Robin Milner introd
 However, the CCS still would have had trouble with our mobile phone network, because it did not provide a way for processes to gain and lose their communication channels.
 
 	Although it can be defined in other ways, one of the ways of giving a process's\emph{\inidx{location}} is in terms of the communication channels which can be used to access it.  
-Since processes are the units populating the space of a CCS system, it is natural to think of a process's location in terms of the processes which are `near' it - those it can connect to.  
+Since processes are the units populating the space of a CCS system, it is natural to think of a process's location in terms of the processes which are `near' it ---  those it can connect to.  
 Since communicate happens via channels, a connection between processes just means that they share at least one channel.  
 In this way, changing the communication channel topology of a system changes the locations of its component processes.  
 
-	In the CCS, channel topology is static - it does not allow new connections to be made or old ones to be removed.  
+	In the CCS, channel topology is static ---  it does not allow new connections to be made or old ones to be removed.  
 Not long after CCS's birth, Robin Milner, Joachim Parrow and David Walker created an improved algebra called the \inidx{\picalc}.  
 The \picalc\ allows communication channels to be dynamically established and relinquished between processes.  
 Since channels are what define location, dynamically created and destroyed channels give a kind of \emph{mobility} of processes, which vastly expands the capabilities of interaction in a system and finally allows us to give an account of our mobile phone system.

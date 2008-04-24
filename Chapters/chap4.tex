@@ -1,21 +1,89 @@
 \chapter{Synchronicity and Distributed Systems}\label{sync_and_dist_sys}
-Given the results of the last chapter, it should come as no surprise that the implementation of synchronous calculi on distributed systems is a thorny issue.  
-On the one hand, it is a useful construct in that it allows us to model many problems more naturally and easily.  
-On the other, all communication in a distributed system is in fact asynchronous in nature, and so synchronous communication must be layered on top at some level of the implementation.  
+A natural question arises at this point: can we represent this expressive communication power using only our asynchronous \picalc?  That is, using the simulations given in Examples \ref{exsynchronous} and \ref{exsummation} (or perhaps some similar but more complicated approach) can we fully capture the `communication' between non-deterministically chosen processes discussed above?  We will explore the surprising complexity of this question and some of its implications in \refsec{Separation Results}.  
+First though, let us give a more formal discussion of the features of the synchronous \picalc. \note{On second thought, I think I might want to leave the reader with this question, for now --- to peak their curiosity, perhaps.}
+
+Given these results, it should come as no surprise that the implementation of synchronous calculi on distributed systems is a thorny issue.  
+On the one hand, it is a useful construct that allows us to model many problems more naturally and easily.  
+On the other, all communication in a distributed system is asynchronous in nature, and so any synchronous communication must implemented as a layer on top of an asynchronous base.  
 It can be quite difficult to construct synchronous communication efficiently without violating the requirements of a truly distributed system where there is no central control process.  
 The issue becomes more difficult still with the Palamidessi's related requirement of symmetry, which means that a process's behavior does not depend on its location in the channel topology. 
 
-The creators of Pict, the Join-calculus, and other implementations based on the \picalc\ all decided to have their primitives support only asynchronous communication, while synchronous communication is made available overtop of this via a library or higher-level language.  
-This these greatly simplifies implementation, resulting in a cleaner, more efficient core language.  
-The summation operator in particular is difficult and expensive to fully simulate.  
-In the implementation of Pict, for example, David Turner notes \cite{turner96} that ``the additional costs imposed by summation are unacceptable.''.  
-Turner goes on to say that essential uses of summation are infrequent in practice.
 
 How can we reconcile this with Palamidessi's result, which indicates that there are important problems that cannot be solved without the full generality of the synchronous calculus?  Is such a calculus even implementable at any cost on distributed systems?  We will see that relaxing any of Palamidessi's assumptions enables a full encoding.  
 Some of such encodings derive from the classic distributed solutions to the problem of synchronous communication but strain important assumptions about symmetry in ways that we may not be comfortable allowing.  
 Palamidessi herself gives as important probabilistic encoding \cite{palam01} which does not break symmetry.
 
+\section{Separation Results}\label{Separation Results}
+When trying to compare the expressive power of different calculi, one good approach is to, as above, provide explicit encodings from one language to another
+\footnote{Note that \refex{syncembedding} is a trivial example of such an encoding since our encodings are straight-forward enough to be equivalent under the structural equivalence.  
+Most encodings require the more advanced structure of \emph{bisimulation} equivalences, which relies on setting up a notion of simulation and then proving that two processes simulate one another.}.  
+We say that we are trying to encode from \defmargin{source language} into the terms of a \defmargin{target language}, and if we succeed, we have shown that the target language is at least as expressive as the source.  
+Hence, in example \refex{syncembedding} we showed that the synchronous calculus is at least as expressive as the asynchronous calculus by giving an encoding from the asynchronous to the synchronous.  
+We will also use the notation
+\[
+	\encode{P} \defequals Q
+\]
+to mean that P in the source language is encoded by Q in the target language.
+
+To prove a separation result between languages, it is enough to show that there are problems that are not solvable in the source language that are not solvable in the target language.  
+In \cite{palam03}, Palamidessi uses the solvability of the leader election problem on symmetric networks to show that the synchronous \picalc\ is strictly more expressive than the asynchronous version.  
+Loosely, the leader election problem is the problem of having group of identifier (via integers, perhaps) processes agree on a `leader' process identification in a finite amount of time.  
+We say that these processes are a symmetric network if any two processes $P_i, P_j$ are equivalent under structural equivalence and renaming of their identifiers.  
+For example, consider the following symmetric network:
+\[
+	P_0\comp P_1 \pdef \ssend{c_0}{} \send{o}{0} + \receive{c_1}{} \send{o}{1} \comp \ssend{c_1}{} \send{o}{1} + \receive{c_0}{} \send{o}{0}
+\]
+It should not be hard to see that this solves the leader election problem in the synchronous \picalc\ by agreeing on a leader via the output channel $o$.  
+It may be less obvious, but it is not possible to solve the leader election problem in a symmetric network of asynchronous \picalc\ processes.  
+This is a direct result of the lack of the choice operator: without it, the symmetric processes have no way to pick a leader non-deterministically without potentially disagreeing with one another.  
+It is only through the implicit communication underlying the choice operator that synchronous processes are able to break out of their symmetry and agree on a leader.
+
+\note{give a brief overview of the argument as to why?}
+
+Using these results, Palamidessi gives a useful set of requirements that formally separate the two calculi.
+
+The first of those requirement, which is on the encoding, is \defmargin{uniformity}, which means that:
+\begin{align}
+	\encode{\alpha(P)} &= \alpha(\encode{Q})\label{unif1}\\
+	\encode{P\comp Q} &= \encode{P} \comp \encode{Q}\label{unif2}
+\end{align}
+Rule (\ref{unif1}) simply states that an arbitrary $\alpha$ renaming function $\alpha$ \todo{When I try to refer to the label $\alpha$-equivalency here, things break.  
+any idea how to fix this without re-engineering my definitions?} is not violated in the process of the encoding.  That is, if we $\alpha$-rename a process $P$ and then encode it we get the same result as if we encode it and then $\alpha$-rename it.
+Rule (\ref{unif2}) is related to the requirements of a distributed system.  
+That is, parallel processes really should just map to parallel processes, with no top level `manager' process or the like to aide the encoding.  That is, we wouldn't want to encode $P \comp Q$ to something like 
+\[
+	P \comp Manager \comp Q
+\]
+This is how Palamidessi uses the requirement of a symmetric network in the leader election problem to forge a more general requirement on the encoding.
+
+The other requirement is on \defmargin{reasonability} and is on the target language's semantics.  
+Reasonability to Palamidessi means that the language itself can distinguish between two processes when their actions are different on a certain given channel.  
+This essentially encapsulates the requirements of the leader election problem.  
+That is, a electoral system would be one were actions on the output channel are the same and we want our target language to be capable of semantically distinguishing this from a non-electoral system (where actions on the output channel differ).
+\todo{come up with an implement a short hand for the calculi: SPI and API?}
+
+\section{Implications}
+Given these two definitions, we can say with Palamidessi that no uniform encoding of the synchronous \picalc\ into the asynchronous \picalc preserving reasonable semantics exists.  This is a very strong result:  weakening either of the requirements that Palamidessi assumes seems like it would produce an encoding not rigorous enough to study.  For this reason, the fully expressive synchronous \picalc\ seems like a better candidate for formal study than the asynchronous \picalc.
+
+However, we need still consider the implementation of a synchronous \picalc.  
+On distributed systems, we have only asynchronous sending available to us.\refmargin{distributed systems}  
+Hence, it is useful to study the asynchronous \picalc\ as well it models these systems more accurately than a synchronous model.
+In the study of distributed systems, rather than showing the asynchronous to be not worth our time, Palamidessi's separation result raises the question of whether we should be considering \emph{synchronous} calculi. 
+
+However, we still would like to be able to use the expressiveness of the synchronous \picalc\ if possible --- it allows us to solve a large class of problems much more easily and clearly.
+We saw just how useful the synchronous \picalc\ can be for expressing distributed systems in our extended mobile phone network example in the introduction.
+We could have modeled this system in the asynchronous \picalc, but it would have involved a convoluted mess of acknowledgement channels just to express the necessary ordering of events in the system.
+Hence, the next chapter looks at some of the more implementation-minded encodings of the synchronous \picalc\ in the asynchronous \picalc, and o what extent we need to relax Palamidessi's requirements to allow these encodings.
+
+\section{The Bakery Algorithm}
+
+
 \section{Symmetry in Practice}
+The creators of Pict, the Join-calculus, and other implementations based on the \picalc\ all decided to have their primitives support only asynchronous communication, while synchronous communication is made available overtop of this via a library or higher-level language.  
+This these greatly simplifies implementation, resulting in a cleaner, more efficient core language.  
+The summation operator in particular is difficult and expensive to fully simulate.  
+In the implementation of Pict, for example, David Turner notes \cite{turner96} that ``the additional costs imposed by summation are unacceptable.''.  
+Turner goes on to say that essential uses of summation are infrequent in practice.
 
 Speaking in an interview on developing the \picalc, Robin Milner notes \cite{miln03}:
 \begin{quote}
@@ -26,5 +94,3 @@ While the synchronous \picalc\ more elegantly and (given certain assumptions) co
 Which we choose as a model depends in part on our goals.  
 In any case, it is evident that by limiting ourselves to smaller calculi, many useful new concepts and structures arise in order to solve the problems posed by asynchronous communication.  
 While these structures might not belong in the `smallest set of primitives', they are useful for bringing the power of the \picalc\ to a model that more closely resembles the implementation of distributed systems.
-
-This section will go on to talk about on Nestmann and other implementation-driven encodings, how much they violate uniformity/reasonableness and whether that has any means for the API as a good model for implementable distributed languages.

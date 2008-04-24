@@ -1,29 +1,28 @@
 %!TEX root = /Users/admin/Desktop/Documents/Academic/MA 470 -THESIS/THESIS/thesis.tex
-\chapter{Synchronicity and Expressiveness}\label{sync_and_express}
+\chapter{The Synchronous \Picalc}\label{sync_and_express}
 In \refsec{spisyntax}, we introduced a version of the \picalc\ which we said was made \emph{asynchronous} by its use of non-blocking send operations.  
 Rather than allowing an operation to happen after a sent value has been received by some other process, a sending process simply ends.  
 In \refex{exsynchronous} we gave a straightforward method of simulating synchronous sending in the asynchronous \picalc.  
 Also absent in our calculus was the non-deterministic choice operator, also known as the summation operator.  
 We gave a method of simulating this in \refex{exsummation}.
 
-The original calculus given by Milner, Parrow and Walker modeled synchronous message passing, and included the two operators -- summation and synchronous sending -- that we omitted in our asynchronous \picalc.  
-When combined, these two operators yield a unique behavior.  
-The power of this behavior will become clear in our presentation of the synchronous \picalc in \refsec{Synchronous picalc}.
+We have already gotten at taste of the expressive power of the synchronous \picalc\ in Chapter \ref{Introduction}'s mobile phone network example.  In fact, the original calculus given by Milner, Parrow and Walker modeled synchronous message passing, and included the two operators -- summation and synchronous sending -- that we omitted in our asynchronous \picalc.  
+When combined, these two operators yield a unique behavior.
 
-Our original calculus features synchronous receiving, but now sending is synchronous as well, allowing a process to be performed after the output has been consumed by some other receiver.  
+Our original calculus featured synchronous receiving, but now sending is synchronous as well, allowing a process to be performed after the output has been consumed by some other receiver.  
 Hence, in the synchronous \picalc, processes can be \refmargin{guarded}guarded by both receiving \emph{and} sending.  
 
 
 If we have a group of guarded processes joined by the summation operator, only one of those will be processes will be `chosen' (non-deterministically)\index{non-determinism} to be executed.  
 The rest will simply terminate without having any effect.  
-The power of the synchronous \picalc comes when we have another group of summed processes, running in parallel, something like: 
+The power of the synchronous \picalc\ comes when we have another group of summed processes, running in parallel, something like: 
 \[
 	\ssend{c}{}P_1 + \ssend{d_1}{}P_2 + \receive{d_2}{}P_3 \comp \receive{c}{}R_1 + \ssend{d_3}{}R_2
 \]
-In the above isolated system, we can actually know which of the processes will be chosen to run, despite the non-deterministic nature of the choice operator.  
-Because both sends and receives are guarded, both the $P_k$'s and $R_K$'s can only run when their respective transmission guards complete.  
+In the above isolated system, we actually \emph{can} know which of the processes will be chosen to run, despite the non-deterministic nature of the choice operator.  
+Because both sends and receives are guarded, the $P_k$'s and $R_k$'s above can only run when their respective transmission guards complete.  
 Hence, only $P_1$ and $R_1$ will be allowed to run since sending on $c$ is the only transmission with a matching reception on $c$.  
-Now imagine a slightly more complicated system:
+Now imagine a slightly different system:
 \[
 	\ssend{c}{}P_1 + \ssend{d}{}P_2 \comp \receive{c}{}R_1 + \receive{d}{}R_2
 \]
@@ -31,10 +30,7 @@ Here we have \emph{two} transmissions with matches, so we cannot make a guarante
 However, we \emph{can} say that if $P_1$ executes on the left side, $R_1$ will be chosen on the right side.  
 We can say the same for $P_2$ and $R_2$.  
 There is a silent, implicit sort of communication that can happen between groups of parallel processes when a non-deterministic choice is made among them.  
-This is a powerful feature which comes with the special operators of the synchronous \picalc.
-
-A natural question arises at this point: can we represent this expressive communication power using only our asynchronous \picalc?  That is, using the simulations given in Examples \ref{exsynchronous} and \ref{exsummation} (or perhaps some similar but more complicated approach) can we fully capture the `communication' between non-deterministically chosen processes discussed above?  We will explore the surprising complexity of this question and some of its implications in \refsec{Separation Results}.  
-First though, let us give a more formal discussion of the features of the synchronous \picalc. \note{On second thought, I think I might want to leave the reader with this question, for now - to peak their curiosity, perhaps.}
+This is a powerful feature which comes with the special operators of the synchronous \picalc.  Now that we have gotten an idea of its unique properties, we will turn in the next section to its formal syntax and rules of computation.
 
 \section{The Synchronous \Picalc}\label{Synchronous picalc}
 
@@ -54,7 +50,7 @@ $R :=$ & $\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i$ &\multirow{2}{*}{Summat
 &$\new{n}R$ & Restriction\\
 &$\pif{v_1 = v_2}\pthen R_1 \pelse R_2$ & Matching\\
 &$\rec{x} R$ & Recursion\\
-&stop & Termination\\
+&\pstop & Termination\\
 &\\
 \end{tabular}
 \emph{\caption{Terms in the synchronous \picalc}\label{spicalcterms}}
@@ -70,28 +66,56 @@ Consider the term:
 	\sum_{i\in \{1,..,n\}} \pi_i.R_i
 \]
 The notation $\pi_i.R_i$ requires that the action $\pi_i$ happen before the guarded process $R_i$ will be executed.  
-If $R_a$ is executed in this way, then for all $j \neq a$, both the capabilities $\pi_j$ and the execution of $R_j$ are lost.  
-In other words, the summation ensures that only one of $n$ guarded processes will be executed. 
-Which of these processes is picked depends on which action prefix capability is exercised first. 
+If $R_a$ is executed in this way, then for all $j\in \{1,...,n\},j \neq a$, the capabilities for both the action $\pi_j$ and the execution of $R_j$ are lost.  
+In other words, the summation ensures that only one of $n$ guarded processes will be executed, providing a branching behavior in the logic of a term. 
+Which of these processes is picked depends on which action prefix capability is exercised first.  As we saw above, we cannot usually guarantee which of the action capabilities will be exercised, so we say that the summation operator is non-deterministic.\index{non-determinism}
 
-For the cases that $n=1$ and $n=2$, we will use the notation $\pi.R$ and $\pi_1.R_1 + \pi_2.R_2$, respectively.  
-We add to our congruence relation given in \refdef{Structural Equivalence} that summation is commutative and associative.
+For the cases that $n=1$ and $n=2$, we will use the notation $\pi.R$ and $\pi_1.R_1 + \pi_2.R_2$, respectively.  Notice that the $n=1$ case is the equivalent of the process terms of our asynchronous calculus.
+To accommodate for the new operator, we add to our congruence relation given in \refdef{Structural Equivalence} that summation is commutative and associative.
 
-The summation case of $n=0$ is what is meant by our $stop$ termination process.  
-Thus the following fact, which we will call (S-SUM-ID), is trivially true:
+The summation case of $n=0$ is what is meant by our $\pstop$ termination process.  It behaves just as it did in our asynchronous calculus.
+Hence, we also add to our congruence relation the following trivially true fact, which we will call (S-SUM-ID)
 \begin{align*}
-	\pi.R + 0 \sequiv \pi.R
+	R + 0 \sequiv R
 \end{align*}
 
-Note also that in our action prefixes, we have made sending a\refmargin{guarded}guarded operation, which means that $R$ will not execute until some other process receives $\tuple{V}$ along $n$.  
- Receiving is also guarded, as in the asynchronous version.  
+Note also that in our action prefixes, we have made sending a\refmargin{guarded}guarded operation, which means that in the term
+\[
+	\ssend{n}{\tuple{V}}R
+\]
+$R$ will not execute until some other process receives $\tuple{V}$ along $n$.  
+Receiving is also guarded, as in the asynchronous version.  
 In the case where $\pi$ is some internal evolution $\tau$, we simply mean that $R$ can proceed after the process does something which we cannot observe.  
-This internal behavior is captured in the new reduction rule (R-TAU) below, while (R-SYNC) expresses the external evolution of the summation operator.
 
+\begin{insettable}
+\begin{center}
+	\begin{align*}
+		R + Q\ &\   \sequiv\ Q + R && \text{\tiny{(S-SUM-COMM)}}\\
+		(P + Q) + R\ &\   \sequiv\ P + (Q + R) && \text{\tiny{(S-SUM-ASSOC)}}\\
+		R + 0\ &\   \sequiv\ R && \text{\tiny{(S-SUM-ID)}}\\
+		P \comp Q\ &\  \sequiv\  Q \comp P && \text{\tiny{(S-COMP-COMM)}}\\
+	 	(P \comp Q) \comp R\ &\ \sequiv\ P \comp (Q \comp R) && \text{\tiny{(S-COMP-ASSOC)}}\\
+		P \comp \pstop\ &\ \sequiv\ P && \text{\tiny{(S-COMP-ID)}}\\
+		\new{c} \pstop\ &\ \sequiv\ \pstop && \text{\tiny{(S-REST-ID)}}\\
+		\new{c}\new{d} P \ &\ \sequiv\ \new{d}\new{c} P && \text{\tiny{(S-REST-COMM)}}\\
+		\new{c}(P \comp Q)\ &\ \sequiv\  P \comp \new{c}Q\text{, if } c\not\in fi(P) && \text{\tiny{(S-REST-COMP)}}
+	\end{align*}
+	\emph{\caption{Structural equivalence axions in the synchronous \picalc}\label{spicalcaxioms}}
+\end{center}\end{insettable}
+
+\section{Computation in the Synchronous \Picalc}
+We are now ready to give a description of the computation behavior.  
+As we might expect, it does not differ hugely from computation in the asynchronous calculus.  
+In the reduction rules, the only changes are to make room for the summation operator.
+In the case of internal action prefixes, we can use the new rule (R-TAU) freely to choose the guarded term to run.
+Internal action prefixes do not need any parallel processes to proceed, but sending and receiving prefixes need to have someone on the other end.
+Because only one process gets chosen from a group of summed processes, it is not enough to have two `matching' send and receive action prefixes in a summation.
+Instead, we need one of each running in parallel.  This behavior is described by (R-SYNC).  
+It expresses the commutation step where the processes have transmitted their value and we want to do the appropriate substitution to the receiving process, run the guarded processes and terminate all the other terms in the sum.
 \begin{insettable}
 \begin{center}\begin{tabular}{rll}
 	$\tau.R + P$\ &\  $\pred\  R$ & \tiny{(R-TAU)}\\
-	$\ssend{c}{\tuple{V}} P + Q \comp \receive{c}{\tuple{X}}R + B$\ &\  $\pred\  (P \comp R)\subst{\tuple{V}}{\tuple{X}}$ & \tiny{(R-SYNC)}\\
+	$\ssend{c}{\tuple{V}} P + Q \comp \receive{c}{\tuple{X}}R + B$\ &\  $\pred\  P \comp R\subst{\tuple{V}}{\tuple{X}}$ & \tiny{(R-SYNC)}\\
 	$\rec{x}R$\ &\  $\pred\  R\subst{\rec{x}R}{x}$ & \tiny{(R-REP)}\\
 	$\pif{v = v}\pthen P \pelse Q$\ &\ $\pred\ P$ & \tiny{(R-EQ)}\\
 	$\pif{v_1 = v_2}\pthen P \pelse Q$\ &\ $\pred\ Q$ \ \ (where $v_1\neq v_2$)& \tiny{(R-NEQ)}\\
@@ -104,28 +128,43 @@ This internal behavior is captured in the new reduction rule (R-TAU) below, whil
 
 \begin{example}{syncembedding}
 	It is not hard to show that the synchronous \picalc\ can model the asynchronous version.  
-To see why, first note that asynchronous sending can be encoded simply by $\ssend{n}{\tuple{V}}stop$.  
+To see why, first note that asynchronous sending can be encoded simply by $\ssend{n}{\tuple{V}}\pstop$.  
 This we will abbreviate with the familiar notation $\send{n}{\tuple{V}}$.  
 As we noted above, the summation notation allows for a single guarded process.  
-If we limit ourselves to these single summations, disallow use of the internal action $\tau$, and limit all sending to be of the form $\ssend{n}{\tuple{V}}stop$, then we have the asynchronous \picalc.  
-To see why the reduction semantics are compatible, note that (R-TAU) is not needed in the asynchronous calculus since we have excluded its operator.  
-The following shows that (R-SYNC) is a more general form of (R-COMM) of \refdef{Reduction}:\\
+If we limit ourselves to these single summations, disallow use of the internal action prefix $\tau$, and limit all sending to be of the form $\ssend{n}{\tuple{V}}\pstop$, then we have the asynchronous \picalc.  
+To see why the reduction semantics are compatible, first note that (R-TAU) is not needed in the asynchronous calculus since we have excluded its operator.  
+The following shows that (R-COMM) of \refdef{Reduction} can be considered to be a special case of (R-SYNC):\\
 	
 	\begin{tabular}{rlr}
-				\ssend{c}{\tuple{V}} stop + stop \comp \receive{c}{\tuple{X}}R + stop\ \ &\ \ \sequiv\ \ \  \ssend{c}{\tuple{V}}stop \comp \receive{c}{\tuple{X}}R, & \text{\tiny{(S-SUM-ID}}\\
-		\ssend{c}{\tuple{V}}stop \comp \receive{c}{\tuple{X}}R\ &\  \pred\  (stop \comp R)\subst{\tuple{V}}{\tuple{X}}, & \text{\tiny{(R-SYNC)}}\\
-		\multicolumn{2}{c}{\hspace{44pt}$\underline{(stop \comp R)\subst{\tuple{V}}{\tuple{X}}\ \ \ \ \sequiv\ \ \ R\subst{\tuple{V}}{\tuple{X}}}$} & \text{\tiny{(S-COMP-ID)}}\\
+				\ssend{c}{\tuple{V}} \pstop + \pstop \comp \receive{c}{\tuple{X}}R + \pstop\ \ &\ \ \sequiv\ \ \  \ssend{c}{\tuple{V}}\pstop \comp \receive{c}{\tuple{X}}R, & \text{\tiny{(S-SUM-ID)}}\\
+		\ssend{c}{\tuple{V}}\pstop \comp \receive{c}{\tuple{X}}R\ &\  \pred\  (\pstop \comp R)\subst{\tuple{V}}{\tuple{X}}, & \text{\tiny{(R-SYNC)}}\\
+		\multicolumn{2}{c}{\hspace{44pt}$\underline{(\pstop \comp R)\subst{\tuple{V}}{\tuple{X}}\ \ \ \ \sequiv\ \ \ R\subst{\tuple{V}}{\tuple{X}}}$} & \text{\tiny{(S-COMP-ID)}}\\
 		\send{c}{\tuple{V}} \comp \receive{c}{\tuple{X}}R\ &\  \pred\  R \subst{\tuple{V}}{\tuple{X}} & \text{\tiny{(R-STRUC)}}\\
 	\end{tabular}\\
 	
-	It will be obvious from our presentation of synchronous action rules below that they needn't be shown to be a general version of the asynchronous rules -- they are equivalent simply by ignoring the extra rules and using our $\ssend{n}{\tuple{V}}stop$ encoding of sending.
+	It will be obvious from our presentation of synchronous action rules below that they needn't be shown to be a general version of the asynchronous rules -- they are compatible simply by ignoring the extra rules and using our $\ssend{n}{\tuple{V}}\pstop$ encoding of sending.
 \end{example}
-Neither do the action rules for the synchronous \picalc, given below, differ significantly from \hyperref[apiactionrules]{those} in the asynchronous version.  
-As we would expect, (A-OUT) has been modified to express synchronous sending: it now evolves over output to a process $R$ and not simple the termination process $stop$.  
+
+Neither do the action rules for the synchronous \picalc, differ significantly from \hyperref[apiactionrules]{those} in the asynchronous version.  
+As we would expect, (A-OUT) has been modified to express synchronous sending. 
+It now evolves over output to a process $R$ and not simple the termination process $\pstop$:
+\[
+	\ssend{c}{\tuple{V}}R \evolves{\sends{c}{\tuple{V}}} R	
+\]
+
 We have also added two new rules.  
-The first, (A-TAU) describes the behavior of a process guarded by an internal action.  
-The second rule, (A-SUM), characterizes the summation operator.  
-It says, for example, that if some process $P$ is able to evolve to $P'$ over some action $\alpha$, then $\alpha$ will also cause $P+Q$ to evolve via choice to $P'$.
+The first, (A-TAU) describes the behavior of a process guarded by an internal action, similar to (R-TAU):
+\[
+	\tau.R \evolves{\tau} R
+\]  
+The second rule, (A-SUM), allows for the summation operator in a manner that is similar to the way (A-COMP) allows for the composition operator.
+\begin{center}
+	$\underline{P_i \evolves{\alpha} P_i'}$\\
+	$\displaystyle\sum_{i\in \{1,..,n\}}\pi_i.P_i \evolves{\alpha} P_i'$\\
+\end{center}
+It says, for example, that if some process $P$ is able to evolve to $P'$ over some action $\alpha$, then $\alpha$ will also cause $P+Q$ to evolve, over the same $\alpha$, to the choice of $P'$.
+Notice that it does not need the prerequisite that (A-COMP) does. 
+Since there no other processes are run by the summation, we needn't worry about causing a naming issue when we possibly export terms by running the action $\alpha$.
 
 \begin{insettable_wide}
 	\begin{center}\begin{tabular}{rllll}
@@ -155,68 +194,5 @@ It says, for example, that if some process $P$ is able to evolve to $P'$ over so
 \end{center}
 \end{insettable_wide}
 
-\begin{example}{spiex2}
-	Example of choice operator inferences over SUMM-L rule.
-\end{example}
-
-\section{Separation Results}\label{Separation Results}
-When trying to compare the expressive power of different calculi, one good approach is to, as above, provide explicit encodings from one language to another
-\footnote{Note that \refex{syncembedding} is a trivial example of such an encoding since our encodings are straight-forward enough to be equivalent under the structural equivalence.  
-Most encodings require the more advanced structure of \emph{bisimulation} equivalences, which relies on setting up a notion of simulation and then proving that two processes simulate one another.}.  
-We say that we are trying to encode from \defmargin{source language} into the terms of a \defmargin{target language}, and if we succeed, we have shown that the target language is at least as expressive as the source.  
-Hence, in example \refex{syncembedding} we showed that the synchronous calculus is at least as expressive as the asynchronous calculus by giving an encoding from the asynchronous to the synchronous.  
-We will also use the notation
-\[
-	\encode{P} \defequals Q
-\]
-to mean that P in the source language is encoded by Q in the target language.
-
-To prove a separation result between languages, it is enough to show that there are problems that are not solvable in the source language that are not solvable in the target language.  
-In \cite{palam03}, Palamidessi uses the solvability of the leader election problem on symmetric networks to show that the synchronous \picalc\ is strictly more expressive than the asynchronous version.  
-Loosely, the leader election problem is the problem of having group of identifier (via integers, perhaps) processes agree on a `leader' process identification in a finite amount of time.  
-We say that these processes are a symmetric network if any two processes $P_i, P_j$ are equivalent under structural equivalence and renaming of their identifiers.  
-For example, consider the following symmetric network:
-\[
-	P_0\comp P_1 \pdef \ssend{c_0}{} \send{o}{0} + \receive{c_1}{} \send{o}{1} \comp \ssend{c_1}{} \send{o}{1} + \receive{c_0}{} \send{o}{0}
-\]
-It should not be hard to see that this solves the leader election problem in the synchronous \picalc\ by agreeing on a leader via the output channel $o$.  
-It may be less obvious, but it is not possible to solve the leader election problem in a symmetric network of asynchronous \picalc\ processes.  
-This is a direct result of the lack of the choice operator: without it, the symmetric processes have no way to pick a leader non-deterministically without potentially disagreeing with one another.  
-It is only through the implicit communication underlying the choice operator that synchronous processes are able to break out of their symmetry and agree on a leader.
-
-(give a brief overview of the argument as to why?)
-
-Using these results, Palamidessi gives a useful set of requirements that formally separate the two calculi.
-
-The first of those requirement, which is on the encoding, is \defmargin{uniformity}, which means that:
-\begin{align}
-	\encode{\alpha(P)} &= \alpha(\encode{Q})\label{unif1}\\
-	\encode{P\comp Q} &= \encode{P} \comp \encode{Q}\label{unif2}
-\end{align}
-Rule (\ref{unif1}) simply states that an arbitrary $\alpha$ renaming function $\alpha$ \todo{When I try to refer to the label $\alpha$-equivalency here, things break.  
-any idea how to fix this without re-engineering my definitions?} is not violated in the process of the encoding.  That is, if we $\alpha$-rename a process $P$ and then encode it we get the same result as if we encode it and then $\alpha$-rename it.
-Rule (\ref{unif2}) is related to the requirements of a distributed system.  
-That is, parallel processes really should just map to parallel processes, with no top level `manager' process or the like to aide the encoding.  That is, we wouldn't want to encode $P \comp Q$ to something like 
-\[
-	P \comp Manager \comp Q
-\]
-This is how Palamidessi uses the requirement of a symmetric network in the leader election problem to forge a more general requirement on the encoding.
-
-The other requirement is on \defmargin{reasonability} and is on the target language's semantics.  
-Reasonability to Palamidessi means that the language itself can distinguish between two processes when their actions are different on a certain given channel.  
-This essentially encapsulates the requirements of the leader election problem.  
-That is, a electoral system would be one were actions on the output channel are the same and we want our target language to be capable of semantically distinguishing this from a non-electoral system (where actions on the output channel differ).
-\todo{come up with an implement a short hand for the calculi: SPI and API?}
-
-\section{Implications}
-Given these two definitions, we can say with Palamidessi that no uniform encoding of the synchronous \picalc\ into the asynchronous \picalc preserving reasonable semantics exists.  This is a very strong result:  weakening either of the requirements that Palamidessi assumes seems like it would produce an encoding not rigorous enough to study.  For this reason, the fully expressive synchronous \picalc\ seems like a better candidate for formal study than the asynchronous \picalc.
-
-However, we need still consider the implementation of a synchronous \picalc.  
-On distributed systems, we have only asynchronous sending available to us.\refmargin{distributed systems}  
-Hence, it is useful to study the asynchronous \picalc as well it models these systems more accurately than a synchronous model.
-In the study of distributed systems, rather than showing the asynchronous to be not worth our time, Palamidessi's separation result raises the question of whether we should be considering \emph{synchronous} calculi. 
-
-However, we still would like to be able to use the expressiveness of the synchronous \picalc if possible - it allows us to solve a large class of problems much more easily and clearly.
-We saw just how useful the synchronous \picalc\ can be for expressing distributed systems in our extended mobile phone network example in the introduction.
-We could have modeled this system in the asynchronous \picalc, but it would have involved a convoluted mess of acknowledgement channels just to express the necessary ordering of events in the system.
-Hence, the next chapter looks at some of the more implementation-minded encodings of the synchronous \picalc in the asynchronous \picalc, and o what extent we need to relax Palamidessi's requirements to allow these encodings.
+\section{Extended Example: Leader Elections}
+adsdas
