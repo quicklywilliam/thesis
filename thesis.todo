@@ -7,5 +7,5 @@
 - TOWRITE@P-14L-273: make all index terms lowercase
 - TOWRITE@P-17L-399: make the arrow for evolution size according to the text above it
 - TOWRITE@P-23L-642: line up all the above equations by putting them in one array and using breaks
-- TOWRITE@P-32L-51: When I try to refer to the label $\alpha $-equivalency here, things break. any idea how to fix this without re-engineering my definitions?
-- TOWRITE@P-32L-63: come up with an implement a short hand for the calculi: SPI and API?
+- TOWRITE@P-31L-51: When I try to refer to the label $\alpha $-equivalency here, things break. any idea how to fix this without re-engineering my definitions?
+- TOWRITE@P-31L-63: come up with an implement a short hand for the calculi: SPI and API?

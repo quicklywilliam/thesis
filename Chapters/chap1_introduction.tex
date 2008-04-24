@@ -170,7 +170,6 @@ In Chapter \ref{the picalc}, we will give a rigorous presentation of the semanti
 
 The two simplifications mentioned above will make our calculus somewhat easier to grasp, but there is another reason to consider an \inidx{asynchronous} calculus: it is far easier to implement on a real distributed system than the full synchronous version.  
 At the base level, communication between machines on a distributed system is asynchronous, so implementing synchronous calculi requires finding a way to simulate synchronous message passing using only asynchronous primitives.  
-In Chapter \ref{sync_and_express}, after briefly presenting the \defmargin{synchronous} \picalc (which has the full expressive power used in the mobile phone network example) and its computational rules, we will look at the problem of modeling the synchronous \picalc\ using the asynchronous version.
+In Chapter \ref{sync_and_express}, we will present the \defmargin{synchronous} \picalc (which has the full expressive power used in the mobile phone network example) and its computational rules.
 
-Having looked at this problem, we will take a practical-minded look at the way that a synchronous \picalc-like language might be implemented on a system using asynchronous primitive \picalc\ constructs. 
-Chapter \ref{sync_and_dist_sys} is a brief survey of some of the approaches that have been suggested or used to implement such a language, and how they bear on the results of Chapter \ref{sync_and_express}.
+Chapter \ref{sync_and_dist_sys} looks at the problem of modeling the synchronous \picalc\ using the asynchronous version.  It then takes a more practical-minded presentation of the way that a synchronous \picalc-like language might be implemented using asynchronous primitive \picalc\ constructs.
