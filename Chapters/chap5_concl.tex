@@ -1,0 +1,29 @@
+\chapter{Conclusions}
+In Chapter \ref{sync_and_dist_sys} we said with Palamidessi that no uniform encoding of the synchronous \picalc\ into the asynchronous \picalc preserving reasonable semantics exists.  This is a very strong result.  Weakening either of the requirements that Palamidessi assumes seems like it might produce an encoding not rigorous enough to study.  
+For this reason, the fully expressive synchronous \picalc\ seems like a better candidate for formal study than the asynchronous \picalc.
+
+However, we need still consider the implementation of a synchronous \picalc.  
+On distributed systems, we have only asynchronous sending available to us.  
+Hence, it also seems useful to study the asynchronous \picalc\ since it models these systems more accurately than a synchronous model.
+For the study of distributed systems, rather than showing the asynchronous to be not worth our time, Palamidessi's separation result raises the question of whether we should be considering \emph{synchronous} calculi. 
+
+Ideally, we'd like the best of both worlds.  The expressiveness of the synchronous \picalc\ allows us to solve a large class of problems much more easily and clearly.
+We saw just how useful the synchronous \picalc\ can be for expressing distributed systems in our extended mobile phone network example in the Chapter \ref{Introduction}.
+We could have modeled this system in the asynchronous \picalc, but it would have involved a convoluted mess of acknowledgement channels just to express the necessary ordering of events in the system.
+Hence, the last chapter looked at some of the more implementation-minded encodings of the synchronous \picalc\ in the asynchronous \picalc, and to what extent we need to relax Palamidessi's requirements to allow these encodings.
+
+The creators of Pict, the Join-calculus, and other implementations based on the \picalc\ all decided to have their primitives support only asynchronous communication, while synchronous communication is made available overtop of this via a library or higher-level language.  
+This these greatly simplifies implementation, resulting in a cleaner, more efficient core language.  
+The summation operator in particular is difficult and expensive to fully simulate.  
+In the implementation of Pict, for example, David Turner notes \cite{turner96} that ``the additional costs imposed by summation are unacceptable.''.  
+Turner goes on to say that \emph{essential} uses of summation are infrequent in practice.
+
+Speaking in an interview on developing the \picalc, Robin Milner notes \cite{miln03}:
+\begin{quote}
+That was to me the challenge: picking communication primitives which could be understood at a reasonably high level as well as in the way these systems are implemented at a very low level...There's a subtle change from the Turing-like question of what are the fundamental, smallest sets of primitives that you can find to understand computation...as we move towards mobility... we are in a terrific tension between (a) finding a small set of primitives and (b) modeling the real world accurately.
+\end{quote}
+This tension is quite evident in the efforts of process algebraists to find the `right' calculus for modeling distributed systems.  
+While the synchronous \picalc\ is more elegant and fundamental, actual implementations must commit to asynchronous communication as their primitives.  
+Hence, which we choose as a model depends in part on our goals.  
+In any case, it is evident that by limiting ourselves to smaller calculi, many useful new concepts and structures arise in order to solve the problems posed by asynchronous communication.  
+While these structures might not belong in the `smallest set of primitives', they are useful for bringing the power of the \picalc\ to a model that more closely resembles the implementation of distributed systems.
