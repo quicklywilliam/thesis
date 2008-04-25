@@ -186,4 +186,53 @@ Since there no other processes are run by the summation, we needn't worry about 
 \end{insettable_wide}
 
 \section{Extended Example: Leader Elections}
-adsdas
+Leader elections, a classic problem in distributed systems, are a good example of the power of the synchronous \picalc.
+Loosely, a leader election is a system where a group of processes, each with a unique identifier (via integers, perhaps), must agree on a `leader' process identification in a finite amount of time.
+The processes vote on a process to be their leader by sending an integer-valued `vote' $v_i$ on a given output channel $o$.  
+Ideally we want each of the processes to operate using the same `program', without any preference or priority hard-coded into that program.
+
+One means of identifying as `the same' the program run by the processes is by the concept of \defmargin{symmetry}.
+We say that two processes are symmetric if any they are equivalent under structural equivalence and a systematic renaming of their identifiers.
+To better understand what is meant by `a systematic renaming', assume that each process, channel name, and vote has a unique identifier $i \in \{1,..,n\}$.
+Now suppose we have an isomorphism $\sigma$ that maps these identifiers to other identifiers in the space $\{1,...,n\}$.
+we apply $\sigma$ to a term according to the following recursive definition:
+\begin{insettable_wide}
+	\begin{center}
+		\begin{tabular}{r l l}
+		\multicolumn{3}{c}{\emph{Action Prefixes}}\\
+			$\sigma(\sends{c_i}{v_i})$ &$= $ &$ \sends{c_{\sigma(i)}}{v_{\sigma(i)}}$\\
+			$\sigma(\receives{c_i}{v_i})$ &$=$ &$ \receives{c_{\sigma(i)}}{v_{\sigma(i)}}$\\[18pt]
+		\multicolumn{3}{c}{\emph{Processes}}\\
+			$\sigma(\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i)$ &$=$ &$ \displaystyle\sum_{i\in \{1,..,n\}} \sigma(\pi_i).\sigma(R_i)$\\
+			$\sigma(R_1 \comp R_2)$ &$=$ &$ \sigma(R_1)\comp \sigma(R_2)$\\
+			$\sigma(\new{n}R)$ & $=$ &$  \new{n}\sigma(R)$\\
+			$\sigma(\pif{v_i = v_j}\pthen R_1 \pelse R_2)$ &$=$ &$ \pif{v_{\sigma(i)} = v_{\sigma(j)}}\pthen \sigma(R_1) \pelse \sigma(R_2)$\\
+			$\sigma(\rec{x} R)$ & $=$ &$\rec{x}\sigma(R)$\\
+			$\sigma(\pstop)$ & $=$ & $\pstop$\\
+		\end{tabular}
+	\end{center}
+	\emph{\caption{Rules for applying $\sigma$}\label{sigmarules}}	
+\end{insettable_wide}
+Using these rules, we have a systematic function $\sigma$ for renaming identifiers in a process.
+For example, consider the following system:
+\begin{align}
+	P_0\comp P_1 \pdef \ssend{c_0}{} \send{o}{0} + \receive{c_1}{} \send{o}{1} \comp \ssend{c_1}{} \send{o}{1} + \receive{c_0}{} \send{o}{0}
+	\label{leader_network_term}	
+\end{align}
+Here is isomorphism $\sigma$ operates in the space $\{0,1\}$, mapping 1 to 0 and 0 to 1.  
+Equivalently, it takes an identifier $i$ to $i+1 mod 2$.
+The output channel $o$ is a special case, and so we extend $\sigma$ to always map $o$ to itself.
+Hence $P_0 = \sigma(P_1)$ and we say that $P_0$ is symmetric to $P_1$.
+
+Now that we have shown that (\ref{leader_network_term}) is a system of processes running `the same program', we need to show that it actually solves the leader election.  This is not hard to show.  There are two possibilities: either $P_0$ notifies $P_1$ on $c_0$ first, or $P_1$ notifies $P_0$ on $c_1$ first.  Applying the reduction rule (R-SYNC) to (\ref{leader_network_term}), the first possibility gives
+\[
+	 \send{o}{0} \comp \send{o}{0}	
+\]
+Here we see that both processes will agree in their output.  Note that no substitutions were necessary since $\sends{c}{}$ is simply a\refmargin{handshake} handshake signal.
+
+If, on the other hand, $P_1$ notifies first, then again we apply (R-SYNC) to get
+\[
+	\send{o}{1} \comp \send{o}{1}
+\]
+Again, a leader has been elected.
+Hence, we have given a term that successfully solves the leader election problem for symmetric processes in the special case of a two-process system.  We will discuss more general leader elections in the next chapter.
