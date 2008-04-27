@@ -608,44 +608,44 @@ Asynchronous channels map naturally to this type of behavior, as we will see in 
 
 We use the short hand $l?lock.P$ to mean:
 \[
-	\rec{q}(\receive{l}{x} \pif{x=true}\pthen (P\comp \send{l}{\mbox{\emph{false}}})\pelse(q \comp \send{l}{\mbox{\emph{false}}}))
+	\rec{q}(\receive{l}{x} \pif{x=\ptrue}\pthen (P\comp \send{l}{\pfalse})\pelse(q \comp \send{l}{\pfalse}))
 \]
-Above we check the lock channel $l$ and execute $P$ if it is currently set to $true$ (meaning the lock is still available). 
+Above we check the lock channel $l$ and execute $P$ if it is currently set to $\ptrue$ (meaning the lock is still available). 
 Otherwise we recursively try to get the lock again.
-Notice that whether the lock is already set to $\mbox{\emph{false}}$ or we are able to acquire it, we need to send $\mbox{\emph{false}}$ to $l$ so that another process can't acquire the lock.
+Notice that whether the lock is already set to \pfalse or we are able to acquire it, we need to send\pfalse to $l$ so that another process can't acquire the lock.
 
 Let's use action semantics to make sure locking behaves as expected.  
 We first note using (A-REP) that the above can internally evolve over $\tau$ to
 \begin{equation}\begin{split}
-	\evolves{\tau} & \receive{l}{x} \pif{x=true}\pthen(P\comp \send{l}{\mbox{\emph{false}}})\pelse\\
-	&l?lock.P \comp \send{l}{\mbox{\emph{false}}}))
+	\evolves{\tau} & \receive{l}{x} \pif{x=\ptrue}\pthen(P\comp \send{l}{\pfalse})\pelse\\
+	&l?lock.P \comp \send{l}{\pfalse}))
 \end{split}\end{equation}
-If $\receive{l}{x}$ receives a true, then
+If $\receive{l}{x}$ receives a \ptrue, then
 \begin{equation}\begin{split}
-	\evolves{\receives{c}{true}} & \pif{true=true}\pthen(P\comp \send{l}{\mbox{\emph{false}}})\pelse\\
-	&l?lock.P \comp \send{l}{\mbox{\emph{false}}}))
+	\evolves{\receives{c}{\ptrue}} & \pif{\ptrue=\ptrue}\pthen(P\comp \send{l}{\pfalse})\pelse\\
+	&l?lock.P \comp \send{l}{\pfalse}))
 \end{split}\end{equation}
 We can now apply (A-EQ), yielding:
 \begin{equation}\begin{split}
-	\evolves{\tau} & P\comp \send{l}{\mbox{\emph{false}}}\\
+	\evolves{\tau} & P\comp \send{l}{\pfalse}\\
 \end{split}\end{equation}
-As expected.  Otherwise, if $\receive{l}{x}$ receives a \mbox{\emph{false}}, then $l?lock.P$
+As expected.  Otherwise, if $\receive{l}{x}$ receives a \pfalse, then $l?lock.P$
 \begin{equation}\begin{split}
-	\evolves{\receives{c}{\mbox{\emph{false}}}} & \pif{\mbox{\emph{false}}=true}\pthen(P\comp \send{l}{\mbox{\emph{false}}})\pelse\\
-	&l?lock.P \comp \send{l}{\mbox{\emph{false}}}))
+	\evolves{\receives{c}{\pfalse}} & \pif{\pfalse=\ptrue}\pthen(P\comp \send{l}{\pfalse})\pelse\\
+	&l?lock.P \comp \send{l}{\pfalse}))
 \end{split}\end{equation}
 This time using (A-NEQ),
 \begin{equation}\begin{split}
-	\evolves{\tau} &l?lock.P \comp \send{l}{\mbox{\emph{false}}}))
+	\evolves{\tau} &l?lock.P \comp \send{l}{\pfalse}))
 \end{split}\end{equation}
 Which again is what we would expect.  
 Thus, we have verified that the lock works as expected.\todo{line up all the above equations by putting them in one array and using breaks}
 
 Now, unlocking is done via the shorthand $l!unlock$, meaning
 \[
-	\receive{l}{x} \send{l}{true}
+	\receive{l}{x} \send{l}{\ptrue}
 \]
-This term simply discards the current $l$ value and sets it to $true$.  
+This term simply discards the current $l$ value and sets it to $\ptrue$.  
 
 Our $MemoryClient$ thus becomes:
 \begin{equation}\begin{split}
@@ -654,5 +654,5 @@ Our $MemoryClient$ thus becomes:
 	&\comp \receive{a_2}{z}(l!unlock\comp \send{o}{z}))))
 \end{split}\end{equation}
 Note that the lock $l$ is exposed.  
-It needs to be initialized to $true$ by the system that defines it so that the first process trying to get the lock can get it.   
+It needs to be initialized to $\ptrue$ by the system that defines it so that the first process trying to get the lock can get it.   
 We will return to the subject of locks in Chapter \ref{sync_and_dist_sys}, where they play a surprisingly similar role in the implementation of a synchronous \picalc.
