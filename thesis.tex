@@ -10,7 +10,7 @@
 \usepackage{datetime}
 % \usepackage{a0size} used for a really big pi symbol - disabled
 
-\usepackage[palatino]{quotchap} %figure out where to stick \thispagestyle{empty}%
+\usepackage[palatino]{quotchapwc} %figure out where to stick \thispagestyle{empty}%
 \renewcommand\chapterheadstartvskip{\vspace*{-5\baselineskip}}
 \usepackage[calcwidth]{titlesec}
 
@@ -41,10 +41,11 @@
   \maketitle
   \frontmatter % this stuff will be roman-numbered
   \pagestyle{empty} % this removes page numbers from the frontmatter
-    
+    \input{Chapters/front_matter}
    	\tableofcontents
-
-	\input{Chapters/front_matter}
+    \listoffigures
+	\input{Chapters/abstract}
+	%dedication?
 
   \mainmatter % here the regular arabic numbering starts
   \pagestyle{fancyplain} % turns page numbering back on
@@ -67,7 +68,6 @@
 	    \fancyfoot{}
 	} % gets rid of page numbering for plain style, which the following commands use.
 	% \listoftables
-    \listoffigures
     \addcontentsline{toc}{chapter}{List of Figures}
 % Make my bibliography be called "Bibliography" and not "References" (or "Works Cited" or...):
 % \renewcommand{\bibname}{Works Cited}

@@ -34,6 +34,9 @@
 \RequirePackage{xspace}
 \RequirePackage{makeidx}
 \RequirePackage{exscale}
+\RequirePackage{hyphenat} %needed in one place to supress hyphenation
+\RequirePackage{mparhack} %needed to fix placement of margin pars for defs/refs
+\usepackage{setspace}
 % This gives us rules below the headers
 \AtBeginDocument{%
 %WCH Begin doc stuff
@@ -292,7 +295,6 @@
 \newcommand{\refdef}[1]{\hyperref[#1]{Definition \ref{#1}}}
 
 
-\marginparwidth=6em %makes things line up right on even pages
 
 \newwrite\@todowrite
 \immediate\openout\@todowrite=\jobname.todo
@@ -309,10 +311,6 @@
 \newcommand{\todof}[1] {%
      \immediate\write\@todowrite{- TODO (format):  \string #1}%
 }
-\todof{Figure captions in italics}
-\todof{fix definitions - should capitalize title but not label}
-\todof{make it easy to disable todos}
-\todof{Fix page numbering (none on chapter headers, figures list...)}
 \todof{make the subst operator have things on a diagonal instead of flat.}
  
 \newcommand{\refmargin}[1]{
@@ -322,11 +320,20 @@
 \newcommand{\inidx}[1]{
 	#1\index{#1}%
 }
+
+
+\marginparwidth=4.5em %makes things line up right on even pages
+
 \newcommand{\defmargin}[2][null]{%
 	\ifthenelse{\equal{#1}{null}}{\emph{#2}}{\emph{#1}}%
 	\label{#2}\index{#2}%
-	% \def\tagform@#1{\maketag@@@{\cornersize{0.8}\ovalbox{\ignorespaces\sffamily{#1}\unskip\@@italiccorr}}}%
 	\marginpar{\cornersize{0.5}\ovalbox{\tiny{\emph{#2}}}}%
+}
+\newcommand{\defmarginwide}[2][null]{%
+	\ifthenelse{\equal{#1}{null}}{\emph{#2}}{\emph{#1}}%
+	\label{#2}\index{#2}%
+	\marginpar{\cornersize*{0.5pt}\begin{Sbox}%
+	\begin{minipage}{.8\marginparwidth}\centering\setstretch{.4}\nohyphens{\tiny{\emph{#2}}}\end{minipage}\end{Sbox}\Ovalbox{\TheSbox}}%
 }
 %%END WCH COMMANDS
 

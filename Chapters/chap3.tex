@@ -54,7 +54,7 @@ $R :=$ & $\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i$ &\multirow{2}{*}{Summat
 &\pstop & Termination\\
 &\\
 \end{tabular}
-\emph{\caption{Terms in the synchronous \picalc}\label{spicalcterms}}
+\caption{\emph{Terms in the synchronous \picalc}}\label{spicalcterms}
 \end{center}
 \end{insettable}
 
@@ -101,7 +101,7 @@ Receiving is also guarded, as in the asynchronous version.
 		\new{c}\new{d} P \ &\ \sequiv\ \new{d}\new{c} P && \text{\tiny{(S-REST-COMM)}}\\
 		\new{c}(P \comp Q)\ &\ \sequiv\  P \comp \new{c}Q\text{, if } c\not\in fi(P) && \text{\tiny{(S-REST-COMP)}}
 	\end{align*}
-	\emph{\caption{Structural equivalence axioms in the synchronous \picalc}\label{spicalcaxioms}}
+	\caption{\emph{Structural equivalence axioms in the synchronous \picalc}}\label{spicalcaxioms}
 \end{center}\end{insettable}
 
 \section{Computation in the Synchronous \Picalc}
@@ -120,7 +120,7 @@ It expresses the commutation step where the processes have transmitted their val
 	\multicolumn{2}{c}{\hspace{4.5em}$\underline{P\sequiv P', P \pred Q, Q\sequiv Q'}$} & \multirow{2}{*}{\tiny{(R-STRUC)}}\\
 	\multicolumn{2}{c}{\hspace{4.5em}$P'\pred Q'$}
 \end{tabular}
-\emph{\caption{Reduction rules for the synchronous \picalc}\label{spireducs}}
+\caption{\emph{Reduction rules for the synchronous \picalc}}\label{spireducs}
 \end{center}
 \end{insettable}
 
@@ -181,7 +181,7 @@ Since there no other processes are run by the summation, we needn't worry about 
 		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{\tuple{X}}} P',\ Q \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{\tuple{B}}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
 		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q')$}\\[10pt]
 	\end{tabular}	
-	\emph{\caption{Action rules for the synchronous \picalc}\label{spiacts}}
+	\caption{\emph{Action rules for the synchronous \picalc}}\label{spiacts}
 \end{center}
 \end{insettable_wide}
 
@@ -210,7 +210,7 @@ Now suppose we have an isomorphism $\sigma$, given by following recursive defini
 			$\sigma(\pstop)$ & $=$ & $\pstop$\\
 		\end{tabular}
 	\end{center}
-	\emph{\caption{Rules for applying $\sigma$}\label{sigmarules}}	
+	\caption{\emph{Rules for applying $\sigma$}}\label{sigmarules}
 \end{insettable_wide}
 Using these rules, we have a systematic function $\sigma$ for renaming identifiers in a process.  When a system of processes running in parallel are all symmetric to one another, we will say that the system is symmetric.
 For example, consider the following symmetric system:

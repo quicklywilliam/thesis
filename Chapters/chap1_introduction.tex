@@ -32,13 +32,13 @@ You are probably already getting a sense of the expressive power of the $\lambda
 In fact, it is capable of expressing \emph{any} computer algorithm, even without the numbers and arithmetic operators we have implicitly included above!  Besides allowing the proof of several important results in computer science, the $\lambda$-calculus went on to inspire many programming languages like Lisp, ML and Haskell, and even some functionality in languages like Smalltalk, Ruby and Python.
 \section{Distributed Systems}
 The discovery of the $\lambda$-calculus did not end the search for new algebra.  
-More recently, new kinds of programs and demands have emerged with the computational platform of \defmargin{distributed systems}.  
+More recently, new kinds of programs and demands have emerged with the computational platform of \defmarginwide{distributed systems}.
 These systems consist of loose networks of machines capable of exchanging messages and information.  
 We say this shared information and computational power belongs to `the system' in that any program running on the machines of the system can freely access these resources and generally behaves just as it would running on a single machine.
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.7]{figures/cell_network.pdf} % requires the graphicx package
-\caption{A Distributed Mobile System}
+\caption{\emph{A distributed mobile system}}
 \label{fig_cell_network}
 \end{figure}
 
@@ -112,7 +112,7 @@ We call $Mobile(talk,switch)$ the \defmargin{interface} of the right-hand term.
 	\begin{figure}[H]
 	\centering
 	\includegraphics[scale=0.7]{figures/cell_network_pi.pdf} % requires the graphicx package
-	\caption{Simplified Mobile Phone Network in the \picalc}
+	\caption{\emph{Simplified mobile phone network in the \picalc}}
 	\label{fig_cell_network_pi}
 	\end{figure}
 	The notation \send{talk}{} means that we are sending an `empty' (since there are no input values given in the brackets) signal on channel $talk$, while $\receivenodot{switch}{t,s}$ means we are listening on $switch$ and receive the input $t,s$.  

@@ -1,12 +1,8 @@
-- TODO (format): Figure captions in italics
-- TODO (format): fix definitions - should capitalize title but not label
-- TODO (format): make it easy to disable todos
-- TODO (format): Fix page numbering (none on chapter headers, figures list...)
 - TODO (format): make the subst operator have things on a diagonal instead of flat.
-- TOWRITE@P-8L-35: Get index up to snuff by making sure more terms are margin defined.
-- TOWRITE@P-14L-273: make all index terms lowercase
-- TOWRITE@P-17L-399: make the arrow for evolution size according to the text above it
-- TOWRITE@P-23L-642: line up all the above equations by putting them in one array and using breaks
-- TOWRITE@P-33L-46: better labeling of these proerties?
-- TOWRITE@P-33L-67: come up with an implement a short hand for the calculi: SPI and API?
-- TOWRITE@P-36L-147: citation for lamport
+- TOWRITE@P-7L-35: Get index up to snuff by making sure more terms are margin defined.
+- TOWRITE@P-13L-273: make all index terms lowercase
+- TOWRITE@P-16L-399: make the arrow for evolution size according to the text above it
+- TOWRITE@P-22L-642: line up all the above equations by putting them in one array and using breaks
+- TOWRITE@P-32L-46: better labeling of these proerties?
+- TOWRITE@P-32L-67: come up with an implement a short hand for the calculi: SPI and API?
+- TOWRITE@P-35L-147: citation for lamport

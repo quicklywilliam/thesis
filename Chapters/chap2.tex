@@ -29,7 +29,7 @@ In general, we will use capital letter to denote a process.
 		\multicolumn{3}{c}{\emph{System}} \\
 		& $\new{c_1,...,c_n} R_1 \comp...\comp R_m$ & $n, m >= 0$\\
 		\end{tabular}
-		\emph{\caption{Terms in the asynchronous \picalc}\label{apicalcterms}}
+		\caption{\emph{Terms in the asynchronous \picalc}}\label{apicalcterms}
 		\end{center}
 		\end{insettable}
 		\todo{Get index up to snuff by making sure more terms are margin defined.}
@@ -592,10 +592,10 @@ Consider the following modification to our system:
 \begin{equation}\begin{split}
 	\new{get_1,set_1}&(Cell\langle get_1, set_1\rangle\\
 	 &\comp  MemoryClient_1\langle get_1,set_1,o\rangle \\
-	 &\comp  MemoryClient_2\langle get_1,set_1,o\rangle)
+	 &\comp  MemoryClient_2\langle get_1,set_1,o\rangle)\\
 \end{split}\end{equation}
 If we were run these as such, we may find that the output channel was producing some unexpected results.  
-This is due to a classic issue in concurrent systems, a \defmargin{race condition}, which means that the output of a system is dependent on the timing of computations in the system.  
+This is due to a classic issue in concurrent systems, a \defmargin{race condition}, which means that the output of a system is dependent on the timing of computations in the system.
 For example, consider what happens if $MemoryClient_1$ gets the value 0 of the cell first, but before it can set it $MemoryClient_2$ steps in, receives the 0 again and then sets the cell to 1.  
 In that case, $MemoryClient_1$ will have a value for the cell (0) that is no longer current.  
 It will then set the value of the cell to 1 again, where we would expect it to set 2 since the two clients each incremented once.
