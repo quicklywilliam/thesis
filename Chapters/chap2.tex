@@ -1,6 +1,6 @@
 %!TEX root = /Users/admin/Desktop/Documents/Academic/MA 470 -THESIS/THESIS/thesis.tex
 
-\chapter{The \Picalc}\label{the picalc}	
+\chapter{The Asynchronous \Picalc}\label{the picalc}	
 	In this chapter, we will give the syntax of the \emph{asynchronous} \picalc\ and a discussion of its features.  
 We will loosely follow the style of a recent presentation given in \cite{henn07}.  
 Following this, we will introduce a notion of equivalence of terms in the language.  
@@ -144,7 +144,7 @@ This allows us to guarantee that $F_2$ has executed before $F_1$ continues with 
 	A natural question at this point is, given two \picalc\ terms, how can we determine if they are equivalent?  Intuitively, we want them to be equivalent if they \emph{act} the same, but actually defining this equivalence relation can be a bit subtle.  
 In exploring this issue, we will first look at identifier substitution, giving rules for when we can safely interchange identifiers without creating a different term. 
 Following this, we will develop the notion of \emph{contexts} and then use it to build an equivalence relation among processes.\index{equivalence}
-\subsection{Identifier Substitution and $\alpha$-equivalence}\label{secSubst}
+\subsection{Identifier Substitution and $\alpha$-Equivalence}\label{secSubst}
 	As a first step in our notion of equivalence, we might assert that the way identifiers are named shouldn't change how they act.  
 However, this doesn't mean we can start interchanging symbols with carefree abandon.  
 In a component process, some terms might be important for how the process acts in a larger system.  
@@ -320,7 +320,7 @@ First, we can use (S-REST-COMP) to bring the restriction to the outside, giving:
 \begin{align}\label{exscopeextr_eqn2}
 	\new{c}(\receive{d}{x}\send{x}{}\comp \send{d}{c} \comp \receive{c}{}\pstop)		
 \end{align}
-	Since (\ref{exscopeextr_eqn1}) is equivalent to (\ref{exscopeextr_eqn2}), we can apply (R-STRUCT) to deduce that if \label{exscopeextr_eqn2} reduces to some $Q$, then (\ref{exscopeextr_eqn1}) will.
+	Since (\ref{exscopeextr_eqn1}) is equivalent to (\ref{exscopeextr_eqn2}), we can apply (R-STRUCT) to deduce that if \ref{exscopeextr_eqn2} reduces to some $Q$, then (\ref{exscopeextr_eqn1}) will.
 	To find this $Q$, we can apply (R-COMM), which we can do inside of the restriction operator thanks to the reduction relation's contextuality, and apply a substitution to (\ref{exscopeextr_eqn2}), resulting in:
 \begin{align}
 	\new{c}(\send{c}{} \comp \receive{c}{}\pstop)

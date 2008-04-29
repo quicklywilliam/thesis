@@ -1,4 +1,4 @@
-\begin{thebibliography}{Hen07}
+\begin{thebibliography}{SWP99}
 
 \bibitem[Ber03]{miln03}
 Martin Berger.
@@ -9,10 +9,48 @@ I.~Castellani, editor.
 \newblock {\em Models of Distribution and Mobility: State of the Art}. MIKADO
   Global Computer Project, August 2002.
 
+\bibitem[FG00]{fourn00}
+C.~Fournet and G.~Gonthier.
+\newblock The join calculus: a language for distributed mobile programming,
+  2000.
+
 \bibitem[Hen07]{henn07}
 Matthew Hennessy.
 \newblock {\em A Distributed Pi-Calculus}.
 \newblock Cambridge University Press, 2007.
+
+\bibitem[Hoa78]{hoar78}
+C.~A.~R. Hoare.
+\newblock Communicating sequential processes.
+\newblock {\em Commun. ACM}, 21(8):666--677, 1978.
+
+\bibitem[HP00]{heres00}
+Oltea~Mihaela Herescu and Catuscia Palamidessi.
+\newblock Probabilistic asynchronous $\pi$-calculus.
+\newblock {\em Lecture Notes in Computer Science}, 1784:146--??, 2000.
+
+\bibitem[HT92]{hond92}
+Kohei Honda and Mario Tokoro.
+\newblock On asynchronous communication semantics.
+\newblock In Mario Tokoro, Oscar Nierstrasz, and Peter Wegner, editors, {\em
+  Proceedings of the {ECOOP}'91 Workshop on Object-Based Concurrent Computing},
+  volume 612, pages 21--51. Springer-Verlag, 1992.
+
+\bibitem[Lam74]{lamp74}
+Leslie Lamport.
+\newblock A new solution of dijkstra's concurrent programming problem.
+\newblock {\em Commun. ACM}, 17(8):453--455, 1974.
+
+\bibitem[Lum99]{lump99}
+Markus Lumpe.
+\newblock {\em A π-calculus based approach to software composition}.
+\newblock PhD thesis, University of Bern, , Institute of Computer Science and
+  Applied Mathematics, 1999.
+
+\bibitem[Mil82]{miln82}
+R.~Milner.
+\newblock {\em A Calculus of Communicating Systems}.
+\newblock Springer-Verlag New York, Inc., Secaucus, NJ, USA, 1982.
 
 \bibitem[Mil92]{miln92}
 Robin Milner.
@@ -46,9 +84,22 @@ Davide Sangiorgi and David Walker.
 \newblock {\em The $\pi$-calculus:A Theory of Mobile Processes}.
 \newblock Cambridge University Press, 2001.
 
-\bibitem[Tur96]{turner96}
+\bibitem[SWP99]{sewell99}
+Peter Sewell, Pawe{\l}~T. Wojciechowski, and Benjamin~C. Pierce.
+\newblock Location-independent communication for mobile agents: {A} two-level
+  architecture.
+\newblock {\em Lecture Notes in Computer Science}, 1686:1+, 1999.
+
+\bibitem[Tur96]{turn96}
 David~N. Turner.
 \newblock {\em The Polymorphic Pi-Calculus: Theory and Implementation}.
 \newblock PhD thesis, 1996.
+
+\bibitem[WS99]{wojci99}
+Pawel Wojciechowski and Peter Sewell.
+\newblock Nomadic pict: Language and infrastructure design for mobile agents.
+\newblock In {\em First International Symposium on Agent Systems and
+  Applications ({ASA}'99)/Third International Symposium on Mobile Agents
+  ({MA}'99)}, Palm Springs, CA, USA, 1999.
 
 \end{thebibliography}
