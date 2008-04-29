@@ -271,7 +271,7 @@
 
 \newenvironment{definition}[1]{%
 			\cornersize*{8.0pt}\begin{Sbox}%
-			\begin{minipage}{.9\textwidth}\begin{mydef}[(#1)]\label{#1}\index{#1}}%
+			\begin{minipage}{.9\textwidth}\begin{mydef}[(#1)]\label{#1}\index{\MakeLowercase{#1}}}%
 {\end{mydef}\end{minipage}\end{Sbox}\begin{center}\Ovalbox{\TheSbox}\end{center}}
 
 \newenvironment{insettable_wide}%

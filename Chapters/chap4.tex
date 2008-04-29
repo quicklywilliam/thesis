@@ -46,7 +46,6 @@ After these actions, $\encode{P_0 \comp P_1}$ is no different than if $\encode{P
 
 Using her separation results, Palamidessi goes on to give a useful set of requirements that formally separate the two calculi.
 The first of those requirement is \defmargin{uniformity}, which means that:
-\todo{better labeling of these proerties?}
 \begin{align}
 	\encode{\sigma(P)} &= \sigma(\encode{P})\label{unif1}\\
 	\encode{P\comp Q} &= \encode{P} \comp \encode{Q}\label{unif2}
@@ -67,7 +66,6 @@ The other requirement is on \defmargin{reasonability} and is on the target langu
 Reasonability to Palamidessi means that the language can distinguish between two processes when their actions are different on a certain given channel.  
 This requirement essentially builds the requirements of the leader election problem into a criteria for the language.  
 Thus, reasonability of a target language means the capability of semantically distinguishing an electoral system, where all actions on the output channel to be the same, from a non-electoral system, where actions on the output channel differ or never happen at all.
-\todo{come up with an implement a short hand for the calculi: SPI and API?}
 
 Given these results, it should come as no surprise that the implementation of synchronous calculi on distributed systems is a thorny issue.  
 On the one hand, its additional operators allow us to model many problems more naturally and easily.  
@@ -91,7 +89,7 @@ Thus we need \emph{two} locks: acquiring one ensures that a receiving process ha
 
 To model synchronous sending, we use an acknowledgement channel $ack$ in send actions as in \refex{exsynchronous}.  On the other side of a transmission, our receive action uses our `double lock' to implement choice and is also responsible for sending the correct acknowledgement depending on the results of trying to get that lock.  Note that we instantiate one shared lock for each summation, as specified by the encoding of summation:
 \[
-	\encode{\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i} \defequals \new{l}(\send{l}{\ptrue} \comp \displaystyle\prod_{i\in \{1,..,n\}}\encode{\pi_i.R_i}_l)
+	\encode{\displaystyle\sum_{i} \pi_i.R_i} \defequals \new{l}(\send{l}{\ptrue} \comp \displaystyle\prod_{i}\encode{\pi_i.R_i}_l)
 \]
 The notation $\prod$ means composition.  We have parameterized the encoding $\encode{\pi_i.R_i}$ with the created lock channel $l$ so that all the terms in a sum have access to the same lock.  Thus, a group of summed senders will have one lock, which we will call a \emph{remote} lock $r$, and a group of summed receivers will have another lock, which we will call a \emph{local} lock $l$.
 
@@ -147,7 +145,7 @@ Palamidessi herself gives a probabilistic encoding \cite{palam01} which does not
 Another route is to violate symmetry by comparing process ids.
 In this case, processes can make asymmetrical decisions by simply comparing their ids and deciding accordingly.
 
-Better yet is a symmetric --- though still not uniform --- variation on Lamport's classic Bakery algorithm \todo{citation for lamport} by given in \cite{nestm00}.
+Better yet is a symmetric --- though still not uniform --- variation on Lamport's classic Bakery algorithm \cite{lamp74} by given in \cite{nestm00}.
 Instead of statically encoding the asymmetry in process ids, Lamport's algorithm has processes dynamically obtain a number from a number server much as a patron might when entering the queue at a bakery counter.
 Because this asymmetry is dynamically determined, the real-world implications on fairness are acceptable but the processes can always elect a leader.
 Requiring a number server also breaks uniformity, since it requires a top-level number server process, but again in a real-world distributed system the cost of running a single number server to provide ids to processes is not serious.  
@@ -155,7 +153,7 @@ Below, we assume the existence of a top level number server which is really just
 Our encoding of the summation operator simply grabs the current number from the server and then sends the next integer value for the next summation operator.  
 Other than that it is the same as our last encoding:
 \[
-	\encode{\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i}^d \defequals \receive{d}{n}(\send{d}{n+1} \comp \new{l}(\send{l}{\ptrue} \comp \displaystyle\prod_{i\in \{1,..,n\}}\encode{\pi_i.R_i}^d_{n,l}))
+	\encode{\displaystyle\sum_{i} \pi_i.R_i}^d \defequals \receive{d}{n}(\send{d}{n+1} \comp \new{l}(\send{l}{\ptrue} \comp \displaystyle\prod_{i}\encode{\pi_i.R_i}^d_{n,l}))
 \]
 Notice that the encoding passes on the number \emph{and} number server to the summed terms.  
 We pass on the latter because some component process of $R_i$ might contain a summation term itself, in which case it will need access to $d$.

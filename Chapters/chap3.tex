@@ -160,7 +160,7 @@ It now evolves over output to a process $R$ and not simply to the termination pr
 We have also added a new rule, (A-SUM). It describes the action of the summation operator much as (A-COMP) describes the action of the composition operator.
 \begin{center}
 	$\underline{P_i \evolves{\pi_i} P_i'}$\\
-	$\displaystyle\sum_{i\in \{1,..,n\}}\pi_i.P_i \evolves{\pi_i} P_i'$\\
+	$\displaystyle\sum_{i}\pi_i.P_i \evolves{\pi_i} P_i'$\\
 \end{center}
 (A-SUM) expresses the fact that, when a single guarded process can evolve in one step to a process $P_i'$ due to an action $\pi_i$, then it can also do so as part of a summation.
 Notice that unlike (A-COMP), (A-SUM) does not need to be careful about capturing names. 
@@ -175,7 +175,7 @@ Since no other processes are run by the summation, we needn't worry about causin
 		$\pif{v_1=v_2} \pthen P \pelse Q$ & \evolves{\tau} & $Q$ & $v_1 \neq v_2$ & \tiny{(A-NEQ)}\\[10pt]
 		
 		\multicolumn{3}{c}{$\underline{P_i \evolves{\pi_i} P_i'}$} &  & \multirow{2}{*}{\tiny{(A-SUM)}}\\
-		\multicolumn{3}{c}{$\displaystyle\sum_{i\in \{1,..,n\}}\pi_i.P_i \evolves{\pi_i} P_i'$}\\[18pt]
+		\multicolumn{3}{c}{$\displaystyle\sum_{i}\pi_i.P_i \evolves{\pi_i} P_i'$}\\[18pt]
 		
 		\multicolumn{3}{c}{$\underline{P \evolves{\pi} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle bn(\alpha) \cap fn(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMP)}}\\
 		\multicolumn{3}{c}{$P\comp Q \evolves{\alpha} P'\comp Q$}\\[10pt]
@@ -210,7 +210,7 @@ Now suppose we have an isomorphism $\sigma$, given by following recursive defini
 			$\sigma(\sends{c_i}{v_i})$ &$= $ &$ \sends{c_{\sigma(i)}}{v_{\sigma(i)}}$\\
 			$\sigma(\receives{c_i}{v_i})$ &$=$ &$ \receives{c_{\sigma(i)}}{v_{\sigma(i)}}$\\[18pt]
 		\multicolumn{3}{c}{\emph{Processes}}\\
-			$\sigma(\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i)$ &$=$ &$ \displaystyle\sum_{i\in \{1,..,n\}} \sigma(\pi_i).\sigma(R_i)$\\
+			$\sigma(\displaystyle\sum_{i} \pi_i.R_i)$ &$=$ &$ \displaystyle\sum_{i} \sigma(\pi_i).\sigma(R_i)$\\
 			$\sigma(R_1 \comp R_2)$ &$=$ &$ \sigma(R_1)\comp \sigma(R_2)$\\
 			$\sigma(\new{n}R)$ & $=$ &$  \new{n}\sigma(R)$\\
 			$\sigma(\pif{v_i = v_j}\pthen R_1 \pelse R_2)$ &$=$ &$ \pif{v_{\sigma(i)} = v_{\sigma(j)}}\pthen \sigma(R_1) \pelse \sigma(R_2)$\\

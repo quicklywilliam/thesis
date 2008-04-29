@@ -272,7 +272,7 @@ The last of these axioms is most important -- it is the basis for\refmargin{scop
 \section{Reduction Semantics}\label{secreducationsemantics}
 We are now ready to give the \emph{semantic} properties that a process in our language should possess.  
 By specifying the behavior of processes, we define how computation proceeds in the \picalc.  
-The set of rules given below show how a process can internally evolve through a number of computation steps.\index{internal evolution}\todo{make all index terms lowercase}
+The set of rules given below show how a process can internally evolve through a number of computation steps.\index{internal evolution}
 \begin{definition}{Reduction}
 	The \emph{reduction relation} \pred\ is the smallest contextual relation that satisfies the following rules:
 	\begin{center}\begin{tabular}{rll}
@@ -398,7 +398,6 @@ For example (thanks to (R-COMM)),
 The capability for $\tau$ is defined through the rules (A-COMM), (A-REP), (A-EQ) and (A-NEQ).  (A-REP), (A-EQ) and (A-NEQ) simply provide the same internal evolution capabilities as (R-REP), (R-EQ) and (R-NEQ) do in the \hyperref[secreducationsemantics]{reduction semantics}. (A-COMM), however, is more subtle then (R-COMM).  We describe it below, after a discussion of some of the other rules in action semantics.
 
 We define the action relation under the following rules (with their preconditions listed alongside them):
-\todo{make the arrow for evolution size according to the text above it}
 \begin{definition}{Action}\label{apiactionrules}
 	The \emph{action relation} \evolves{} is the smallest relation between processes that satisfy the following rules:
 	\begin{center}\begin{tabular}{rllll}

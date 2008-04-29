@@ -22,3 +22,4 @@
 \contentsline {chapter}{Chapter 5: Conclusions}{38}{chapter.5}
 \contentsline {chapter}{List of Figures}{40}{chapter.5}
 \contentsline {chapter}{References}{40}{chapter*.5}
+\contentsline {chapter}{Index}{42}{chapter*.5}
