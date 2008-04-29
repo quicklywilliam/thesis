@@ -1,12 +1,16 @@
 \chapter{Synchronicity and Distributed Systems}\label{sync_and_dist_sys}
-Can we represent the expressive communication power of the synchronous \picalc\ using only our asynchronous \picalc?  That is, using the simulations given in Examples \ref{exsynchronous} and \ref{exsummation} (or perhaps some similar but more complicated approach) can we fully capture the implicit `communication' (see the introduction to Chapter \ref{sync_and_express}) between non-deterministically chosen processes discussed above?  In this chapter, we will explore the surprising complexity of this question and some of its implications in implementing the synchronous \picalc\ on distributed systems.  
+In the preceding chapters, we presented both the synchronous and asynchronous variants of the \picalc\ and explored some of the systems they can model.  
+We also demonstrated in \refex{syncembedding} that the asynchronous \picalc\ can be fully encoded in the synchronous version.
+This begs the question: can we represent the expressive communication power of the synchronous \picalc\ using only our asynchronous \picalc?  That is, using the simulations given in Examples \ref{exsynchronous} and \ref{exsummation} (or perhaps some similar but more complicated approach) can we fully capture the implicit `communication' (see the introduction to Chapter \ref{sync_and_express}) between non-deterministically chosen processes discussed above?  In this chapter, we will explore the surprising complexity of this question and some of its implications in implementing the synchronous \picalc\ on distributed systems.  
 
 
 
 \section{Separation Results}\label{Separation Results}
 When trying to compare the expressive power of different calculi, one approach is to provide explicit encodings from one language to another as we did in \refex{syncembedding}.
-We say that we are trying to encode a \defmargin{source language} into the terms of a \defmargin{target language}. If we succeed, we have shown that the target language is at least as expressive as the source.  
-Hence, in example \refex{syncembedding} we showed that the synchronous calculus is at least as expressive as the asynchronous calculus by giving an encoding from the asynchronous to the synchronous.  
+We say that we are trying to encode a \defmargin{source language} into the terms of a \defmargin{target language}. 
+Thus, having an encoding gives us a sort of `compiler' from terms in the source language to terms written in the target language.
+If we succeed in finding an encoding, we have shown that the target language is at least as expressive as the source.  
+We used this idea in \refex{syncembedding} to demonstrate that the synchronous calculus is at least as expressive as the asynchronous calculus by giving an encoding from the asynchronous to the synchronous.  
 We use the notation
 \[
 	\encode{P} \defequals Q
@@ -14,12 +18,11 @@ We use the notation
 to mean that P in the source language is encoded by Q in the target language.
 
 To prove a separation result between languages, it is enough to show that there are problems that are solvable in the source language that are not solvable in the target language.
-In \refsec{secleaderelecs}, we showed that a special case of the leader election problem for symmetric systems was solvable in the synchronous \picalc.
-In fact, the synchronous \picalc\ is capable of solving this problem in general.
-Catuscia Palamidessi shows this in \cite{palam03}.
-She then goes on to show that the asynchronous \picalc\ is \emph{not} capable of solving the leader election problem in symmetric systems.
+In \refsec{secleaderelecs}, we found that a special case of the leader election problem for symmetric systems was solvable in the synchronous \picalc.
+In fact, Palamidessi \cite{palam03} proves that the synchronous \picalc\ is capable of solving the leader election problem in general.
+In the same paper, she show that the asynchronous \picalc\ is \emph{not} capable of solving the leader election problem in symmetric systems.
  
-The latter result stems directly from the lack of the choice operator: without it, symmetric processes have no way to pick a leader non-deterministically without potentially disagreeing with one another.  
+The latter result stems directly from the lack of the choice operator and the requirement that the election system be symmetric: without guarded choice summation, symmetric processes have no way to pick a leader non-deterministically in general, without potentially disagreeing with one another.  
 It is only through the implicit communication underlying the choice operator that synchronous processes are able to agree on a leader.
 
 We will not give the full argument here, but we will try to give a sketch of its important properties and will also look at an illustrative example in \refsec{failedencoding}.  
@@ -28,7 +31,7 @@ Palamidessi's proof lies on an important property enjoyed by only the \emph{asyn
 \begin{quote}
 	\textbf{Lemma 4.1} \emph{Let P be a process of the asynchronous \picalc.  Assume that P can make two transitions $P \evolves{\alpha_s} Q$ and $P \evolves{\alpha_r} Q'$, where $\alpha_s$ is a send action while $\alpha_r$ is a receive action.  Then there exists a process R such that $Q \evolves{\alpha_r} R$ and $Q' \evolves{\alpha_s} R$.}
 \end{quote}
-Our processes may start out symmetrical, but as we showed in \refsec{secleaderelecs} in the synchronous calculus the processes must break their original symmetry in order to elect a leader.  
+Our processes may start out symmetrical, but as we showed in \refsec{secleaderelecs} in the synchronous calculus the processes must collectively break the original symmetry of the system in order to elect a leader.  
 The issue with the asynchronous calculus is that if a process has two options available to it (say to vote or wait for the other process to vote first) and it chooses one, confluence guarantees that we can still make the action representing the other choice, bringing us to a state that is the same as if we had performed the actions in the opposite order.  
 Consider trying to encode the symmetric election system from \refsec{secleaderelecs}:
 \begin{align}
@@ -53,7 +56,7 @@ That is, if we $\sigma$-rename a process $P$ and then encode it we get the same 
 Because our encoding is required to preserve $\sigma$, a symmetric term in the source language will still be symmetric in the target language.
 
 Rule (\ref{unif2}) is related to the requirements of a distributed system.  
-Parallel processes really should just map to parallel processes, with no top level `manager' process or the like to aide the encoding.  
+Parallel processes really should just map to parallel processes, with no top level `manager' process or the like to aid the encoding.  
 That is, we wouldn't want to encode $P \comp Q$ to something like 
 \[
 	P \comp Manager \comp Q

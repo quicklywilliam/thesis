@@ -8,7 +8,7 @@ We gave a method of simulating this in \refex{exsummation}.
 
 We have already had a taste of the expressive power of the synchronous \picalc\ in Chapter \ref{Introduction}'s mobile phone network example.  In fact, the original calculus given by Milner, Parrow and Walker was synchronous and included the two operators -- summation and synchronous sending -- that we omitted in our asynchronous \picalc.  
 
-Our original calculus featured synchronous receiving, but we now make sending synchronous as well, allowing a process to be performed after the output has been consumed by some other receiver.  
+Our original calculus featured synchronous receiving, but we now make sending synchronous as well, allowing a process to execute after the output has been consumed by some other receiver.  
 Hence, in the synchronous \picalc, processes can be \refmargin{guarded}guarded by both receiving \emph{and} sending.  
 
 
@@ -46,7 +46,7 @@ $\pi :=$  & $\send{n}{\tuple{V}}$ & Send\\
 &\\
 
 \multicolumn{3}{c}{\emph{Process terms}}\\
-$R :=$ & $\displaystyle\sum_{i\in \{1,..,n\}} \pi_i.R_i$ &\multirow{2}{*}{Summation ($n \in \mathbb{Z}$)}\\[20pt]
+$R :=$ & $\displaystyle\sum_{i} \pi_i.R_i$ &\multirow{2}{*}{Summation}\\[20pt]
 &$R_1 \comp R_2$ & Composition\\
 &$\new{n}R$ & Restriction\\
 &$\pif{v_1 = v_2}\pthen R_1 \pelse R_2$ & Matching\\
@@ -64,21 +64,21 @@ These prefixes are made available to processes via the summation operator.
 
 Consider the term:
 \[
-	\sum_{i\in \{1,..,n\}} \pi_i.R_i
+	\sum_{i} \pi_i.R_i
 \]
 The notation $\pi_i.R_i$ requires that the action $\pi_i$ happen before the guarded process $R_i$ can be executed.  
-If $R_a$ is executed in this way, then for all $j\in \{1,...,n\},j \neq a$, the capabilities for both the action $\pi_j$ and the execution of $R_j$ are lost.  
+If $R_a$ is executed in this way, then for all $j \neq a$, the capabilities for both the action $\pi_j$ and the execution of $R_j$ are lost.  
 In other words, the summation ensures that only one of $n$ guarded processes will be executed, providing a branching behavior in the logic of a term. 
 Which of these branches is picked depends on which action prefix capability is exercised first.  As we saw above, we cannot always guarantee which of the action capabilities will be exercised, so we say that the summation operator is non-deterministic.\index{non-determinism}
 
-For the cases that $n=1$ and $n=2$, we will use the notation $\pi.R$ and $\pi_1.R_1 + \pi_2.R_2$, respectively.  Notice that the $n=1$ case is the equivalent of the process terms of our asynchronous calculus.
-To accommodate for the new operator, we add to our congruence relation given in \refdef{Structural Equivalence} that summation is commutative (S-SUM-COMM) and associative (S-SUM-ASSOC).
+For the cases that summation is of size 1 or 2, we will use the notation $\pi.R$ and $\pi_1.R_1 + \pi_2.R_2$, respectively.  Notice that the former is the equivalent of the process terms of our asynchronous calculus.
+To accommodate the new operator, we add to our congruence relation given in \refdef{Structural Equivalence} that summation is commutative (S-SUM-COMM) and associative (S-SUM-ASSOC).
 
-The summation case of $n=0$ is what is meant by our $\pstop$ termination process.  
+A summation of size 0 is what is meant by our $\pstop$ termination process.  
 It behaves just as it did in our asynchronous calculus.
 We also add to our congruence relation the following trivially true fact, which we call (S-SUM-ID)
 \begin{align*}
-	R + 0 \sequiv R
+	R + stop \sequiv R
 \end{align*}
 
 Note also that in our action prefixes, we have made sending a\refmargin{guarded}guarded operation, which means that in the term
@@ -93,7 +93,7 @@ Receiving is also guarded, as in the asynchronous version.
 	\begin{align*}
 		R + Q\ &\   \sequiv\ Q + R && \text{\tiny{(S-SUM-COMM)}}\\
 		(P + Q) + R\ &\   \sequiv\ P + (Q + R) && \text{\tiny{(S-SUM-ASSOC)}}\\
-		R + 0\ &\   \sequiv\ R && \text{\tiny{(S-SUM-ID)}}\\
+		R + stop\ &\   \sequiv\ R && \text{\tiny{(S-SUM-ID)}}\\
 		P \comp Q\ &\  \sequiv\  Q \comp P && \text{\tiny{(S-COMP-COMM)}}\\
 	 	(P \comp Q) \comp R\ &\ \sequiv\ P \comp (Q \comp R) && \text{\tiny{(S-COMP-ASSOC)}}\\
 		P \comp \pstop\ &\ \sequiv\ P && \text{\tiny{(S-COMP-ID)}}\\
@@ -108,8 +108,7 @@ Receiving is also guarded, as in the asynchronous version.
 We are now ready to give a description of the computation behavior.  
 As we might expect, it does not differ hugely from computation in the asynchronous calculus.  
 In the reduction rules, the only changes are to make room for the summation operator.
-Because only one process gets chosen from a group of summed processes, it is not enough to have two `matching' send and receive action prefixes in a summation.
-Instead, we need one of each running in parallel.  This behavior is described by (R-SYNC).  
+Because only one process gets chosen from a group of summed processes, we need two `matching' sender and receiver terms each running in parallel.  This behavior is described by (R-SYNC).  
 It expresses the commutation step where the processes have transmitted their value.  Hence, we perform the appropriate substitution to the receiving process, run the guarded processes and terminate all the other terms in the sum.
 \begin{insettable}
 \begin{center}\begin{tabular}{rll}
@@ -130,16 +129,25 @@ To see why, first note that asynchronous sending can be encoded simply by $\ssen
 This we will abbreviate with the familiar notation $\send{n}{\tuple{V}}$.  
 As we noted above, the summation notation allows for a single guarded process.  
 If we limit ourselves to these single summations and limit all sending to be of the form $\ssend{n}{\tuple{V}}\pstop$, then we have the asynchronous \picalc.  
-To see why the reduction semantics are compatible, consider the following which shows that (R-COMM) of \refdef{Reduction} can be considered to be a special case of (R-SYNC):\\
-	
-	\begin{tabular}{rlr}
-				\ssend{c}{\tuple{V}} \pstop + \pstop \comp \receive{c}{\tuple{X}}R + \pstop\ \ &\ \ \sequiv\ \ \  \ssend{c}{\tuple{V}}\pstop \comp \receive{c}{\tuple{X}}R, & \text{\tiny{(S-SUM-ID)}}\\
-		\ssend{c}{\tuple{V}}\pstop \comp \receive{c}{\tuple{X}}R\ &\  \pred\  (\pstop \comp R)\subst{\tuple{V}}{\tuple{X}}, & \text{\tiny{(R-SYNC)}}\\
-		\multicolumn{2}{c}{\hspace{44pt}$\underline{(\pstop \comp R)\subst{\tuple{V}}{\tuple{X}}\ \ \ \ \sequiv\ \ \ R\subst{\tuple{V}}{\tuple{X}}}$} & \text{\tiny{(S-COMP-ID)}}\\
-		\send{c}{\tuple{V}} \comp \receive{c}{\tuple{X}}R\ &\  \pred\  R \subst{\tuple{V}}{\tuple{X}} & \text{\tiny{(R-STRUC)}}\\
-	\end{tabular}\\
-	
-	It will be obvious from our presentation of synchronous action rules below that they needn't be shown to be a general version of the asynchronous rules -- they are compatible simply by ignoring the extra rule and using our $\ssend{n}{\tuple{V}}\pstop$ encoding of sending.
+To see why the reduction semantics are compatible, consider the following which shows that (R-COMM) of \refdef{Reduction} can be considered to be a special case of (R-SYNC).\\
+
+\noindent First, we use (S-SUM-ID):
+\[
+	\ssend{c}{\tuple{V}} \pstop + \pstop \comp \receive{c}{\tuple{X}}R + \pstop \sequiv \ssend{c}{\tuple{V}}\pstop \comp \receive{c}{\tuple{X}}R
+\]
+Using (R-SYNC) enables the action:
+\[
+	\ssend{c}{\tuple{V}}\pstop \comp \receive{c}{\tuple{X}}R \pred\  (\pstop \comp R)\subst{\tuple{V}}{\tuple{X}}
+\]
+We now use (S-COMP-ID):
+\[
+	(\pstop \comp R)\subst{\tuple{V}}{\tuple{X}}\sequiv R\subst{\tuple{V}}{\tuple{X}}
+\]
+Thus, we can now conclude, using (R-STRUC):
+\[
+	\send{c}{\tuple{V}} \comp \receive{c}{\tuple{X}}R \pred\  R \subst{\tuple{V}}{\tuple{X}}
+\]
+	It should be evident from our presentation of synchronous action rules below that they needn't be shown to be a general version of the asynchronous rules -- they are compatible simply by ignoring the extra rule and by using our encoding of asynchronous sending as $\ssend{n}{\tuple{V}}\pstop$.
 \end{example}
 
 Neither do the action rules for the synchronous \picalc\ differ significantly from \hyperref[apiactionrules]{those} in the asynchronous version.  
@@ -149,14 +157,14 @@ It now evolves over output to a process $R$ and not simply to the termination pr
 	\ssend{c}{\tuple{V}}R \evolves{\sends{c}{\tuple{V}}} R	
 \]
 
-We have also added a new rule, (A-SUM), allows for the summation operator in a manner that is similar to the way (A-COMP) allows for the composition operator.
+We have also added a new rule, (A-SUM). It describes the action of the summation operator much as (A-COMP) describes the action of the composition operator.
 \begin{center}
 	$\underline{P_i \evolves{\pi_i} P_i'}$\\
 	$\displaystyle\sum_{i\in \{1,..,n\}}\pi_i.P_i \evolves{\pi_i} P_i'$\\
 \end{center}
-(A-SUM) expresses that if we know a process evolves on its own then we can infer that it will evolve in a summation.  It says, for example, that if some process $\pi_1.P$ is able to evolve to $P'$ over some action $\pi_1$, then $\pi_1$ will also cause $\pi_1.P+\pi_2.Q$ to evolve, over the same $\pi_1$, to the choice of $P'$.
+(A-SUM) expresses the fact that, when a single guarded process can evolve in one step to a process $P_i'$ due to an action $\pi_i$, then it can also do so as part of a summation.
 Notice that unlike (A-COMP), (A-SUM) does not need to be careful about capturing names. 
-Since there no other processes are run by the summation, we needn't worry about causing a naming issue when we possibly export terms by running the action $\alpha$.
+Since no other processes are run by the summation, we needn't worry about causing a naming issue when we possibly export terms by running the action $\alpha$.
 
 \begin{insettable_wide}
 	\begin{center}\begin{tabular}{rllll}
@@ -187,7 +195,7 @@ Since there no other processes are run by the summation, we needn't worry about 
 
 \section{Extended Example: Leader Elections}\label{secleaderelecs}
 Leader elections, a classic problem in distributed systems, are a good example of the power of the synchronous \picalc.
-A leader election is a system where a group of processes, each with a unique identifier (via integers, perhaps), must agree on a `leader' process identification in a finite amount of time.
+A leader election is a system where a group of processes, each with a unique identifier (via integers, perhaps), must agree on the selection of a `leader' process.
 The processes vote on a process to be their leader by sending an integer-valued `vote' $v_i$ on a given output channel $o$.  
 Ideally, we want each of the processes to operate using the same `program', without any preference or priority hard-coded into that program.
 
@@ -229,7 +237,7 @@ Applying the reduction rule (R-SYNC) to (\ref{leader_network_term}), the first p
 \[
 	 \send{o}{0} \comp \send{o}{0}	
 \]
-Here we see that both processes will agree in their output.  Note that no substitutions were necessary since $\send{c}{}$ is simply a\refmargin{handshake} handshake signal.  Note also that these resulting processes are \emph{not} symmetric: applying the isomorphism $\sigma$ to $P_0$ would yield $\send{o}{1}$.
+Here we see that both processes will agree in this ``election'' --- that is, they output the same value.  Note that no substitutions were necessary since $\send{c}{}$ is simply a\refmargin{handshake} handshake signal.  Note also that these resulting processes are \emph{not} symmetric: applying the isomorphism $\sigma$ to $P_0$ would yield $\send{o}{1}$.
 
 If, on the other hand, $P_1$ notifies first, then again we apply (R-SYNC) to get
 \[

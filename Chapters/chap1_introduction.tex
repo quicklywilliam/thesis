@@ -29,12 +29,12 @@ We give this program with each computational `step' below:
 	15\\
 \end{align*}
 You are probably already getting a sense of the expressive power of the $\lambda$-calculus.  
-In fact, it is capable of expressing \emph{any} computer algorithm, even without the numbers and arithmetic operators we have implicitly included above!  Besides allowing the proof of several important results in computer science, the $\lambda$-calculus went on to inspire many programming languages like Lisp, ML and Haskell, and even some functionality in languages like Smalltalk, Ruby and Python.
+In fact, it is capable of expressing \emph{any} computer algorithm, even without the numbers and arithmetic operators we have implicitly included above!  Besides allowing us to study the nature of computation in the abstract, the $\lambda$-calculus went on to inspire many programming languages like Lisp, ML and Haskell, and even some functionality in languages like Smalltalk, Ruby and Python.
 \section{Distributed Systems}
-The discovery of the $\lambda$-calculus did not end the search for new algebra.  
+The discovery of the $\lambda$-calculus did not end the search for new algebras.  
 More recently, new kinds of programs and demands have emerged with the computational platform of \defmarginwide{distributed systems}.
 These systems consist of loose networks of machines capable of exchanging messages and information.  
-We say this shared information and computational power belongs to `the system' in that any program running on the machines of the system can freely access these resources and generally behaves just as it would running on a single machine.
+We say this shared information and computational power belongs to `the system' in that any program running on the machines of the system can freely access these resources, coordinating efforts to produce a single complex behavior.\note{wasn't sure exactly how to phrase this.  ok like this?}
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.7]{figures/cell_network.pdf} % requires the graphicx package
@@ -45,7 +45,7 @@ We say this shared information and computational power belongs to `the system' i
 For example, consider the familiar system that powers your mobile phone network.  
 There may be one or more connected central servers, all of which are connected to the various towers that provide service.  
 Towers and servers may have different capabilities and responsibilities, but the important thing is that the entire system needs to behave as a single unit with a bunch of shared information and computational power.  
-A call in progress, for example, is a resource that will need to be accessed in various places in the system ---  by a tower to handle the call, by a server, perhaps, to handle the billing and routing of that call.  
+A call in progress, for example, uses capabilities at various places in the system ---  by a tower to handle the call, by a server, perhaps, to handle the billing and routing of that call.  
 
 Mobile clients are also connected and a part of this system.  
 When a user places a call, for example, he may use some capabilities on the phone to input the number, which is transmitted by the phone to the tower and then sent to the server to be routed.  
@@ -59,10 +59,10 @@ Furthermore, our system of many machines could be doing many different things at
 Yet the $\lambda$-calculus has no means of easily expressing this concurrency which is so basic to many distributed systems.
 
 Consider the phones on our system.  
-They are\defmargin[mobile]{mobility} ---  in the sense that their connections to the system can be added and removed at any time.  
+They are \defmargin[mobile]{mobility} ---  in the sense that their connections to the system can be added and removed at any time.  
 In \reffig{fig_cell_network} above, client $M_b$ is wirelessly connected to tower $T_a$ while $M_c,M_d$ are connected to $T_b$.  
 Client $M_a$ is currently disconnected and $T_c$ has no clients.  
-All the towers maintain a hard-wired link to $server$.  
+All the towers maintain a hard-wired link to the $\mbox{\emph{server}}$.  
 We refer to the connections in a distributed system as its communication \defmargin{topology}.
 
 Furthermore, $M_a$ and $M_b$ are in physical movement and their connections may change soon.  
@@ -74,24 +74,24 @@ How can we abstract function invocation such that a function can be called from 
 Clearly we need an algebraic model for computation that eases the difficulty of modeling such systems.  
 Such a model might consider computation via its natural distributed unit ---  the \defmargin{process}. 
 A process is just a computational task, without reference to where it might be run nor with what input.  
-For example, we might make a conversation on a phone somewhere in our network a process. 
+For example, we assign a process to a conversation on a phone somewhere in our network. 
 Since \inidx{concurrency} of processes is such a basic operation, we make it a part of our algebra.  
 A system, then, is simply a group of processes which are executing concurrently. 
 An important thing about processes is that they maintain computation state independently of one another.  
-Instead of a single program state where functions interact via invocation, processes run independently and interact via \defmargin{message passing} -- sending data back-and-forth via named\inidx{channels}.  
+Instead of a single program state where functions interact via invocation, processes run independently and interact via \defmargin{message passing} -- sending data back-and-forth via named\inidx{channels}.  These channels can be shared between some or all processes in the system, but a single instance of communication is always between a pair of processes.
 
 Because these channels can be shared among processes and used an arbitrary number of times, channels are not a concrete invocation system for a chunk of computation the way a function call is ---  processes simply send values to channels, assuming the receiver (if there is one) will do something useful with it.  
 As with functions in the $\lambda$-calculus, processes are the basic unit of a program in the \picalc. 
 Any bit of functionality can be referred to as a process, with no specification of the granularity.
 
-A major step towards such an algebra came in the 1980's when Robin Milner introduced his Calculus of Communicating Systems (\!\inidx{CCS}).  
+In 1978 C.A.R. Hoare introduced an early process algebra called CSP.  Another major step came in the 1980's when Robin Milner introduced his Calculus of Communicating Systems (\!\inidx{CCS}).  
  The CCS modeled systems as groups of communicating processes interacting via shared channels, and drastically eased the difficulty of modeling indirectly invoked concurrent operations.  
-However, the CCS still would have had trouble with our mobile phone network, because it did not provide a way for processes to gain and lose their communication channels.
+However, the CCS still would have had trouble with our mobile phone network, because it did not provide a way for processes to gain and lose their communication channels.  
 
 	Although it can be defined in other ways, one of the ways of giving a process's\emph{\inidx{location}} is in terms of the communication channels which can be used to access it.  
 Since processes are the units populating the space of a CCS system, it is natural to think of a process's location in terms of the processes which are `near' it ---  those it can connect to.  
 Since communicate happens via channels, a connection between processes just means that they share at least one channel.  
-In this way, changing the communication channel topology of a system changes the locations of its component processes.  
+In this way, changing the communication channel topology of a system can be seen as changing the locations of its component processes.  
 
 	In the CCS, channel topology is static ---  it does not allow new connections to be made or old ones to be removed.  
 Not long after CCS's birth, Robin Milner, Joachim Parrow and David Walker created an improved algebra called the \inidx{\picalc}.  
@@ -122,8 +122,8 @@ After a signal is sent or received on a channel, execution then continues with t
 	Thus, $\receive{switch}{t,s} Mobile\langle t,s\rangle$ indicates that we should listen on $switch$ for the input $t,s$ and then use $t,s$ to `spawn' a new computation of $Mobile$ with these new channels. 
 	The term $\ssend{talk}{} Mobile\langle talk,switch\rangle$ means send a signal on $talk$ before spawning a computation of $Mobile$ with the same $talk,switch$ channels we are using.  
 Finally, the $+$ operator denotes that we should choose to compute one or the other of the operands (but not both).  
-In sum then, $mobile$ has the ability to either send along $talk$ and stay in its current location, or it can receive on $switch$ and `move' to the location where it has new talking and switching channels $t,s$.  
-This last capability expresses the mobile nature of our processes with surprising elegance: here we have just expressed that channels $talk,switch$ are lost and new channels $t,s$ are established.
+In sum then, $Mobile$ has the ability to either send along $talk$ and stay in its current location, or it can receive on $switch$ and `move' to the location where it has new talking and switching channels $t,s$.  
+This last capability expresses the mobile nature of our processes with surprising elegance: here we have just expressed that channels $talk,switch$ are dropped and new channels $t,s$ are established.
 	
 	Next we consider the behavior of a tower:
 	\begin{align*}

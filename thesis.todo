@@ -1,8 +1,8 @@
 - TODO (format): make the subst operator have things on a diagonal instead of flat.
 - TOWRITE@P-7L-35: Get index up to snuff by making sure more terms are margin defined.
-- TOWRITE@P-13L-273: make all index terms lowercase
-- TOWRITE@P-16L-399: make the arrow for evolution size according to the text above it
-- TOWRITE@P-22L-642: line up all the above equations by putting them in one array and using breaks
-- TOWRITE@P-32L-46: better labeling of these proerties?
-- TOWRITE@P-32L-67: come up with an implement a short hand for the calculi: SPI and API?
-- TOWRITE@P-35L-147: citation for lamport
+- TOWRITE@P-13L-275: make all index terms lowercase
+- TOWRITE@P-16L-401: make the arrow for evolution size according to the text above it
+- TOWRITE@P-23L-654: line up all the above equations by putting them in one array and using breaks
+- TOWRITE@P-32L-49: better labeling of these proerties?
+- TOWRITE@P-33L-70: come up with an implement a short hand for the calculi: SPI and API?
+- TOWRITE@P-35L-150: citation for lamport
