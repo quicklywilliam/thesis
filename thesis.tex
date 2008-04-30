@@ -36,14 +36,14 @@
 \setlength{\parskip}{0pt}
 
 \begin{document}
-	\lfoot[Build version: \pdfdate]{}%temporary - for revision marking
-	\rfoot[]{Build version: \pdfdate}%
+	% \lfoot[Build version: \pdfdate]{}%enable for revision marking
+	% \rfoot[]{Build version: \pdfdate}%
+	
   \maketitle
   \frontmatter % this stuff will be roman-numbered
   \pagestyle{empty} % this removes page numbers from the frontmatter
     \input{Chapters/front_matter}
    	\tableofcontents
-    \listoffigures
 	\input{Chapters/abstract}
 	%dedication?
 
@@ -68,7 +68,6 @@
 	    \fancyfoot{}
 	} % gets rid of page numbering for plain style, which the following commands use.
 	% \listoftables
-    \addcontentsline{toc}{chapter}{List of Figures}
 % Make my bibliography be called "Bibliography" and not "References" (or "Works Cited" or...):
 % \renewcommand{\bibname}{Works Cited}
     \nocite{*}

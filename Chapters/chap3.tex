@@ -14,7 +14,7 @@ Hence, in the synchronous \picalc, processes can be \refmargin{guarded}guarded b
 
 If we have a group of guarded processes joined by the summation operator, only one of those will be processes will be `chosen' (non-deterministically)\index{non-determinism} to be executed.  
 The rest will simply terminate without having any effect.  
-The power of the synchronous \picalc\ comes when we have another group of summed processes, running in parallel, something like: 
+The power of the synchronous \picalc\ comes when we have another group of summed processes, running in parallel, something like: \index{choice}\index{summation}
 \[
 	\ssend{c}{}P_1 + \ssend{d_1}{}P_2 + \receive{d_2}{}P_3 \comp \receive{c}{}R_1 + \ssend{d_3}{}R_2
 \]
@@ -34,7 +34,7 @@ This is a powerful feature which comes with the special operators of the synchro
 
 Now that we have gotten an idea of the synchronous \picalc' unique properties, we will turn in the next section to its formal syntax and rules of computation.
 
-\section{The Synchronous \Picalc}\label{Synchronous picalc}
+\section{Syntax and Equivalence}\label{Synchronous picalc}
 
 \begin{insettable}
 \begin{center}
@@ -69,12 +69,12 @@ Consider the term:
 The notation $\pi_i.R_i$ requires that the action $\pi_i$ happen before the guarded process $R_i$ can be executed.  
 If $R_a$ is executed in this way, then for all $j \neq a$, the capabilities for both the action $\pi_j$ and the execution of $R_j$ are lost.  
 In other words, the summation ensures that only one of $n$ guarded processes will be executed, providing a branching behavior in the logic of a term. 
-Which of these branches is picked depends on which action prefix capability is exercised first.  As we saw above, we cannot always guarantee which of the action capabilities will be exercised, so we say that the summation operator is non-deterministic.\index{non-determinism}
+Which of these branches is picked depends on which action prefix capability is exercised first.  As we saw above, we cannot always guarantee which of the action capabilities will be exercised, so we say that the summation operator is non-deterministic.\index{non-determinism}\index{summation}\index{choice}\index{guarded}
 
 For the cases that summation is of size 1 or 2, we will use the notation $\pi.R$ and $\pi_1.R_1 + \pi_2.R_2$, respectively.  Notice that the former is the equivalent of the process terms of our asynchronous calculus.
 To accommodate the new operator, we add to our congruence relation given in \refdef{Structural Equivalence} that summation is commutative (S-SUM-COMM) and associative (S-SUM-ASSOC).
 
-A summation of size 0 is what is meant by our $\pstop$ termination process.  
+A summation of size 0 is what is meant by our $\pstop$ termination process.\index{termination}  
 It behaves just as it did in our asynchronous calculus.
 We also add to our congruence relation the following trivially true fact, which we call (S-SUM-ID)
 \begin{align*}
@@ -102,9 +102,9 @@ Receiving is also guarded, as in the asynchronous version.
 		\new{c}(P \comp Q)\ &\ \sequiv\  P \comp \new{c}Q\text{, if } c\not\in fi(P) && \text{\tiny{(S-REST-COMP)}}
 	\end{align*}
 	\caption{\emph{Structural equivalence axioms in the synchronous \picalc}}\label{spicalcaxioms}
-\end{center}\end{insettable}
+\end{center}\end{insettable}\index{structural equivalence}
 
-\section{Computation in The Synchronous \Picalc}
+\section{Semantics}
 We are now ready to give a description of the computation behavior.  
 As we might expect, it does not differ hugely from computation in the asynchronous calculus.  
 In the reduction rules, the only changes are to make room for the summation operator.
@@ -121,7 +121,7 @@ It expresses the commutation step where the processes have transmitted their val
 \end{tabular}
 \caption{\emph{Reduction rules for the synchronous \picalc}}\label{spireducs}
 \end{center}
-\end{insettable}
+\end{insettable}\index{reduction}
 
 \begin{example}{syncembedding}
 	It is not hard to show that the synchronous \picalc\ can model the asynchronous version.  
@@ -191,57 +191,40 @@ Since no other processes are run by the summation, we needn't worry about causin
 	\end{tabular}	
 	\caption{\emph{Action rules for the synchronous \picalc}}\label{spiacts}
 \end{center}
-\end{insettable_wide}
+\end{insettable_wide}\index{action}
 
 \section{Extended Example: Leader Elections}\label{secleaderelecs}
-Leader elections, a classic problem in distributed systems, are a good example of the power of the synchronous \picalc.
-A leader election is a system where a group of processes, each with a unique identifier (via integers, perhaps), must agree on the selection of a `leader' process.
-The processes vote on a process to be their leader by sending an integer-valued `vote' $v_i$ on a given output channel $o$.  
-Ideally, we want each of the processes to operate using the same `program', without any preference or priority hard-coded into that program.
+\note{FINAL CHANGE HERE - note in particular fuzification of $\sigma$ and reworking the election system to send channels instead of integers (not sure how Palam does it but this make it clearer here in any case)}Leader elections, a classic problem in distributed systems, are a good example of the power of the synchronous \picalc.\index{leader elections}
+A leader election is a system where a group of processes, each with a unique identifier (an integer, perhaps), must agree on the selection of a `leader' process.
+The processes vote on a process to be their leader by sending a vote on a given output channel $o$.   
+The vote consists of a channel name $c_i$ representing their vote for $P_i$ .  
 
-One means of specifying when two processes' programs are the same is by the concept of \defmargin{symmetry}.
-We say that two processes are symmetric if they are equivalent under structural equivalence and a systematic renaming of their identifiers.
-To better understand what is meant by `a systematic renaming', assume that each process $p_i$, channel name $c_i$, and vote $v_i$ has a unique identifier $i \in \{1,..,n\}$.
-Now suppose we have an isomorphism $\sigma$, given by following recursive definition, that maps these identifiers to other identifiers in the space $\{1,...,n\}$.
-\begin{insettable_wide}
-	\begin{center}
-		\begin{tabular}{r l l}
-		\multicolumn{3}{c}{\emph{Action Prefixes}}\\
-			$\sigma(\sends{c_i}{v_i})$ &$= $ &$ \sends{c_{\sigma(i)}}{v_{\sigma(i)}}$\\
-			$\sigma(\receives{c_i}{v_i})$ &$=$ &$ \receives{c_{\sigma(i)}}{v_{\sigma(i)}}$\\[18pt]
-		\multicolumn{3}{c}{\emph{Processes}}\\
-			$\sigma(\displaystyle\sum_{i} \pi_i.R_i)$ &$=$ &$ \displaystyle\sum_{i} \sigma(\pi_i).\sigma(R_i)$\\
-			$\sigma(R_1 \comp R_2)$ &$=$ &$ \sigma(R_1)\comp \sigma(R_2)$\\
-			$\sigma(\new{n}R)$ & $=$ &$  \new{n}\sigma(R)$\\
-			$\sigma(\pif{v_i = v_j}\pthen R_1 \pelse R_2)$ &$=$ &$ \pif{v_{\sigma(i)} = v_{\sigma(j)}}\pthen \sigma(R_1) \pelse \sigma(R_2)$\\
-			$\sigma(\rec{x} R)$ & $=$ &$\rec{x}\sigma(R)$\\
-			$\sigma(\pstop)$ & $=$ & $\pstop$\\
-		\end{tabular}
-	\end{center}
-	\caption{\emph{Rules for applying $\sigma$}}\label{sigmarules}
-\end{insettable_wide}
-Using these rules, we have a systematic function $\sigma$ for renaming identifiers in a process.  When a system of processes running in parallel are all symmetric to one another, we will say that the system is symmetric.
+Ideally, we want each of the processes to operate using the same `program', without any preference or priority hard-coded into that program.
+One means of specifying that the programs are the same is by the concept of \defmargin{symmetry}.
+We say that a system is symmetric if its processes are equivalent under structural equivalence and any systematic renaming of their identifiers.
+The formal definition of `a systematic renaming' is given by Palamidessi \cite{palam03} as an automorphism $\sigma$.
+It maps exposed channels in the processes to other free channels, and maps processes in our system to other processes.\refmargin{exposed channels}
 For example, consider the following symmetric system:
 \begin{align}
-	P_0\comp P_1 \pdef \ssend{c_0}{} \send{o}{0} + \receive{c_1}{} \send{o}{1} \comp \ssend{c_1}{} \send{o}{1} + \receive{c_0}{} \send{o}{0}
+	P_0\comp P_1 \pdef \ssend{c_0}{} \send{o}{c_0} + \receive{c_1}{} \send{o}{c_1} \comp \ssend{c_1}{} \send{o}{c_1} + \receive{c_0}{} \send{o}{c_1}
 	\label{leader_network_term}	
 \end{align}
-Here the isomorphism $\sigma$ operates in the space $\{0,1\}$, mapping 1 to 0 and 0 to 1.  
-Equivalently, it takes an identifier $i$ to $(i+1)mod 2$.
-The output channel $o$ is special so we extend $\sigma$ to always map $o$ to itself.
-Hence $P_0 = \sigma(P_1)$ and we say that $P_0$ is symmetric to $P_1$.
+Here there are only two possible automorphisms: the identity function and one that maps $P_0$ to $P_1$ (and vice versa) and $c_0$ to $c_1$ (and vice versa).  
+If we call the later case $\sigma$, we have that $P_1 = \sigma(P_0)$. 
+Note that we consider the output channel $o$ as a special case that is not operated on by the automorphism.
+Hence we can say that the leader election system $P_0 \comp P_1$ is symmetric.
 
 Now that we have shown that (\ref{leader_network_term}) is a system of processes running `the same program', we need to show that it actually solves the leader election. 
 There are two possibilities: either $P_0$ notifies $P_1$ on $c_0$ first, or $P_1$ notifies $P_0$ on $c_1$ first.  
 Applying the reduction rule (R-SYNC) to (\ref{leader_network_term}), the first possibility gives
 \[
-	 \send{o}{0} \comp \send{o}{0}	
+	 \send{o}{c_0} \comp \send{o}{c_0}	
 \]
-Here we see that both processes will agree in this ``election'' --- that is, they output the same value.  Note that no substitutions were necessary since $\send{c}{}$ is simply a\refmargin{handshake} handshake signal.  Note also that these resulting processes are \emph{not} symmetric: applying the isomorphism $\sigma$ to $P_0$ would yield $\send{o}{1}$.
+Here we see that both processes will agree in this ``election'' --- that is, they output the same value.  Note that no substitutions were necessary since $\send{c}{}$ is simply a\refmargin{handshake} handshake signal.  Note also that these resulting processes are \emph{not} symmetric: applying the automorphism $\sigma$ to $P_0$ would yield $\send{o}{c_1}$.
 
 If, on the other hand, $P_1$ notifies first, then again we apply (R-SYNC) to get
 \[
-	\send{o}{1} \comp \send{o}{1}
+	\send{o}{c_1} \comp \send{o}{c_1}
 \]
 Again, a leader has been elected.
 Hence, we have given a term that successfully solves the leader election problem for symmetric systems in the special case of a two processes.  We will discuss more general leader elections in the next chapter.

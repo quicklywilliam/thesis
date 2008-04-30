@@ -34,6 +34,7 @@
 \RequirePackage{xspace}
 \RequirePackage{makeidx}
 \RequirePackage{exscale}
+\RequirePackage{nicefrac} %used to make subsitution operator a diagonal frac
 \RequirePackage{hyphenat} %needed in one place to supress hyphenation
 \RequirePackage{mparhack} %needed to fix placement of margin pars for defs/refs
 \usepackage{setspace}
@@ -310,11 +311,13 @@
 }
 \newcommand{\todof}[1] {%
      \immediate\write\@todowrite{- TODO (format):  \string #1}%
-}
-\todof{make the subst operator have things on a diagonal instead of flat.}
- 
+} 
 \newcommand{\refmargin}[1]{
-	\index{#1}\marginpar{\tiny{{#1}\\%
+	\index{#1}\marginpar{\setstretch{.4}\nohyphens{\tiny{{#1}}\\%
+	$\hookrightarrow$ \hyperref[#1]{page \pageref{#1}}}}%
+}
+\newcommand{\refmarginnoindex}[1]{
+	\marginpar{\setstretch{.4}\nohyphens{\tiny{{#1}}\\%
 	$\hookrightarrow$ \hyperref[#1]{page \pageref{#1}}}}%
 }
 \newcommand{\inidx}[1]{
@@ -327,6 +330,11 @@
 \newcommand{\defmargin}[2][null]{%
 	\ifthenelse{\equal{#1}{null}}{\emph{#2}}{\emph{#1}}%
 	\label{#2}\index{#2}%
+	\marginpar{\cornersize{0.5}\ovalbox{\tiny{\emph{#2}}}}%
+}
+\newcommand{\defmarginnoindex}[2][null]{%
+	\ifthenelse{\equal{#1}{null}}{\emph{#2}}{\emph{#1}}%
+	\label{#2}%
 	\marginpar{\cornersize{0.5}\ovalbox{\tiny{\emph{#2}}}}%
 }
 \newcommand{\defmarginwide}[2][null]{%
