@@ -16,7 +16,7 @@
 
 %DIFFERING BEHAVOIR FOR PDF VS PRINT OUTPUT
 \newcounter{outputmode}
-\setcounter{outputmode}{0} %0 for pdf, 1 for print
+\setcounter{outputmode}{1} %0 for pdf, 1 for print
 \ifthenelse{\equal{\value{outputmode}}{0}}{\usepackage[bookmarks,unicode, colorlinks, linkcolor= darkblue, citecolor= darkblue, pdftitle={The $pi$-calculus}, pdfauthor={William Henderson}]{hyperref}}{\usepackage[bookmarks, colorlinks=true, linkcolor=black, citecolor= black, pdftitle={The $pi$-calculus}, pdfauthor={William Henderson}]{hyperref}}
 \ifthenelse{\equal{\value{outputmode}}{0}}{\setlength{\evensidemargin}{0.3in}\setlength{\oddsidemargin}{0.3in}}{}
 
@@ -24,7 +24,7 @@
  {\Large\thesection}{12pt}{\Large}[{\titlerule[0.5pt]}]
 
 
-\title{The \picalc}
+\title{Distributed and Mobile Systems in The \Picalc}
 \author{William Henderson}
 % see http://library.reed.edu/help/thesisformat.html for formatting reqs
 % The month and year that you submit your FINAL draft TO THE LIBRARY (May or December)
@@ -45,6 +45,7 @@
     \input{Chapters/front_matter}
    	\tableofcontents
 	\input{Chapters/abstract}
+	\input{Chapters/dedication}
 	%dedication?
 
   \mainmatter % here the regular arabic numbering starts
