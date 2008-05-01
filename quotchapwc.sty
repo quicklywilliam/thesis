@@ -104,14 +104,19 @@
   \@afterindentfalse
   \secdef\@chapter\@schapter}
 \renewcommand{\@makechapterhead}[1]{\chapterheadstartvskip%
-  {\size@chapter{\sectfont\raggedleft
-      {\chapnumfont
-        \ifnum \c@secnumdepth >\m@ne%
+  \ifthenelse{\c@secnumdepth >\m@ne}{{\size@chapter{\sectfont\raggedleft%
+      {\chapnumfont%
         \if@mainmatter\thechapter%
-        \fi\fi
+        \fi%
         \par\nobreak}%
-      {\raggedleft\advance\leftmargin10em\interlinepenalty\@M #1\par}}
-    \nobreak\chapterheadendvskip}}
+      {\raggedleft\advance\leftmargin10em\interlinepenalty\@M #1\par}}%
+    \nobreak\chapterheadendvskip}}%
+	{{\size@chapter{\sectfont%
+	      {\chapnumfont%
+	\vspace{5mm}}%
+	      {\noindent\textbf{#1}\par}}%
+	    \nobreak\chapterheadendvskip}}
+}
 \renewcommand{\@makeschapterhead}[1]{%
   {\let\c@secnumdepth\m@ne\@makechapterhead{#1}}}
 \newcommand*{\@iprintcites}{%

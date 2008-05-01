@@ -2,7 +2,7 @@
 
 \bibitem[Ber03]{miln03}
 Martin Berger.
-\newblock An interview with robin milner, September 2003.
+\newblock An interview with {Robin Milner}, September 2003.
 
 \bibitem[Cas02]{cast02}
 I.~Castellani, editor.
@@ -27,7 +27,7 @@ C.~A.~R. Hoare.
 \bibitem[HP00]{heres00}
 Oltea~Mihaela Herescu and Catuscia Palamidessi.
 \newblock Probabilistic asynchronous $\pi$-calculus.
-\newblock {\em Lecture Notes in Computer Science}, 1784:146--??, 2000.
+\newblock {\em Lecture Notes in Computer Science}, 1784:146--160, 2000.
 
 \bibitem[HT92]{hond92}
 Kohei Honda and Mario Tokoro.
@@ -38,13 +38,13 @@ Kohei Honda and Mario Tokoro.
 
 \bibitem[Lam74]{lamp74}
 Leslie Lamport.
-\newblock A new solution of dijkstra's concurrent programming problem.
+\newblock A new solution of {Dijkstra's} concurrent programming problem.
 \newblock {\em Commun. ACM}, 17(8):453--455, 1974.
 
 \bibitem[Lum99]{lump99}
 Markus Lumpe.
-\newblock {\em A π-calculus based approach to software composition}.
-\newblock PhD thesis, University of Bern, , Institute of Computer Science and
+\newblock {\em A $\pi$-calculus based approach to software composition}.
+\newblock PhD thesis, University of Bern, Institute of Computer Science and
   Applied Mathematics, 1999.
 
 \bibitem[Mil82]{miln82}
@@ -77,7 +77,7 @@ Catuscia Palamidessi.
 
 \bibitem[PH01]{palam01}
 C.~Palamidessi and O.~Herescu.
-\newblock A randomized encoding of the -calculus with mixed choice, 2001.
+\newblock A randomized encoding of the $\pi$-calculus with mixed choice, 2001.
 
 \bibitem[SW01]{sang01}
 Davide Sangiorgi and David Walker.
@@ -88,7 +88,7 @@ Davide Sangiorgi and David Walker.
 Peter Sewell, Pawe{\l}~T. Wojciechowski, and Benjamin~C. Pierce.
 \newblock Location-independent communication for mobile agents: {A} two-level
   architecture.
-\newblock {\em Lecture Notes in Computer Science}, 1686:1+, 1999.
+\newblock {\em Lecture Notes in Computer Science}, 1686:1--31, 1999.
 
 \bibitem[Tur96]{turn96}
 David~N. Turner.
@@ -97,7 +97,7 @@ David~N. Turner.
 
 \bibitem[WS99]{wojci99}
 Pawel Wojciechowski and Peter Sewell.
-\newblock Nomadic pict: Language and infrastructure design for mobile agents.
+\newblock {Nomadic Pict}: Language and infrastructure design for mobile agents.
 \newblock In {\em First International Symposium on Agent Systems and
   Applications ({ASA}'99)/Third International Symposium on Mobile Agents
   ({MA}'99)}, Palm Springs, CA, USA, 1999.

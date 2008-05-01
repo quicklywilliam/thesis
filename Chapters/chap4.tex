@@ -20,7 +20,7 @@ to mean that P in the source language is encoded by Q in the target language.
 To prove a separation result between languages, it is enough to show that there are problems that are solvable in the source language that are not solvable in the target language.
 In \refsec{secleaderelecs}, we found that a special case of the leader election problem for symmetric systems was solvable in the synchronous \picalc.\index{leader elections}\refmargin{symmetry}
 In fact, Palamidessi \cite{palam03} proves that the synchronous \picalc\ is capable of solving the leader election problem in general.
-In the same paper, she show that the asynchronous \picalc\ is \emph{not} capable of solving the leader election problem in symmetric systems.
+In the same paper, she showed that the asynchronous \picalc\ is \emph{not} capable of solving the leader election problem in symmetric systems.
  
 The latter result stems directly from the lack of the choice operator and the requirement that the election system be symmetric: without guarded choice summation, symmetric processes have no way to pick a leader non-deterministically in general, without potentially disagreeing with one another.\index{choice}\index{summation}  
 It is only through the implicit communication underlying the choice operator that synchronous processes are able to agree on a leader.
@@ -31,13 +31,13 @@ Palamidessi's proof lies on an important property enjoyed by only the \emph{asyn
 	\textbf{Lemma 4.1} \emph{Let P be a process of the asynchronous \picalc.  Assume that P can make two transitions $P \evolves{\alpha_s} Q$ and $P \evolves{\alpha_r} Q'$, where $\alpha_s$ is a send action while $\alpha_r$ is a receive action.  Then there exists a process R such that $Q \evolves{\alpha_r} R$ and $Q' \evolves{\alpha_s} R$.}
 \end{quote}
 Our processes may start out symmetrical, but as we showed in \refsec{secleaderelecs} in the synchronous calculus the processes must collectively break the original symmetry of the system in order to elect a leader.  
-The issue with the asynchronous calculus is that if a process has two options available to it (say to vote or wait for the other process to vote first) and it chooses one, confluence guarantees that we can still make the action representing the other choice, bringing us to a state that is the same as if we had performed the actions in the opposite order.  
+The issue with the asynchronous calculus is that if a process has two options available to it (say to choose or wait for the other process to choose first) and it chooses one, confluence guarantees that we can still make the action representing the other choice, bringing us to a state that is the same as if we had performed the actions in the opposite order.  
 Consider trying to encode the symmetric election system from \refsec{secleaderelecs}:
 \begin{align}
 	P_0\comp P_1 \pdef \ssend{c_0}{} \send{o}{c_0} + \receive{c_1}{} \send{o}{c_1} \comp \ssend{c_1}{} \send{o}{c_1} + \receive{c_0}{} \send{o}{c_0}
 	\label{leader_network_term2}	
 \end{align}
-Whatever our encoding looks like, $\encode{P_0}$ will have a choice between voting $c_0$ our waiting - call these $\alpha_s$ and $\alpha_r$ respectively.  
+Whatever our encoding looks like, $\encode{P_0}$ will have a choice between choosing $c_0$ or waiting - call these $\alpha_s$ and $\alpha_r$ respectively.  
 Suppose it chooses $\alpha_s$.  
 Then $\encode{P_1}$ must make the opposite choice $\encode{\alpha_r}$ in order for them to agree on a leader.  
 But by confluence $\encode{P_0}$ still has the capability for $\alpha_r$ and $\encode{P_1}$ the capability for $\encode{\alpha_s}$.  
@@ -64,11 +64,11 @@ Hence, in uniformity, Palamidessi has built symmetry and distributivity into a g
 The other requirement is on \defmargin{reasonability} and is on the target language's semantics.  
 Reasonability to Palamidessi means that the language can distinguish between two processes when their actions are different on a certain given channel.  
 This requirement essentially builds the requirements of the leader election problem into a criteria for the language.  
-Thus, reasonability of a target language means the capability of semantically distinguishing an electoral system, where all actions on the output channel to be the same, from a non-electoral system, where actions on the output channel differ or never happen at all.
+Thus, reasonability of a target language means the capability of semantically distinguishing an electoral system, where all actions on the output channel are the same, from a non-electoral system, where actions on the output channel differ or never happen at all.
 
 Given these results, it should come as no surprise that the implementation of synchronous calculi on distributed systems is a thorny issue.  
 On the one hand, its additional operators allow us to model many problems more naturally and easily.  
-On the other, communication in a distributed system is asynchronous in nature and any synchronous communication must implemented as a layer on top of an asynchronous base.  
+On the other, communication in a distributed system is asynchronous in nature and any synchronous communication must be implemented as a layer on top of an asynchronous base.  
 How can we reconcile the requirements of implementing a distributed system with Palamidessi's result, which indicates that there are important problems that cannot be solved without the full generality of the synchronous calculus?  
 Is such a calculus even implementable on distributed systems?
 We will look below at two encodings that attempt to do so in the proceeding sections.  
@@ -81,8 +81,8 @@ We will call this limitation on summation \emph{separated choice}.
 
 With this limitation in place, we can provide a good encoding.  
 The basic idea for this encoding is similar to that of \refsec{secmemcells}, where we used a lock to protect a memory cell from multiple clients trying to use the cell at once.\index{locks}  
-Here again, we want to provide mutually exclusive access to something --- only instead of the ability to access to the cell we are providing the chosen process the ability to execute.  
-The chosen process is the only one that gets run, so once the process runs the lock never become unlocked.  
+Here again, we want to provide mutually exclusive access to something --- only instead of the ability to access the cell we are providing the chosen process the ability to execute.  
+The chosen process is the only one that gets run, so once the process runs the lock never becomes unlocked.  
 In order to proceed, a receiver term in one summation depends on a sender term in another summation proceeding as well.
 Thus we need \emph{two} locks: acquiring one ensures that a receiving process has been chosen in one summation, and acquiring the other lock ensures that the corresponding sending process in the other summation is also chosen to run.
 
@@ -98,32 +98,32 @@ Now we give the encoding for a sending process:
 	&\pelse (\pif{x=\pretry} \pthen \send{c}{r,ack,\tuple{V}} \pelse \pstop))
 \end{split}\end{equation*}
 This encoding simply sends on $c$ the value, lock, and acknowledgement channel and then waits to receive the acknowledgement.  
-If it receives \ptrue it runs the encoding of $P$ and if it receives \pretry then it resends the input, which we will explain below.  Otherwise it has received \pfalse and it terminates accordingly.
+If it receives \ptrue\ it runs the encoding of $P$ and if it receives \pretry\ then it resends the input, which we will explain below.  Otherwise it has received \pfalse\ and it terminates accordingly.
 
 Our receiver process encoding is simply a recursive listener that tries the lock when it get input on $c$:
 \begin{equation*}\begin{split}
-	\encode{\receive{c}{\tuple{X}}P}_l \defequals & \rec{q}\receive{c}{r,ack,\tuple{X}} (l,r)?d-lock.\encode{P}
+	\encode{\receive{c}{\tuple{X}}P}_l \defequals & \rec{q}\receive{c}{r,ack,\tuple{X}} (l,r)?d\mbox{\emph{-}}lock.\encode{P}
 \end{split}\end{equation*}
-We use the notation $(l,r)?d-lock.P$ as shorthand for our double lock.
+We use the notation $(l,r)?d\mbox{\emph{-}}lock.P$ as shorthand for our double lock.
 Note that the recursive variable $q$ defined above is actually called in the body of the double lock.
 So what does this double lock look like?  Without further ado:
-\begin{equation}\begin{split}
+\begin{equation*}\begin{split}
 	\receive{l}{x}(&\pif{x=\ptrue}\\
 	&\pthen \receive{r}{y} (\pif {y=\ptrue}\\
 	&\ \ \ \ \ \ \pthen \send{l}{\pfalse} \comp \send{r}{\pfalse} \comp \send{ack}{\ptrue} \comp P\\
 	&\ \ \ \ \ \ \pelse \send{l}{\ptrue} \comp \send{r}{\pfalse} \comp \send{ack}{\pfalse} \comp q)\\
 	&\pelse\send{l}{\pfalse} \comp \send{ack}{\pretry})\\
-\end{split}\end{equation}%note: it was really late when i did this.  sorry....
+\end{split}\end{equation*}%note: it was really late when i did this.  sorry....
 Let's go through the cases to see how this works.  
 First we check the local lock, and if it's available, we check the remote lock (note that this order is useful in the real-world case where a remote lock is more expensive to query than a local one).  
-If both are available, first we send \pfalse to both locks to make sure no processes in either summation can acquire the lock.  
-Then, we run $P$ and send \ptrue to $ack$ so the matching sender in the other summation will run.
+If both are available, first we send \pfalse\ to both locks to make sure no processes in either summation can acquire the lock.  
+Then, we run $P$ and send \ptrue\ to $ack$ so the matching sender in the other summation will run.
 
 If the local lock is acquired but the remote lock isn't, we make sure that the local lock is still available by sending \send{l}{\ptrue} and that the remote lock is \emph{not} made available by sending \send{l}{\pfalse}.  
 We also need a recursive call to $q$ to ensure we continue to poll the lock ourselves.  
-The fact that the remote lock is not available means another sender has already run (i.e. it was sent \ptrue on its acknowledgement channel by some receiver) so we need to make sure \emph{this} sender is sent \pfalse on its acknowledgement channel.
+The fact that the remote lock is not available means another sender has already run (i.e. it was sent \ptrue\ on its acknowledgement channel by some receiver) so we need to make sure \emph{this} sender is sent \pfalse\ on its acknowledgement channel.
 
-Finally, if we fail to acquire a local lock, we send \pfalse to the lock to ensure no one else gets it either, and then we send the acknowledgement channel the special message \pretry so that sender still has a chance to run, since the remote lock might still be available.
+Finally, if we fail to acquire a local lock, we send \pfalse\ to the lock to ensure no one else gets it either, and then we send the acknowledgement channel the special message \pretry\ so that sender still has a chance to run, since the remote lock might still be available.
 
 Though this clever double lock successfully encodes our source language restricted to separated choice, it does not effectively encode the full synchronous \picalc.  
 For example, our two-party electoral system breaks the check and balance system.  Here is that system again:
@@ -133,21 +133,21 @@ For example, our two-party electoral system breaks the check and balance system.
 Notice that the encoding of the senders will both send, on $c_0$ and $c_1$ respectively.  
 Now suppose that both receivers are running and have acquired their local lock.  
 Since one's local lock is the other's remote lock, both will be trapped in a circular wait, with no hope of exiting the deadlock.  
-As per Palamidessi's results, neither process can break out of its symmetry and thus neither will ever have a chance to vote.
+As per Palamidessi's results, neither process can break out of its symmetry and thus neither will ever have a chance to choose.
 
 \section{A `Bakery' Algorithm}
 We showed in the last section that the asynchronous \picalc\ is fully capable of encoding the summation and synchronous send operators when limited to separated choice.
 However, to truly encode the synchronous \picalc, we need to derive a way to break out of symmetry.
 
 In fact, this is not a new problem in computer science and many solutions have been proposed, though all of them violate Palamidessi's encoding criteria to some extent.
-Palamidessi herself gives a probabilistic encoding \cite{palam01} which does not break uniformity \refmargin{uniformity} but is not reasonable \refmargin{reasonability} since, though it succeeds with probability 1, it cannot distinguish between the freak case divergence and a successful election.
-Another route is to violate symmetry by comparing process ids.
-In this case, processes can make asymmetrical decisions by simply comparing their ids and deciding accordingly.
+Palamidessi herself gives a probabilistic encoding \cite{palam01} which does not break uniformity \refmargin{uniformity} but is not reasonable \refmargin{reasonability} since, though it succeeds with probability 1, it cannot distinguish between the freak case of divergence and a successful election.
+Another route is to violate symmetry by comparing process identifiers.
+In this case, processes can make asymmetrical decisions by simply comparing their identifiers and deciding accordingly.
 
 Better yet is a symmetric --- though still not uniform --- variation on Lamport's classic Bakery algorithm \cite{lamp74} also given by Nestmann \cite{nestm00}.
-Instead of statically encoding the asymmetry in process ids, Lamport's algorithm has processes dynamically obtain a number from a number server much as a patron might when entering the queue at a bakery counter.
+Instead of statically encoding the asymmetry in process identifiers, Lamport's algorithm has processes dynamically obtain a number from a number server much as a patron might when entering the queue at a bakery counter.
 Because this asymmetry is dynamically determined, the real-world implications on fairness are acceptable but the processes can always elect a leader.
-Requiring a number server also breaks uniformity, since it requires a top-level number server process, but again in a real-world distributed system the cost of running a single number server to provide ids to processes is not serious.  
+Requiring a number server also breaks uniformity, since it requires a top-level number server process, but again in a real-world distributed system the cost of running a single number server to provide identifiers to processes is not serious.  
 Below, we assume the existence of a top level number server which is really just a shared channel $d$ initialized with some integer value.  
 Our encoding of the summation operator simply grabs the current number from the server and then sends the next integer value for the next summation operator.  
 Other than that it is the same as our last encoding:
@@ -172,16 +172,16 @@ Here we give the encoding for the receiver:
 \begin{equation*}\begin{split}
 	\encode{\receive{c}{\tuple{X}}P}^d_{n,l} \defequals & \rec{q}(\receive{c}{m,r,ack,\tuple{X}}(\\
 	&\pif{n=m} \pthen (\send{ack}{\pretry}\comp q) \pelse(\\
-	&\pif{n<m} \pthen (l,r)?d-lock.\encode{P}^d \pelse (r,l)?d-lock.\encode{P}^d)))\\
+	&\pif{n<m} \pthen (l,r)?d\mbox{\emph{-}}lock.\encode{P}^d \pelse (r,l)?rd\mbox{\emph{-}}lock.\encode{P}^d)))\\
 \end{split}\end{equation*}
-The double lock $(l,r)$ is just as before, but the other double lock is slightly different.  It expresses that $r$ is checked before $l$.  We use $(r,l)?d-lock.P$ to denote:
-\begin{equation}\begin{split}
+The double lock $(l,r)$ is just as before, but the other double lock is slightly different in that the ordering of locks has been reserved.  That is, $r$ is checked before $l$.  We use $(r,l)?rd\mbox{\emph{-}}lock.P$ to denote the \emph{reverse} double lock:
+\begin{equation*}\begin{split}
 	\receive{r}{x}(&\pif{x=\ptrue}\\
 	&\pthen \receive{l}{y} (\pif {y=\ptrue}\\
 	&\ \ \ \ \ \ \pthen \send{l}{\pfalse} \comp \send{r}{\pfalse} \comp \send{ack}{\ptrue} \comp P\\
 	&\ \ \ \ \ \ \pelse \send{l}{\pfalse} \comp \send{r}{\ptrue} \comp \send{ack}{\pretry})\\
 	&\pelse\send{r}{\pfalse} \comp \send{ack}{\pfalse}\comp q)\\
-\end{split}\end{equation}%note: it was really late when i did this.  sorry....
-Because the order of the conditions is reversed, we've had to reverse the order of the else statements too.  The case of successfully getting both the remote and local locks is the same as in (l,r).  If the process only gets the remote lock it tells the remote sender to keep trying and continues to make the remote lock available.  If on the other hand it fails to get the remote lock, it restarts the receiver and makes sure to tell the remote sender its failed.
+\end{split}\end{equation*}%note: it was really late when i did this.  sorry....
+Because the order of the conditions is also reversed, we've had to interchange the else statements.  The case of successfully getting both the remote and local locks is the same as in (l,r).  If the process only gets the remote lock it tells the remote sender to keep trying and continues to make the remote lock available.  If on the other hand it fails to get the remote lock, it restarts the receiver and makes sure to tell the remote sender its failed.
 
-Note that Nestmann's `implementation' of the synchronous \picalc\ does not pay attention to the efficiency questions that would be crucial in a real system.  Perhaps its worst property is that in the $n=m$ case there is a possible divergence.  If two terms (a sender and a receiver) in the same summation are communicating with one another, our $n=m$ case has them both retry.  Thus, they might continue trying forever.  Though this represents potentially divergent behavior, it is important to note that this is not the same as a live-lock: the processes will run forever without progressing, but only because they are both in a summation that is unable to progress anyway.  However, it still represents a violation of reasonability since it is possible (though unlikely) that the two might continue communicating forever, never allowing for the computation step of sending the leader votes to the output channel $o$\footnote{Though we will not discuss it here, Nestmann \cite{nestm00} does goes to give the same encoding --- using a slightly enhanced target language --- that does not have this divergence problem.}.  Hence, while Nestmann's encoding violates both of Palamidessi's criteria to some extent, it nevertheless provides the full behavior of the synchronous in a way that could easily be implemented on a distributed system using only asynchronous primitives.
+Note that Nestmann's `implementation' of the synchronous \picalc\ does not pay attention to the efficiency questions that would be crucial in a real system.  Perhaps its worst property is that in the $n=m$ case there is a possible divergence.  If two terms (a sender and a receiver) in the same summation are communicating with one another, our $n=m$ case has them both retry.  Thus, they might continue trying forever.  Though this represents potentially divergent behavior, it is important to note that this is not the same as a live-lock: the processes will run forever without progressing, but only because they are both in a summation that is unable to progress anyway.  However, it still represents a violation of reasonability since it is possible (though unlikely) that the two might continue communicating forever, never allowing for the computation step of sending the leader choice to the output channel $o$\footnote{Though we will not discuss it here, Nestmann \cite{nestm00} does goes to give the same encoding --- using a slightly enhanced target language --- that does not have this divergence problem.}.  Hence, while Nestmann's encoding violates both of Palamidessi's criteria to some extent, it nevertheless provides the full behavior of the synchronous in a way that could easily be implemented on a distributed system using only asynchronous primitives.

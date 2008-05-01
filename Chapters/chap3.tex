@@ -12,7 +12,7 @@ Our original calculus featured synchronous receiving, but we now make sending sy
 Hence, in the synchronous \picalc, processes can be \refmargin{guarded}guarded by both receiving \emph{and} sending.  
 
 
-If we have a group of guarded processes joined by the summation operator, only one of those will be processes will be `chosen' (non-deterministically)\index{non-determinism} to be executed.  
+If we have a group of guarded processes joined by the summation operator, only one of those processes will be `chosen' (non-deterministically)\index{non-determinism} to be executed.  
 The rest will simply terminate without having any effect.  
 The power of the synchronous \picalc\ comes when we have another group of summed processes, running in parallel, something like: \index{choice}\index{summation}
 \[
@@ -68,7 +68,7 @@ Consider the term:
 \]
 The notation $\pi_i.R_i$ requires that the action $\pi_i$ happen before the guarded process $R_i$ can be executed.  
 If $R_a$ is executed in this way, then for all $j \neq a$, the capabilities for both the action $\pi_j$ and the execution of $R_j$ are lost.  
-In other words, the summation ensures that only one of $n$ guarded processes will be executed, providing a branching behavior in the logic of a term. 
+In other words, the summation ensures that only one of the guarded processes will be executed, providing a branching behavior in the logic of a term. 
 Which of these branches is picked depends on which action prefix capability is exercised first.  As we saw above, we cannot always guarantee which of the action capabilities will be exercised, so we say that the summation operator is non-deterministic.\index{non-determinism}\index{summation}\index{choice}\index{guarded}
 
 For the cases that summation is of size 1 or 2, we will use the notation $\pi.R$ and $\pi_1.R_1 + \pi_2.R_2$, respectively.  Notice that the former is the equivalent of the process terms of our asynchronous calculus.
@@ -88,7 +88,7 @@ Note also that in our action prefixes, we have made sending a\refmargin{guarded}
 $R$ will not execute until some other process receives $\tuple{V}$ along $n$.  
 Receiving is also guarded, as in the asynchronous version.  
 
-\begin{insettable}
+\begin{insettable_wide}
 \begin{center}
 	\begin{align*}
 		R + Q\ &\   \sequiv\ Q + R && \text{\tiny{(S-SUM-COMM)}}\\
@@ -102,7 +102,7 @@ Receiving is also guarded, as in the asynchronous version.
 		\new{c}(P \comp Q)\ &\ \sequiv\  P \comp \new{c}Q\text{, if } c\not\in fi(P) && \text{\tiny{(S-REST-COMP)}}
 	\end{align*}
 	\caption{\emph{Structural equivalence axioms in the synchronous \picalc}}\label{spicalcaxioms}
-\end{center}\end{insettable}\index{structural equivalence}
+\end{center}\end{insettable_wide}\index{structural equivalence}
 
 \section{Semantics}
 We are now ready to give a description of the computation behavior.  
@@ -183,10 +183,10 @@ Since no other processes are run by the summation, we needn't worry about causin
 		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle b \not \in n(\alpha)$ }} & \multirow{2}{*}{\tiny{(A-REST)}}\\
 		\multicolumn{3}{c}{$\new{b} P \evolves{\alpha} \new{b} P'$}\\[10pt]
 
-		\multicolumn{3}{c}{$\underline{P\evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\in \tuple{V}$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
+		\multicolumn{3}{c}{$\underline{P\evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\text{ is in }\tuple{V}$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
 		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,\tuple{B}}\sends{c}{\tuple{V}}} P'$}\\[10pt]
 		
-		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{\tuple{X}}} P',\ Q \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{\tuple{B}}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
+		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{\tuple{V}}} P',\ Q \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{\tuple{B}}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
 		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q')$}\\[10pt]
 	\end{tabular}	
 	\caption{\emph{Action rules for the synchronous \picalc}}\label{spiacts}
@@ -194,10 +194,10 @@ Since no other processes are run by the summation, we needn't worry about causin
 \end{insettable_wide}\index{action}
 
 \section{Extended Example: Leader Elections}\label{secleaderelecs}
-\note{FINAL CHANGE HERE - note in particular fuzification of $\sigma$ and reworking the election system to send channels instead of integers (not sure how Palam does it but this make it clearer here in any case)}Leader elections, a classic problem in distributed systems, are a good example of the power of the synchronous \picalc.\index{leader elections}
+Leader elections, a classic problem in distributed systems, are a good example of the power of the synchronous \picalc.\index{leader elections}
 A leader election is a system where a group of processes, each with a unique identifier (an integer, perhaps), must agree on the selection of a `leader' process.
-The processes vote on a process to be their leader by sending a vote on a given output channel $o$.   
-The vote consists of a channel name $c_i$ representing their vote for $P_i$ .  
+The processes each choose a process to be their leader by sending their choice on a given output channel $o$.   
+The choice consists of a channel name $c_i$ representing their choice for $P_i$ .  
 
 Ideally, we want each of the processes to operate using the same `program', without any preference or priority hard-coded into that program.
 One means of specifying that the programs are the same is by the concept of \defmargin{symmetry}.

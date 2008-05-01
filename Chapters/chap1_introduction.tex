@@ -34,7 +34,7 @@ In fact, it is capable of expressing \emph{any} computer algorithm, even without
 The discovery of the $\lambda$-calculus did not end the search for new algebras.  
 More recently, new kinds of programs and demands have emerged with the computational platform of \defmarginwide{distributed systems}.
 These systems consist of loose networks of machines capable of exchanging messages and information.  
-We say this shared information and computational power belongs to `the system' in that any program running on the machines of the system can freely access these resources, coordinating efforts to produce a single complex behavior.\note{FINAL CHANGE HERE - wasn't sure exactly how to phrase this.  ok like this?}
+We say this shared information and computational power belongs to `the system' in that any program running on the machines of the system can freely access these resources, coordinating efforts to produce a single complex behavior.
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.7]{figures/cell_network.pdf} % requires the graphicx package
@@ -84,7 +84,7 @@ Because these channels can be shared among processes and used an arbitrary numbe
 As with functions in the $\lambda$-calculus, processes are the basic unit of a program in the \picalc. 
 Any bit of functionality can be referred to as a process, with no specification of the granularity.
 
-In 1978 C.A.R. Hoare introduced an early process algebra called Communicating Sequential Processes (\!\inidx{CSP})\cite{hoar78}.  In the 1980's, Robin Milner introduced his similar Calculus of Communicating Systems (\!\inidx{CCS})\cite{miln82}.  
+In 1978 C.A.R. Hoare introduced an early process algebra called Communicating Sequential Processes (\!\!\inidx{CSP})\cite{hoar78}.  In the 1980's, Robin Milner introduced his similar Calculus of Communicating Systems (\!\!\inidx{CCS})\cite{miln82}.  
  The CCS modeled systems as groups of communicating processes interacting via shared channels, and drastically eased the difficulty of modeling indirectly invoked concurrent operations.  
 However, the CCS still would have had trouble with our mobile phone network, because it did not provide a way for processes to gain and lose their communication channels.  
 
@@ -127,7 +127,7 @@ This last capability expresses the mobile nature of our processes with surprisin
 	
 	Next we consider the behavior of a tower:
 	\begin{align*}
-		ActiveT(talk,switch,gain,lose) \pdef & \receive{talk}{}ActiveT\angle talk,switch,gain,lose\rangle \\  
+		ActiveT(talk,switch,gain,lose) \pdef & \receive{talk}{}ActiveT\langle talk,switch,gain,lose\rangle \\  
 		 & +\receive{lose}{t,s}\ssend{switch}{t,s}IdleT\langle gain, lose\rangle\\
 		IdleT(gain,lose) \pdef & \receive{gain}{t,s}ActiveT\langle t,s,gain,lose\rangle\\
 	\end{align*}
@@ -170,6 +170,6 @@ In Chapter \ref{the picalc}, we will give a rigorous presentation of the semanti
 
 The two simplifications mentioned above will make our calculus somewhat easier to grasp, but there is another reason to consider an \inidx{asynchronous} calculus: it is far easier to implement on a real distributed system than the full synchronous version.  
 At the base level, communication between machines on a distributed system is asynchronous, so implementing synchronous calculi requires finding a way to simulate synchronous message passing using only asynchronous primitives.  
-In Chapter \ref{sync_and_express}, we will present the \defmargin{synchronous} \picalc (which has the full expressive power used in the mobile phone network example) and its computational rules.
+In Chapter \ref{sync_and_express}, we will present the \defmargin{synchronous} \picalc\ (which has the full expressive power used in the mobile phone network example) and its computational rules.
 
 Chapter \ref{sync_and_dist_sys} looks at the problem of modeling the synchronous \picalc\ using the asynchronous version.  It then takes a more practical-minded presentation of the way that a synchronous \picalc-like language might be implemented using asynchronous primitive \picalc\ constructs.
