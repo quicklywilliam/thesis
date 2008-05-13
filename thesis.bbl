@@ -3,6 +3,9 @@
 \bibitem[Ber03]{miln03}
 Martin Berger.
 \newblock An interview with {Robin Milner}, September 2003.
+\newblock Available from:
+  http://www.dcs.qmul.ac.uk/\verb+~+martinb/interviews/milner/ [cited March 23,
+  2008].
 
 \bibitem[Cas02]{cast02}
 I.~Castellani, editor.
@@ -93,7 +96,7 @@ Peter Sewell, Pawe{\l}~T. Wojciechowski, and Benjamin~C. Pierce.
 \bibitem[Tur96]{turn96}
 David~N. Turner.
 \newblock {\em The Polymorphic Pi-Calculus: Theory and Implementation}.
-\newblock PhD thesis, 1996.
+\newblock PhD thesis, University of Edinburgh, 1996.
 
 \bibitem[WS99]{wojci99}
 Pawel Wojciechowski and Peter Sewell.

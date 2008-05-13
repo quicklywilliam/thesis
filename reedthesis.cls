@@ -38,6 +38,13 @@
 \RequirePackage{hyphenat} %needed in one place to supress hyphenation
 \RequirePackage{mparhack} %needed to fix placement of margin pars for defs/refs
 \usepackage{setspace}
+
+% Font Catalogue:  http://www.tug.dk/FontCatalogue/seriffonts.html
+\let\oldsfdefault=\sfdefault
+
+%\usepackage[T1]{fontenc}
+\usepackage{tgpagella}
+
 % This gives us rules below the headers
 \AtBeginDocument{%
 %WCH Begin doc stuff
@@ -60,8 +67,8 @@
 %  \fancyhead[RE]{\slshape \leftmark}
 %  \fancyhead[LO]{\slshape \rightmark}
 %	The above makes your headers in all caps. If you would like different headers, choose one of the following options (be sure to remove the % symbol from both the right and left headers):
-	 \fancyhead[RE]{\slshape \nouppercase \leftmark} % This makes the headers on the RIGHT side pages be italic and use lowercase With Capitals When Specified.
-	\fancyhead[LO]{\slshape \nouppercase \rightmark} % This does the same thing to the LEFT side pages
+	 \fancyhead[RE]{\sffamily \slshape \nouppercase \leftmark} % This makes the headers on the RIGHT side pages be italic and use lowercase With Capitals When Specified.
+	\fancyhead[LO]{\sffamily \slshape \nouppercase \rightmark} % This does the same thing to the LEFT side pages
 %	or
 %	\fancyhead[RE]{\scshape \leftmark} % The RIGHT headers will be in small caps.
 %	\fancyhead[LO]{\scshape \rightmark} %  And so will the LEFT headers
@@ -290,10 +297,10 @@
 	{\end{minipage}\end{Sbox}\Ovalbox{\TheSbox}\end{center}\end{figure}}%	
 %END WCH ENVIRONMENTS
 %%BEGIN WCH COMMANDS
-\newcommand{\refex}[1]{\hyperref[#1]{Example \ref{#1}}}
-\newcommand{\refsec}[1]{\hyperref[#1]{Section \ref{#1}}}
-\newcommand{\reffig}[1]{\hyperref[#1]{Figure \ref{#1}}}
-\newcommand{\refdef}[1]{\hyperref[#1]{Definition \ref{#1}}}
+\newcommand{\refex}[1]{\hyperref[#1]{Example~\ref{#1}}}
+\newcommand{\refsec}[1]{\hyperref[#1]{Section~\ref{#1}}}
+\newcommand{\reffig}[1]{\hyperref[#1]{Figure~\ref{#1}}}
+\newcommand{\refdef}[1]{\hyperref[#1]{Definition~\ref{#1}}}
 
 
 
@@ -302,22 +309,22 @@
 
 \newcommand{\todo}[1] {%
      \immediate\write\@todowrite{- TOWRITE@P-\thepage L-\the\inputlineno:  \string #1}%
-	\marginpar{\tiny{\textbf{TODO:\\ #1}}}%
+	\marginpar{\sffamily\tiny{\textbf{TODO:\\ #1}}}%
 	}
 }
 %a note to your reader (the reader's name is the default for the optional argument)
 \newcommand{\note}[2][Jim] {%
-	\marginpar{\tiny{\textbf{{#1}:\\ #2}}}%
+	\marginpar{\sffamily\tiny{\textbf{{#1}:\\ #2}}}%
 }
 \newcommand{\todof}[1] {%
      \immediate\write\@todowrite{- TODO (format):  \string #1}%
 } 
 \newcommand{\refmargin}[1]{
-	\index{#1}\marginpar{\setstretch{.4}\nohyphens{\tiny{{#1}}\\%
+	\index{#1}\marginpar{\setstretch{.4}\nohyphens{\sffamily\tiny{{#1}}\\%
 	$\hookrightarrow$ \hyperref[#1]{page \pageref{#1}}}}%
 }
 \newcommand{\refmarginnoindex}[1]{
-	\marginpar{\setstretch{.4}\nohyphens{\tiny{{#1}}\\%
+	\marginpar{\setstretch{.4}\nohyphens{\sffamily\tiny{{#1}}\\%
 	$\hookrightarrow$ \hyperref[#1]{page \pageref{#1}}}}%
 }
 \newcommand{\inidx}[1]{
@@ -330,18 +337,19 @@
 \newcommand{\defmargin}[2][null]{%
 	\ifthenelse{\equal{#1}{null}}{\emph{#2}}{\emph{#1}}%
 	\label{#2}\index{#2}%
-	\marginpar{\cornersize{0.5}\ovalbox{\tiny{\emph{#2}}}}%
+	\marginpar{\cornersize{0.5}\ovalbox{\sffamily\tiny{\itshape
+	{#2}}}}%
 }
 \newcommand{\defmarginnoindex}[2][null]{%
 	\ifthenelse{\equal{#1}{null}}{\emph{#2}}{\emph{#1}}%
 	\label{#2}%
-	\marginpar{\cornersize{0.5}\ovalbox{\tiny{\emph{#2}}}}%
+	\marginpar{\cornersize{0.5}\ovalbox{\sffamily\tiny{\itshape{#2}}}}%
 }
 \newcommand{\defmarginwide}[2][null]{%
 	\ifthenelse{\equal{#1}{null}}{\emph{#2}}{\emph{#1}}%
 	\label{#2}\index{#2}%
 	\marginpar{\cornersize*{0.5pt}\begin{Sbox}%
-	\begin{minipage}{.8\marginparwidth}\centering\setstretch{.4}\nohyphens{\tiny{\emph{#2}}}\end{minipage}\end{Sbox}\Ovalbox{\TheSbox}}%
+	\begin{minipage}{.8\marginparwidth}\centering\setstretch{.4}\nohyphens{\sffamily\tiny{\itshape{#2}}}\end{minipage}\end{Sbox}\ovalbox{\TheSbox}}%
 }
 %%END WCH COMMANDS
 

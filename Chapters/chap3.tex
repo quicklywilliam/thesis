@@ -4,12 +4,11 @@ In \refsec{spisyntax}, we introduced a version of the \picalc\ which we said was
 Rather than allowing an operation to happen after a sent value has been received by some other process, a sending process simply ends.  
 In \refex{exsynchronous} we gave a straightforward method of simulating synchronous sending in the asynchronous \picalc\ using acknowledgement channels.  
 Also absent in our calculus was the non-deterministic choice operator, also known as the summation operator.  
-We gave a method of simulating this in \refex{exsummation}.
 
-We have already had a taste of the expressive power of the synchronous \picalc\ in Chapter \ref{Introduction}'s mobile phone network example.  In fact, the original calculus given by Milner, Parrow and Walker was synchronous and included the two operators -- summation and synchronous sending -- that we omitted in our asynchronous \picalc.  
+We have already had a taste of the expressive power of the synchronous \picalc\ in Chapter \ref{Introduction}'s mobile phone network example.  In fact, the original calculus given by Milner, Parrow and Walker was synchronous and included the two operators --- summation and synchronous sending --- that we omitted in our asynchronous \picalc.  
 
-Our original calculus featured synchronous receiving, but we now make sending synchronous as well, allowing a process to execute after the output has been consumed by some other receiver.  
-Hence, in the synchronous \picalc, processes can be \refmargin{guarded}guarded by both receiving \emph{and} sending.  
+Our original calculus featured synchronous receiving, but we now allow synchronous sending as well, enabling a process to continue after its output has been consumed by some receiver.  
+Hence, in the synchronous \picalc, processes can be\refmargin{guarded}guarded by both receiving \emph{and} sending.  
 
 
 If we have a group of guarded processes joined by the summation operator, only one of those processes will be `chosen' (non-deterministically)\index{non-determinism} to be executed.  
@@ -99,7 +98,7 @@ Receiving is also guarded, as in the asynchronous version.
 		P \comp \pstop\ &\ \sequiv\ P && \text{\tiny{(S-COMP-ID)}}\\
 		\new{c} \pstop\ &\ \sequiv\ \pstop && \text{\tiny{(S-REST-ID)}}\\
 		\new{c}\new{d} P \ &\ \sequiv\ \new{d}\new{c} P && \text{\tiny{(S-REST-COMM)}}\\
-		\new{c}(P \comp Q)\ &\ \sequiv\  P \comp \new{c}Q\text{, if } c\not\in fi(P) && \text{\tiny{(S-REST-COMP)}}
+		\new{c}(P \comp Q)\ &\ \sequiv\  P \comp \new{c}Q\text{, if } c\not\in \mbox{\emph{fi}}(P) && \text{\tiny{(S-REST-COMP)}}
 	\end{align*}
 	\caption{\emph{Structural equivalence axioms in the synchronous \picalc}}\label{spicalcaxioms}
 \end{center}\end{insettable_wide}\index{structural equivalence}
@@ -109,7 +108,7 @@ We are now ready to give a description of the computation behavior.
 As we might expect, it does not differ hugely from computation in the asynchronous calculus.  
 In the reduction rules, the only changes are to make room for the summation operator.
 Because only one process gets chosen from a group of summed processes, we need two `matching' sender and receiver terms each running in parallel.  This behavior is described by (R-SYNC).  
-It expresses the commutation step where the processes have transmitted their value.  Hence, we perform the appropriate substitution to the receiving process, run the guarded processes and terminate all the other terms in the sum.
+It expresses the communication step where the processes have transmitted their value.  Hence, we perform the appropriate substitution to the receiving process, run the guarded processes and terminate all the other terms in the sum.
 \begin{insettable}
 \begin{center}\begin{tabular}{rll}
 	$\ssend{c}{\tuple{V}} P + Q \comp \receive{c}{\tuple{X}}R + B$\ &\  $\pred\  P \comp R\subst{\tuple{V}}{\tuple{X}}$ & \tiny{(R-SYNC)}\\
@@ -147,9 +146,35 @@ Thus, we can now conclude, using (R-STRUC):
 \[
 	\send{c}{\tuple{V}} \comp \receive{c}{\tuple{X}}R \pred\  R \subst{\tuple{V}}{\tuple{X}}
 \]
-	It should be evident from our presentation of synchronous action rules below that they needn't be shown to be a general version of the asynchronous rules -- they are compatible simply by ignoring the extra rule and by using our encoding of asynchronous sending as $\ssend{n}{\tuple{V}}\pstop$.
+	It should be evident from our presentation of synchronous action rules below that they needn't be shown to be a general version of the asynchronous rules --- they are compatible simply by ignoring the extra rule and by using our encoding of asynchronous sending as $\ssend{n}{\tuple{V}}\pstop$.
 \end{example}
 
+\begin{insettable_wide}
+	\begin{center}\begin{tabular}{rllll}
+ 		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{\tuple{V}}} & $R$\subst{\tuple{V}}{\tuple{X}} & & \tiny{(A-IN)}\\
+		$\ssend{c}{\tuple{V}}R$ & \evolves{\sends{c}{\tuple{V}}} & $R$ & & \tiny{(A-OUT)}\\
+		$\rec{x}R$ & \evolves{\tau} & $R\subst{\rec{x}R}{x}$ & & \tiny{(A-REP)}\\
+		$\pif{v=v} \pthen P \pelse Q$ & \evolves{\tau} & $P$ & & \tiny{(A-EQ)}\\[10pt]
+		$\pif{v_1=v_2} \pthen P \pelse Q$ & \evolves{\tau} & $Q$ & $v_1 \neq v_2$ & \tiny{(A-NEQ)}\\[10pt]
+		
+		\multicolumn{3}{c}{$\underline{P_i \evolves{\pi_i} P_i'}$} &  & \multirow{2}{*}{\tiny{(A-SUM)}}\\
+		\multicolumn{3}{c}{$\displaystyle\sum_{i}\pi_i.P_i \evolves{\pi_i} P_i'$}\\[18pt]
+		
+		\multicolumn{3}{c}{$\underline{P \evolves{\pi} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \mbox{\emph{bn}}(\alpha) \cap \mbox{\emph{fn}}(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMP)}}\\
+		\multicolumn{3}{c}{$P\comp Q \evolves{\alpha} P'\comp Q$}\\[10pt]
+		
+		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle b \not \in n(\alpha)$ }} & \multirow{2}{*}{\tiny{(A-REST)}}\\
+		\multicolumn{3}{c}{$\new{b} P \evolves{\alpha} \new{b} P'$}\\[10pt]
+
+		\multicolumn{3}{c}{$\underline{P\evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\text{ is in }\tuple{V}$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
+		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,\tuple{B}}\sends{c}{\tuple{V}}} P'$}\\[10pt]
+		
+		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{\tuple{V}}} P',\ Q \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{\tuple{B}}\cap \mbox{\emph{fn}}(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
+		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q')$}\\[10pt]
+	\end{tabular}	
+	\caption{\emph{Action rules for the synchronous \picalc}}\label{spiacts}
+\end{center}
+\end{insettable_wide}\index{action}
 Neither do the action rules for the synchronous \picalc\ differ significantly from \hyperref[apiactionrules]{those} in the asynchronous version.  
 As we would expect, (A-OUT) has been modified to express synchronous sending. 
 It now evolves over output to a process $R$ and not simply to the termination process $\pstop$:
@@ -165,33 +190,6 @@ We have also added a new rule, (A-SUM). It describes the action of the summation
 (A-SUM) expresses the fact that, when a single guarded process can evolve in one step to a process $P_i'$ due to an action $\pi_i$, then it can also do so as part of a summation.
 Notice that unlike (A-COMP), (A-SUM) does not need to be careful about capturing names. 
 Since no other processes are run by the summation, we needn't worry about causing a naming issue when we possibly export terms by running the action $\alpha$.
-
-\begin{insettable_wide}
-	\begin{center}\begin{tabular}{rllll}
- 		$\receive{c}{\tuple{X}}R$ & \evolves{\receives{c}{\tuple{V}}} & $R$\subst{\tuple{V}}{\tuple{X}} & & \tiny{(A-IN)}\\
-		$\ssend{c}{\tuple{V}}R$ & \evolves{\sends{c}{\tuple{V}}} & $R$ & & \tiny{(A-OUT)}\\
-		$\rec{x}R$ & \evolves{\tau} & $R\subst{\rec{x}R}{x}$ & & \tiny{(A-REP)}\\
-		$\pif{v=v} \pthen P \pelse Q$ & \evolves{\tau} & $P$ & & \tiny{(A-EQ)}\\[10pt]
-		$\pif{v_1=v_2} \pthen P \pelse Q$ & \evolves{\tau} & $Q$ & $v_1 \neq v_2$ & \tiny{(A-NEQ)}\\[10pt]
-		
-		\multicolumn{3}{c}{$\underline{P_i \evolves{\pi_i} P_i'}$} &  & \multirow{2}{*}{\tiny{(A-SUM)}}\\
-		\multicolumn{3}{c}{$\displaystyle\sum_{i}\pi_i.P_i \evolves{\pi_i} P_i'$}\\[18pt]
-		
-		\multicolumn{3}{c}{$\underline{P \evolves{\pi} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle bn(\alpha) \cap fn(Q) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMP)}}\\
-		\multicolumn{3}{c}{$P\comp Q \evolves{\alpha} P'\comp Q$}\\[10pt]
-		
-		\multicolumn{3}{c}{$\underline{P \evolves{\alpha} P'}$} & \multirow{2}{*}{\footnotesize{$\textstyle b \not \in n(\alpha)$ }} & \multirow{2}{*}{\tiny{(A-REST)}}\\
-		\multicolumn{3}{c}{$\new{b} P \evolves{\alpha} \new{b} P'$}\\[10pt]
-
-		\multicolumn{3}{c}{$\underline{P\evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} P'}$} & \multirow{2}{*}{\footnotesize{$n \neq c, n\text{ is in }\tuple{V}$ }}& \multirow{2}{*}{\tiny{(A-OPEN)}}\\
-		\multicolumn{3}{c}{$\new{n}P \evolves{\exports{n,\tuple{B}}\sends{c}{\tuple{V}}} P'$}\\[10pt]
-		
-		\multicolumn{3}{c}{$\underline{P\evolves{\receives{c}{\tuple{V}}} P',\ Q \evolves{\exports{\tuple{B}}\sends{c}{\tuple{V}}} Q'}$} & \multirow{2}{*}{\footnotesize{$\textstyle \exports{\tuple{B}}\cap fn(P) = \emptyset$ }} & \multirow{2}{*}{\tiny{(A-COMM)}}\\
-		\multicolumn{3}{c}{$P\comp Q \evolves{\tau} \new{\tuple{B}}(P'\comp Q')$}\\[10pt]
-	\end{tabular}	
-	\caption{\emph{Action rules for the synchronous \picalc}}\label{spiacts}
-\end{center}
-\end{insettable_wide}\index{action}
 
 \section{Extended Example: Leader Elections}\label{secleaderelecs}
 Leader elections, a classic problem in distributed systems, are a good example of the power of the synchronous \picalc.\index{leader elections}
@@ -220,11 +218,11 @@ Applying the reduction rule (R-SYNC) to (\ref{leader_network_term}), the first p
 \[
 	 \send{o}{c_0} \comp \send{o}{c_0}	
 \]
-Here we see that both processes will agree in this ``election'' --- that is, they output the same value.  Note that no substitutions were necessary since $\send{c}{}$ is simply a\refmargin{handshake} handshake signal.  Note also that these resulting processes are \emph{not} symmetric: applying the automorphism $\sigma$ to $P_0$ would yield $\send{o}{c_1}$.
+Here we see that both processes will agree in this ``election'' --- that is, they output the same value.  Note that no substitutions were necessary since $\send{c}{}$ is simply a\refmargin{handshake} handshake signal.  Note also that these resulting processes are \emph{not} symmetric: applying the automorphism $\sigma$ to the residual $\send{o}{c_0}$ of $P_0$ would yield $\send{o}{c_1}$.
 
 If, on the other hand, $P_1$ notifies first, then again we apply (R-SYNC) to get
 \[
 	\send{o}{c_1} \comp \send{o}{c_1}
 \]
 Again, a leader has been elected.
-Hence, we have given a term that successfully solves the leader election problem for symmetric systems in the special case of a two processes.  We will discuss more general leader elections in the next chapter.
+Hence, we have given a term that successfully solves the leader election problem for symmetric systems in the special case of two processes.  We will discuss more general leader elections in the next chapter.
