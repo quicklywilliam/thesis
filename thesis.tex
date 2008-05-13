@@ -5,9 +5,11 @@
 \usepackage{longtable,booktabs,setspace} 
 \usepackage{url}
 \usepackage{float}
-\usepackage{natbib}
+\usepackage[square]{natbib}
 \usepackage{multirow}
 \usepackage{datetime}
+\usepackage[titles]{tocloft}
+\renewcommand{\cftchapfont}{\boldmath\bfseries\sffamily} %makes pi symbol bold in ToC
 % \usepackage{a0size} used for a really big pi symbol - disabled
 
 \usepackage[palatino]{quotchapwc} %figure out where to stick \thispagestyle{empty}%
@@ -20,8 +22,10 @@
 \ifthenelse{\equal{\value{outputmode}}{0}}{\usepackage[bookmarks,unicode, colorlinks, linkcolor= darkblue, citecolor= darkblue, pdftitle={The $pi$-calculus}, pdfauthor={William Henderson}]{hyperref}}{\usepackage[bookmarks, colorlinks=true, linkcolor=black, citecolor= black, pdftitle={The $pi$-calculus}, pdfauthor={William Henderson}]{hyperref}}
 \ifthenelse{\equal{\value{outputmode}}{0}}{\setlength{\evensidemargin}{0.3in}\setlength{\oddsidemargin}{0.3in}}{}
 
-\titleformat{\section}[hang]{\bfseries}
+\titleformat{\section}[hang]{\sffamily\boldmath\bfseries}
  {\Large\thesection}{12pt}{\Large}[{\titlerule[0.5pt]}]
+\titleformat{\subsection}[hang]{\sffamily\boldmath\bfseries}
+ {\large\thesubsection}{12pt}{\large}[]
 
 
 \title{Distributed and Mobile Systems in The \Picalc}

@@ -21,4 +21,3 @@
 \contentsline {section}{\numberline {4.3}A `Bakery' Algorithm}{37}{section.4.3}
 \contentsline {chapter}{Chapter 5: Conclusions}{41}{chapter.5}
 \contentsline {chapter}{References}{43}{chapter*.3}
-\contentsline {chapter}{Index}{45}{chapter*.3}

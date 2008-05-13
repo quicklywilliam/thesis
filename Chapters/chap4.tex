@@ -28,7 +28,7 @@ It is only through the implicit communication underlying the choice operator tha
 We will not give the full argument here, but we will try to give a sketch of its important properties and will also look at an illustrative example in \refsec{failedencoding}.  
 Palamidessi's proof lies on an important property enjoyed by only the \emph{asynchronous} \picalc:  \defmargin{confluence}, which comes from lemma 4.1 from Palamidessi's proof.
 \begin{quote}
-	\textbf{Lemma 4.1} \emph{Let P be a process of the asynchronous \picalc.  Assume that P can make two transitions $P \evolves{\alpha_s} Q$ and $P \evolves{\alpha_r} Q'$, where $\alpha_s$ is a send action while $\alpha_r$ is a receive action.  Then there exists a process R such that $Q \evolves{\alpha_r} R$ and $Q' \evolves{\alpha_s} R$.}
+	\textsf{\textbf{Lemma 4.1}} \emph{Let P be a process of the asynchronous \picalc.  Assume that P can make two transitions $P \evolves{\alpha_s} Q$ and $P \evolves{\alpha_r} Q'$, where $\alpha_s$ is a send action while $\alpha_r$ is a receive action.  Then there exists a process R such that $Q \evolves{\alpha_r} R$ and $Q' \evolves{\alpha_s} R$.}
 \end{quote}
 Our processes may start out symmetrical, but as we showed in \refsec{secleaderelecs} in the synchronous calculus the processes must collectively break the original symmetry of the system in order to elect a leader.  
 The issue with the asynchronous calculus is that if a process has two options available to it (say to choose or wait for the other process to choose first) and it chooses one, confluence guarantees that we can still make the action representing the other choice, bringing us to a state that is the same as if we had performed the actions in the opposite order.  

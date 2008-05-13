@@ -37,13 +37,13 @@
 \RequirePackage{nicefrac} %used to make subsitution operator a diagonal frac
 \RequirePackage{hyphenat} %needed in one place to supress hyphenation
 \RequirePackage{mparhack} %needed to fix placement of margin pars for defs/refs
-\usepackage{setspace}
+\RequirePackage{setspace}
 
 % Font Catalogue:  http://www.tug.dk/FontCatalogue/seriffonts.html
-\let\oldsfdefault=\sfdefault
 
 %\usepackage[T1]{fontenc}
-\usepackage{tgpagella}
+\RequirePackage{tgpagella}
+
 
 % This gives us rules below the headers
 \AtBeginDocument{%
@@ -53,7 +53,7 @@
 	\definecolor{darkblue}{rgb}{0,0.08,0.45} %link color
 	\definecolor{chaptergrey}{rgb}{0,0,0} %chapter number color
 	\let\size@chapter\LARGE %sets the chapter title size
-	\newtheoremstyle{waystylish}{}{}{}{}{\bfseries}{}{1.0em}{\thmname{#1}\thmnumber{ #2}\thmnote{ #3}} %{space above}{space below}{body font}{Indent amount}{thm head font}{thm head affix}{space after head}{thm head spec}
+	\newtheoremstyle{waystylish}{}{}{}{}{\sffamily\bfseries}{}{1.0em}{\thmname{#1}\thmnumber{ #2}\thmnote{ #3}} %{space above}{space below}{body font}{Indent amount}{thm head font}{thm head affix}{space after head}{thm head spec}
 	\numberwithin{figure}{section}
 	\numberwithin{equation}{section}
 	\theoremstyle{waystylish}
